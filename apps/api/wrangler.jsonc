@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "api",
+  "compatibility_date": "2025-08-03",
+  "main": "./src/index.tsx",
+
+  // 環境変数（公開可能）
+  "vars": {
+    "APP_URL": "http://localhost:3000",
+    "API_URL": "http://localhost:8787"
+  },
+
+  // D1 Database
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "inspirehub-db",
+      "database_id": "YOUR_D1_DATABASE_ID"
+    }
+  ],
+
+  // KV Namespace
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "YOUR_KV_NAMESPACE_ID"
+    }
+  ]
+}

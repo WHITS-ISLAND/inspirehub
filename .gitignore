@@ -1,0 +1,105 @@
+# Dependencies
+node_modules/
+.yarn/
+.pnp.*
+.yarn-integrity
+
+# Build outputs
+out/
+dist/
+.output/
+build/
+*.tgz
+*.tar.gz
+
+# Turborepo
+.turbo/
+
+# Cloudflare Workers
+.wrangler/
+.dev.vars
+worker.js
+worker.js.map
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# Test results
+test-results/
+.test-results/
+
+# TypeScript
+*.tsbuildinfo
+.tscache/
+
+# Caches
+.cache/
+.eslintcache
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+
+# IDE and editor files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+local.db
+
+# Bun
+bun.lock
+
+# JWT decode utility (temporary files)
+decode-jwt.js
+query.sql
