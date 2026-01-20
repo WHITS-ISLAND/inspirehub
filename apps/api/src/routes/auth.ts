@@ -18,10 +18,10 @@ import {
   generateAccessToken,
   generateRefreshToken,
   verifyJwt,
+  type RefreshTokenPayload,
 } from "../lib/jwt";
 import { createDb } from "../lib/db";
 import { authMiddleware } from "../middleware/auth";
-import type { RefreshTokenPayload } from "@inspirehub/shared/types";
 import {
   GoogleAuthUrlQuerySchema,
   GoogleAuthUrlResponseSchema,

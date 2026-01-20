@@ -17,11 +17,14 @@ export interface CloudflareBindings {
   CLIENT_URL: string;
 }
 
+import type { AccessTokenPayload } from "../lib/jwt";
+
 // Hono app type with bindings
 export type HonoEnv = {
   Bindings: CloudflareBindings;
   Variables: {
     userId?: string;
     userEmail?: string;
+    jwtPayload?: AccessTokenPayload;
   };
 };

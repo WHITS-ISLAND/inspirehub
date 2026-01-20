@@ -1,100 +1,22 @@
-// Simple JWT implementation using HS256 (HMAC with SHA-256)
-import type { AccessTokenPayload, RefreshTokenPayload } from "@inspirehub/shared/types";
+import { sign, verify } from "hono/jwt";
+import type { JWTPayload } from "hono/utils/jwt/types";
 
-// Base64URL encode
-function base64urlEncode(data: string | ArrayBuffer): string {
-  const bytes =
-    typeof data === "string"
-      ? new TextEncoder().encode(data)
-      : new Uint8Array(data);
-  const base64 = btoa(String.fromCharCode(...bytes));
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+// Access Token Payload
+export interface AccessTokenPayload extends JWTPayload {
+  sub: string;
+  email: string;
+  type: "access";
 }
 
-// Base64URL decode to string
-function base64urlDecode(str: string): string {
-  const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-  return atob(padded);
+// Refresh Token Payload
+export interface RefreshTokenPayload extends JWTPayload {
+  sub: string;
+  type: "refresh";
+  family_id: string;
+  jti: string;
 }
 
-// Import secret key for HMAC
-async function importSecretKey(secret: string): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  return crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign", "verify"]
-  );
-}
-
-// Sign JWT with HS256
-export async function signJwt(
-  payload: Record<string, unknown>,
-  secret: string
-): Promise<string> {
-  const header = { alg: "HS256", typ: "JWT" };
-  const key = await importSecretKey(secret);
-
-  const encodedHeader = base64urlEncode(JSON.stringify(header));
-  const encodedPayload = base64urlEncode(JSON.stringify(payload));
-  const data = `${encodedHeader}.${encodedPayload}`;
-
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(data)
-  );
-
-  const encodedSignature = base64urlEncode(signature);
-  return `${data}.${encodedSignature}`;
-}
-
-// Verify JWT with HS256
-export async function verifyJwt(
-  jwt: string,
-  secret: string
-): Promise<Record<string, unknown>> {
-  const [encodedHeader, encodedPayload, encodedSignature] = jwt.split(".");
-
-  if (!encodedHeader || !encodedPayload || !encodedSignature) {
-    throw new Error("Invalid JWT format");
-  }
-
-  const key = await importSecretKey(secret);
-  const data = `${encodedHeader}.${encodedPayload}`;
-
-  // Decode signature from base64url
-  const signatureStr = base64urlDecode(encodedSignature);
-  const signature = new Uint8Array(signatureStr.length);
-  for (let i = 0; i < signatureStr.length; i++) {
-    signature[i] = signatureStr.charCodeAt(i);
-  }
-
-  const isValid = await crypto.subtle.verify(
-    "HMAC",
-    key,
-    signature,
-    new TextEncoder().encode(data)
-  );
-
-  if (!isValid) {
-    throw new Error("Invalid JWT signature");
-  }
-
-  const payload = JSON.parse(base64urlDecode(encodedPayload));
-
-  // Check expiration
-  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-    throw new Error("JWT expired");
-  }
-
-  return payload;
-}
-
-// Generate Access Token
+// Generate Access Token (15 minutes)
 export async function generateAccessToken(
   userId: string,
   userEmail: string,
@@ -106,13 +28,13 @@ export async function generateAccessToken(
     email: userEmail,
     type: "access",
     iat: now,
-    exp: now + 15 * 60, // 15 minutes
+    exp: now + 15 * 60,
   };
 
-  return signJwt(payload, secret);
+  return sign(payload, secret);
 }
 
-// Generate Refresh Token
+// Generate Refresh Token (30 days)
 export async function generateRefreshToken(
   userId: string,
   familyId: string,
@@ -126,8 +48,21 @@ export async function generateRefreshToken(
     family_id: familyId,
     jti,
     iat: now,
-    exp: now + 30 * 24 * 60 * 60, // 30 days
+    exp: now + 30 * 24 * 60 * 60,
   };
 
-  return signJwt(payload, secret);
+  return sign(payload, secret);
+}
+
+// Verify JWT and return payload (returns null if invalid)
+export async function verifyJwt<T extends JWTPayload>(
+  token: string,
+  secret: string
+): Promise<T | null> {
+  try {
+    const payload = await verify(token, secret, "HS256");
+    return payload as T;
+  } catch {
+    return null;
+  }
 }

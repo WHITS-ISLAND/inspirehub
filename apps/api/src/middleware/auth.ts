@@ -1,40 +1,25 @@
+import { jwt } from "hono/jwt";
 import { createMiddleware } from "hono/factory";
 import type { HonoEnv } from "../types/bindings";
-import { verifyJwt } from "../lib/jwt";
-import type { AccessTokenPayload } from "@inspirehub/shared/types";
+import type { AccessTokenPayload } from "../lib/jwt";
 
+// JWT authentication middleware
+// Wraps hono/jwt to access environment variables and set user context
 export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
-  const authHeader = c.req.header("Authorization");
+  const jwtMiddleware = jwt({
+    secret: c.env.JWT_ACCESS_SECRET,
+    alg: "HS256",
+  });
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "UNAUTHORIZED", message: "Missing authorization header" },
-      },
-      401
-    );
-  }
+  // Run JWT middleware
+  await jwtMiddleware(c, async () => {
+    // Get payload from JWT middleware
+    const payload = c.get("jwtPayload") as AccessTokenPayload;
 
-  const token = authHeader.slice(7);
-  const payload = await verifyJwt<AccessTokenPayload>(
-    token,
-    c.env.JWT_PUBLIC_KEY
-  );
+    // Set user info in context
+    c.set("userId", payload.sub);
+    c.set("userEmail", payload.email);
 
-  if (!payload) {
-    return c.json(
-      {
-        success: false,
-        error: { code: "INVALID_TOKEN", message: "Invalid or expired token" },
-      },
-      401
-    );
-  }
-
-  // Set user info in context
-  c.set("userId", payload.sub);
-  c.set("userEmail", payload.email);
-
-  await next();
+    await next();
+  });
 });

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { generateSpecs, type GenerateSpecOptions } from "hono-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
 import type { OpenAPIV3_1 } from "openapi-types";
@@ -10,6 +11,7 @@ import type { HonoEnv } from "./types/bindings";
 const app = new Hono<HonoEnv>();
 
 // Middleware
+app.use(logger());
 app.use("*", createCorsMiddleware());
 app.use(renderer);
 
