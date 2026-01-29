@@ -1,0 +1,10 @@
+cloudflare_account_id = "your-account-id"
+cloudflare_zone_id    = "your-zone-id"  # Optional
+client_url            = "https://inspirehub.example.com"
+custom_domain         = "api.inspirehub.example.com"  # Optional
+
+# Secrets should be set via environment variables or GitHub Secrets:
+# TF_VAR_google_client_id
+# TF_VAR_google_client_secret
+# TF_VAR_jwt_access_secret
+# TF_VAR_jwt_refresh_secret

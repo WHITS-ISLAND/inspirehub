@@ -15,6 +15,7 @@ binding = "DB"
 database_name = "inspirehub"
 database_id = "local-inspirehub" # ローカル開発用
 
+
 # 環境変数（公開可能な値のみ）
 # シークレットは .dev.vars（ローカル）または wrangler secret（本番）で設定
 [vars]
