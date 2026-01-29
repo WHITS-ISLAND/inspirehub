@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "cloudflare" {
-  # CLOUDFLARE_API_TOKEN環境変数を使用
+  api_token = var.cloudflare_api_token
 }
 
 # D1 Database
