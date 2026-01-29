@@ -44,8 +44,10 @@ jobs:
         id: plan
         working-directory: infrastructure/terraform/environments/production
         run: |
-          terraform plan -detailed-exitcode -out=tfplan || export exitcode=$?
+          terraform plan -detailed-exitcode -out=tfplan
+          exitcode=$?
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          echo "Terraform Plan exit code: $exitcode"
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

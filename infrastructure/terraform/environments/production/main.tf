@@ -16,7 +16,7 @@ provider "cloudflare" {
 # D1 Database
 resource "cloudflare_d1_database" "inspirehub" {
   account_id = var.cloudflare_account_id
-  name       = "inspirehub-production"
+  name       = "inspirehub-d1"
 }
 
 # Workers Script
