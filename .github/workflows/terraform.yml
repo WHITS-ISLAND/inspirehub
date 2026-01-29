@@ -33,16 +33,16 @@ jobs:
           EOF
 
       - name: Terraform Init
-        working-directory: infrastructure/terraform/environments/production
+        working-directory: infrastructure/terraform/environments/develop
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: infrastructure/terraform/environments/production
+        working-directory: infrastructure/terraform/environments/develop
         run: terraform validate
 
       - name: Terraform Plan
         id: plan
-        working-directory: infrastructure/terraform/environments/production
+        working-directory: infrastructure/terraform/environments/develop
         run: |
           terraform plan -detailed-exitcode -out=tfplan > plan_output.txt 2>&1
           exitcode=$?
@@ -97,11 +97,11 @@ jobs:
           EOF
 
       - name: Terraform Init
-        working-directory: infrastructure/terraform/environments/production
+        working-directory: infrastructure/terraform/environments/develop
         run: terraform init
 
       - name: Terraform Apply
-        working-directory: infrastructure/terraform/environments/production
+        working-directory: infrastructure/terraform/environments/develop
         run: terraform apply -auto-approve
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -116,7 +116,7 @@ jobs:
 
       - name: Get Terraform Outputs
         id: tf_outputs
-        working-directory: infrastructure/terraform/environments/production
+        working-directory: infrastructure/terraform/environments/develop
         run: |
           D1_DATABASE_ID=$(terraform output -raw d1_database_id)
           echo "d1_database_id=$D1_DATABASE_ID" >> $GITHUB_OUTPUT

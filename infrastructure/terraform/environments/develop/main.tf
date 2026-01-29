@@ -23,7 +23,16 @@ resource "cloudflare_d1_database" "inspirehub" {
 resource "cloudflare_worker_script" "api" {
   account_id = var.cloudflare_account_id
   name       = "inspirehub-api"
-  content    = "export default { async fetch(request, env, ctx) { return new Response('API deployment in progress...', { status: 503 }); } };"
+  content    = <<-EOT
+    export default {
+      async fetch(request, env, ctx) {
+        return new Response('API deployment in progress...', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      }
+    };
+    EOT
 
   # D1 binding
   d1_database_binding {
