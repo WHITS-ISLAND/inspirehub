@@ -8,6 +8,7 @@ vars = { ENVIRONMENT = "development" }
 
 [env.production]
 vars = { ENVIRONMENT = "production" }
+route = { pattern = "api.inspirehub.wtnqk.org/*", zone_name = "wtnqk.org" }
 
 # D1 Database binding (Cloudflare's SQLite)
 [[d1_databases]]

@@ -37,25 +37,17 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Configure Terraform Backend
-        working-directory: infrastructure/terraform/environments/production
+      - name: Setup Terraform Cloud
         run: |
-          cat > backend.tf << EOF
-          terraform {
-            backend "s3" {
-              bucket = "${{ secrets.TF_STATE_BUCKET }}"
-              key    = "inspirehub/production/terraform.tfstate"
-              region = "${{ secrets.TF_STATE_REGION }}"
-            }
+          cat > ~/.terraformrc << EOF
+          credentials "app.terraform.io" {
+            token = "${{ secrets.TF_API_TOKEN }}"
           }
           EOF
 
       - name: Terraform Init
         working-directory: infrastructure/terraform/environments/production
         run: terraform init
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Validate
         working-directory: infrastructure/terraform/environments/production
@@ -67,9 +59,6 @@ jobs:
         run: |
           terraform plan -detailed-exitcode -out=tfplan || export exitcode=$?
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
@@ -118,32 +107,21 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Configure Terraform Backend
-        working-directory: infrastructure/terraform/environments/production
+      - name: Setup Terraform Cloud
         run: |
-          cat > backend.tf << EOF
-          terraform {
-            backend "s3" {
-              bucket = "${{ secrets.TF_STATE_BUCKET }}"
-              key    = "inspirehub/production/terraform.tfstate"
-              region = "${{ secrets.TF_STATE_REGION }}"
-            }
+          cat > ~/.terraformrc << EOF
+          credentials "app.terraform.io" {
+            token = "${{ secrets.TF_API_TOKEN }}"
           }
           EOF
 
       - name: Terraform Init
         working-directory: infrastructure/terraform/environments/production
         run: terraform init
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Apply
         working-directory: infrastructure/terraform/environments/production
         run: terraform apply -auto-approve
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
