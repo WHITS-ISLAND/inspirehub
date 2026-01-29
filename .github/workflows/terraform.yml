@@ -44,10 +44,19 @@ jobs:
         id: plan
         working-directory: infrastructure/terraform/environments/production
         run: |
-          terraform plan -detailed-exitcode -out=tfplan
+          terraform plan -detailed-exitcode -out=tfplan > plan_output.txt 2>&1
           exitcode=$?
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
           echo "Terraform Plan exit code: $exitcode"
+
+          # Terraform Cloudでは detailed-exitcode が正しく動作しない場合があるため、
+          # 出力を解析して変更があるかチェック
+          if grep -q "Plan:" plan_output.txt && grep -q "to add\|to change\|to destroy" plan_output.txt; then
+            echo "Changes detected in plan output"
+            echo "exitcode=2" >> $GITHUB_OUTPUT
+          fi
+
+          cat plan_output.txt
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
