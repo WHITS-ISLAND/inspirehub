@@ -19,30 +19,15 @@ resource "cloudflare_d1_database" "inspirehub" {
   name       = "inspirehub-d1"
 }
 
-# Workers Script (最小限のプレースホルダー)
-# 実際のコードとバインディングはwrangler deployで管理
-resource "cloudflare_worker_script" "api" {
-  account_id = var.cloudflare_account_id
-  name       = "inspirehub-api"
-  content    = <<-EOT
-    export default {
-      async fetch(request, env, ctx) {
-        return new Response('Deployment pending. Please deploy via wrangler.', {
-          status: 503,
-          headers: { 'Content-Type': 'text/plain' }
-        });
-      }
-    }
-  EOT
-  module = true  # ES Module形式を明示的に指定
-}
+# Workers Script は wrangler deploy で管理
+# Terraform では Worker Route のみ管理
 
 # Workers Route for Custom Domain
 resource "cloudflare_worker_route" "api" {
   count       = var.custom_domain != "" ? 1 : 0
   zone_id     = var.cloudflare_zone_id
   pattern     = "${var.custom_domain}/*"
-  script_name = cloudflare_worker_script.api.name
+  script_name = "inspirehub-api"  # wrangler deploy で作成されるワーカー名
 }
 
 # DNS Record for Custom Domain
