@@ -6,7 +6,14 @@
     "build": "vite build",
     "preview": "$npm_execpath run build && vite preview",
     "deploy": "$npm_execpath run build && wrangler deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "typecheck": "bunx --bun vite build --mode typecheck",
+    "lint": "oxlint src/",
+    "format": "oxfmt src/ --write",
+    "format:check": "oxfmt src/",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260118.0",

@@ -1,0 +1,193 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - "apps/api/**"
+      - "apps/client/**"
+      - ".github/workflows/pr-checks.yml"
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  api-checks:
+    name: API Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Type check
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Format check
+        run: bun run format:check
+
+      - name: Security audit
+        run: bun audit
+
+      - name: Build
+        run: bun run build
+
+      - name: Run tests with coverage
+        run: bun test --coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+      - name: Test database migrations
+        run: |
+          # ローカルD1データベースでマイグレーションテスト
+          bunx wrangler d1 migrations apply DB --local
+          bunx wrangler d1 execute DB --local --command "SELECT name FROM sqlite_master WHERE type='table';"
+
+  client-checks:
+    name: Client Checks
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'apps/client/')
+    defaults:
+      run:
+        working-directory: apps/client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Type check
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Format check
+        run: bun run format:check
+
+      - name: Security audit
+        run: bun audit
+
+      - name: Build
+        run: bun run build
+
+      - name: Run tests with coverage
+        run: bun test --coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD
+
+  pr-summary:
+    name: PR Summary
+    needs: [api-checks, client-checks, security-scan, dependency-review]
+    runs-on: ubuntu-latest
+    if: always()
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Comment PR Results
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const needs = ${{ toJSON(needs) }};
+            let summary = "## 🔍 CI/CD チェック結果\n\n";
+
+            const jobs = [
+              { name: 'API Checks', key: 'api-checks', emoji: '🔧' },
+              { name: 'Client Checks', key: 'client-checks', emoji: '💻' },
+              { name: 'Security Scan', key: 'security-scan', emoji: '🔒' },
+              { name: 'Dependency Review', key: 'dependency-review', emoji: '📦' }
+            ];
+
+            jobs.forEach(job => {
+              const result = needs[job.key];
+              if (result) {
+                const status = result.result === 'success' ? '✅' : result.result === 'failure' ? '❌' : '⏭️';
+                summary += `${job.emoji} **${job.name}**: ${status} ${result.result}\n`;
+              }
+            });
+
+            summary += `\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
