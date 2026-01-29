@@ -6,6 +6,9 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import { renderer } from "./renderer";
 import { createCorsMiddleware } from "./middleware/cors";
 import auth from "./routes/auth";
+import nodes from "./routes/nodes";
+import comments from "./routes/comments";
+import tags from "./routes/tags";
 import type { HonoEnv } from "./types/bindings";
 
 const app = new Hono<HonoEnv>();
@@ -17,6 +20,9 @@ app.use(renderer);
 
 // Routes
 app.route("/auth", auth);
+app.route("/nodes", nodes);
+app.route("/comments", comments);
+app.route("/tags", tags);
 
 // Health check
 app.get("/", (c) => {
@@ -29,10 +35,10 @@ const openAPIConfig: Partial<GenerateSpecOptions> = {
     info: {
       title: "InspireHub API",
       version: "1.0.0",
-      description: "API for InspireHub",
+      description: "InspireHubのAPI仕様書",
     },
     servers: [
-      { url: "http://localhost:5173", description: "Local development" },
+      { url: "http://localhost:8787", description: "ローカル開発環境" },
     ],
     components: {
       securitySchemes: {

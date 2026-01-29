@@ -3,17 +3,16 @@ main = "src/index.tsx"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat_v2"]
 
-[env.development]
-vars = { ENVIRONMENT = "development" }
-
-[env.production]
-vars = { ENVIRONMENT = "production" }
+[env.develop]
+vars = { ENVIRONMENT = "develop" }
+route = { pattern = "api.inspirehub.wtnqk.org/*", zone_name = "wtnqk.org" }
 
 # D1 Database binding (Cloudflare's SQLite)
 [[d1_databases]]
 binding = "DB"
 database_name = "inspirehub"
 database_id = "local-inspirehub" # ローカル開発用
+
 
 # 環境変数（公開可能な値のみ）
 # シークレットは .dev.vars（ローカル）または wrangler secret（本番）で設定
