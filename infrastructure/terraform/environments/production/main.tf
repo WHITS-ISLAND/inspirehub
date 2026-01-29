@@ -1,10 +1,20 @@
 terraform {
-  backend "s3" {
-    # GitHub Actions環境変数で設定
-    # bucket = "your-terraform-state-bucket"
-    # key    = "inspirehub/production/terraform.tfstate"
-    # region = "us-east-1"
+  cloud {
+    organization = "inspirehub"
+
+    workspaces {
+      name = "inspirehub-develop"
+    }
   }
+
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+  }
+
+  required_version = ">= 1.6.0"
 }
 
 provider "cloudflare" {
