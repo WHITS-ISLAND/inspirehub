@@ -31,7 +31,7 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "inspirehub-d1",
+          "database_name": "",
           "database_id": "17c33eda-5d8d-4166-a1ac-b2278ec834a5"
         }
       ],
