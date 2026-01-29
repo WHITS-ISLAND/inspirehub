@@ -4,13 +4,16 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat_v2"]
 
 [env.develop]
-vars = { ENVIRONMENT = "develop" }
 route = { pattern = "api.inspirehub.wtnqk.org/*", zone_name = "wtnqk.org" }
 
 [[env.develop.d1_databases]]
 binding = "DB"
 database_name = "inspirehub-d1"
 database_id = "17c33eda-5d8d-4166-a1ac-b2278ec834a5"
+
+[env.develop.vars]
+ENVIRONMENT = "develop"
+CLIENT_URL = "https://inspirehub.wtnqk.org"
 
 # D1 Database binding (ローカル開発用)
 [[d1_databases]]

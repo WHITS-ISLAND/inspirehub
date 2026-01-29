@@ -19,58 +19,21 @@ resource "cloudflare_d1_database" "inspirehub" {
   name       = "inspirehub-d1"
 }
 
-# Workers Script
+# Workers Script (最小限のプレースホルダー)
+# 実際のコードとバインディングはwrangler deployで管理
 resource "cloudflare_worker_script" "api" {
   account_id = var.cloudflare_account_id
   name       = "inspirehub-api"
   content    = <<-EOT
     export default {
       async fetch(request, env, ctx) {
-        return new Response('API deployment in progress...', {
+        return new Response('Deployment pending. Please deploy via wrangler.', {
           status: 503,
           headers: { 'Content-Type': 'text/plain' }
         });
       }
-    };
-    EOT
-
-  # D1 binding
-  d1_database_binding {
-    name        = "DB"
-    database_id = cloudflare_d1_database.inspirehub.id
-  }
-
-  # 環境変数
-  plain_text_binding {
-    name = "CLIENT_URL"
-    text = var.client_url
-  }
-
-  plain_text_binding {
-    name = "ENVIRONMENT"
-    text = "develop"
-  }
-
-  # シークレットはGitHub Actionsから注入
-  secret_text_binding {
-    name = "GOOGLE_CLIENT_ID"
-    text = var.google_client_id
-  }
-
-  secret_text_binding {
-    name = "GOOGLE_CLIENT_SECRET"
-    text = var.google_client_secret
-  }
-
-  secret_text_binding {
-    name = "JWT_ACCESS_SECRET"
-    text = var.jwt_access_secret
-  }
-
-  secret_text_binding {
-    name = "JWT_REFRESH_SECRET"
-    text = var.jwt_refresh_secret
-  }
+    }
+  EOT
 }
 
 # Workers Route for Custom Domain
