@@ -1,12 +1,4 @@
 terraform {
-  cloud {
-    organization = "inspirehub"
-
-    workspaces {
-      name = "inspirehub-develop"
-    }
-  }
-
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -31,7 +23,7 @@ resource "cloudflare_d1_database" "inspirehub" {
 resource "cloudflare_worker_script" "api" {
   account_id = var.cloudflare_account_id
   name       = "inspirehub-api"
-  content    = file("${path.module}/../../../apps/api/dist/index.js")
+  content    = "export default { fetch(request, env, ctx) { return new Response('API deployment in progress...', { status: 503 }); } };"
 
   # D1 binding
   d1_database_binding {
@@ -47,7 +39,7 @@ resource "cloudflare_worker_script" "api" {
 
   plain_text_binding {
     name = "ENVIRONMENT"
-    text = "production"
+    text = "develop"
   }
 
   # シークレットはGitHub Actionsから注入
