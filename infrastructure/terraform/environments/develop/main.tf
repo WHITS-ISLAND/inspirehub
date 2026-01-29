@@ -34,6 +34,7 @@ resource "cloudflare_worker_script" "api" {
       }
     }
   EOT
+  module = true  # ES Module形式を明示的に指定
 }
 
 # Workers Route for Custom Domain
