@@ -7,11 +7,16 @@ compatibility_flags = ["nodejs_compat_v2"]
 vars = { ENVIRONMENT = "develop" }
 route = { pattern = "api.inspirehub.wtnqk.org/*", zone_name = "wtnqk.org" }
 
-# D1 Database binding (Cloudflare's SQLite)
+[[env.develop.d1_databases]]
+binding = "DB"
+database_name = "inspirehub-d1"
+database_id = "17c33eda-5d8d-4166-a1ac-b2278ec834a5"
+
+# D1 Database binding (ローカル開発用)
 [[d1_databases]]
 binding = "DB"
 database_name = "inspirehub"
-database_id = "local-inspirehub" # ローカル開発用
+database_id = "local-inspirehub"
 
 
 # 環境変数（公開可能な値のみ）
