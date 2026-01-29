@@ -16,11 +16,10 @@ on:
       environment:
         description: 'Environment to deploy'
         required: true
-        default: 'production'
+        default: 'develop'
         type: choice
         options:
-          - production
-          - staging
+          - develop
 
 env:
   NODE_VERSION: "20"
@@ -31,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     # PR時はマージされた時のみ実行
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    environment: ${{ github.event.inputs.environment || 'production' }}
+    environment: ${{ github.event.inputs.environment || 'develop' }}
 
     steps:
       - name: Checkout
@@ -62,6 +61,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env develop
           workingDirectory: apps/api
           secrets: |
             GOOGLE_CLIENT_ID

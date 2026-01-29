@@ -17,14 +17,14 @@ on:
 
 env:
   TERRAFORM_VERSION: "1.6.0"
-  TF_WORKSPACE: "production"
+  TF_WORKSPACE: "develop"
   TF_IN_AUTOMATION: true
 
 jobs:
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-    environment: production
+    environment: develop
     outputs:
       exitcode: ${{ steps.plan.outputs.exitcode }}
 
@@ -92,7 +92,7 @@ jobs:
     name: Terraform Apply
     needs: terraform-plan
     runs-on: ubuntu-latest
-    environment: production
+    environment: develop
     # developブランチへの直接pushまたはPRマージ時のみ実行
     if: |
       needs.terraform-plan.outputs.exitcode == '2' &&
