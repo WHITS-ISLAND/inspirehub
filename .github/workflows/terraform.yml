@@ -133,45 +133,65 @@ jobs:
           echo "d1_database_id=$D1_DATABASE_ID" >> $GITHUB_OUTPUT
           echo "D1 Database ID: $D1_DATABASE_ID"
 
-      - name: Update wrangler.toml with D1 Database ID
+      - name: Update wrangler.jsonc with D1 Database ID
         run: |
-          # wrangler.tomlのdevelop環境にdatabase_idを設定
-          cat > temp_wrangler.toml << EOF
-          name = "inspirehub-api"
-          main = "src/index.tsx"
-          compatibility_date = "2024-09-23"
-          compatibility_flags = ["nodejs_compat_v2"]
+          # wrangler.jsoncのdevelop環境にdatabase_idを設定
+          cat > apps/api/wrangler.jsonc << EOF
+          {
+            "\$schema": "node_modules/wrangler/config-schema.json",
+            "name": "inspirehub-api",
+            "main": "./src/index.tsx",
+            "compatibility_date": "2024-09-23",
+            "compatibility_flags": ["nodejs_compat_v2"],
 
-          [env.develop]
-          vars = { ENVIRONMENT = "develop" }
-          route = { pattern = "api.inspirehub.wtnqk.org/*", zone_name = "wtnqk.org" }
+            // ローカル開発用のデフォルトD1設定
+            "d1_databases": [
+              {
+                "binding": "DB",
+                "database_name": "inspirehub",
+                "database_id": "local-inspirehub"
+              }
+            ],
 
-          [[env.develop.d1_databases]]
-          binding = "DB"
-          database_name = "inspirehub-production"
-          database_id = "${{ steps.tf_outputs.outputs.d1_database_id }}"
+            // ローカル開発用の環境変数
+            "vars": {
+              "CLIENT_URL": "http://localhost:5173"
+            },
 
-          # D1 Database binding (ローカル開発用)
-          [[d1_databases]]
-          binding = "DB"
-          database_name = "inspirehub"
-          database_id = "local-inspirehub"
-
-          # 環境変数（公開可能な値のみ）
-          [vars]
-          CLIENT_URL = "http://localhost:5173"
+            // develop環境（本番）
+            "env": {
+              "develop": {
+                "routes": [
+                  {
+                    "pattern": "api.inspirehub.wtnqk.org/*",
+                    "zone_name": "wtnqk.org"
+                  }
+                ],
+                "d1_databases": [
+                  {
+                    "binding": "DB",
+                    "database_name": "${{ steps.tf_outputs.outputs.d1_database_name }}",
+                    "database_id": "${{ steps.tf_outputs.outputs.d1_database_id }}"
+                  }
+                ],
+                "vars": {
+                  "ENVIRONMENT": "develop",
+                  "CLIENT_URL": "https://inspirehub.wtnqk.org"
+                }
+              }
+            }
+          }
           EOF
-          mv temp_wrangler.toml apps/api/wrangler.toml
 
-      - name: Commit updated wrangler.toml
+      - name: Commit updated wrangler.jsonc
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add apps/api/wrangler.toml
+          git add apps/api/wrangler.jsonc
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update wrangler.toml with D1 database ID from Terraform
+            git commit -m "Update wrangler.jsonc with D1 database ID from Terraform
 
             🤖 Generated with [Claude Code](https://claude.ai/code)
 
