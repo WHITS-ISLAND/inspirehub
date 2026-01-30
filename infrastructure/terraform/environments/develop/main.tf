@@ -34,12 +34,13 @@ resource "cloudflare_record" "api" {
 }
 
 # Worker Custom Domain
-resource "cloudflare_worker_domain" "api" {
-  count       = var.custom_domain != "" && var.cloudflare_zone_id != "" ? 1 : 0
-  account_id  = var.cloudflare_account_id
-  hostname    = var.custom_domain
-  service     = "inspirehub-api"
-  zone_id     = var.cloudflare_zone_id
+resource "cloudflare_workers_domain" "api" {
+  count                        = var.custom_domain != "" && var.cloudflare_zone_id != "" ? 1 : 0
+  account_id                   = var.cloudflare_account_id
+  hostname                     = var.custom_domain
+  service                      = "inspirehub-api"
+  zone_id                      = var.cloudflare_zone_id
+  override_existing_dns_record = true  # 既存のDNSレコードを上書き
 
   depends_on = [cloudflare_record.api]
 }
