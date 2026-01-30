@@ -16,7 +16,8 @@
 
   // ローカル開発用の環境変数
   "vars": {
-    "CLIENT_URL": "http://localhost:5173"
+    "CLIENT_URL": "http://localhost:5173",
+    "API_URL": "http://localhost:8787"
   },
 
   // develop環境（本番）
@@ -38,7 +39,8 @@
       ],
       "vars": {
         "ENVIRONMENT": "develop",
-        "CLIENT_URL": "https://inspirehub.wtnqk.org"
+        "CLIENT_URL": "https://inspirehub.wtnqk.org",
+        "API_URL": "https://api.inspirehub.wtnqk.org"
       }
     }
   }

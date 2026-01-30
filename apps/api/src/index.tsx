@@ -30,7 +30,7 @@ app.get("/", (c) => {
 });
 
 // OpenAPI configuration
-const openAPIConfig: Partial<GenerateSpecOptions> = {
+const createOpenAPIConfig = (env: HonoEnv["Bindings"]): Partial<GenerateSpecOptions> => ({
   documentation: {
     info: {
       title: "InspireHub API",
@@ -38,7 +38,10 @@ const openAPIConfig: Partial<GenerateSpecOptions> = {
       description: "InspireHubのAPI仕様書",
     },
     servers: [
-      { url: "http://localhost:8787", description: "ローカル開発環境" },
+      {
+        url: env.API_URL || "http://localhost:8787",
+        description: env.ENVIRONMENT === "develop" ? "本番環境" : "ローカル開発環境"
+      },
     ],
     components: {
       securitySchemes: {
@@ -55,13 +58,15 @@ const openAPIConfig: Partial<GenerateSpecOptions> = {
 
 // OpenAPI spec endpoint
 app.get("/openapi.json", async (c) => {
-  const spec = await generateSpecs(app, openAPIConfig);
+  const config = createOpenAPIConfig(c.env);
+  const spec = await generateSpecs(app, config);
   return c.json(spec);
 });
 
 // Scalar API documentation UI (with inline spec)
 app.get("/docs", async (c) => {
-  const spec = await generateSpecs(app, openAPIConfig);
+  const config = createOpenAPIConfig(c.env);
+  const spec = await generateSpecs(app, config);
   const html = await apiReference({
     content: spec,
     theme: "kepler",
