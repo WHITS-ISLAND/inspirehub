@@ -20,21 +20,13 @@ resource "cloudflare_d1_database" "inspirehub" {
 }
 
 # Workers Script は wrangler deploy で管理
-# Terraform では Worker Route のみ管理
+# DNSレコードのみTerraformで管理（ルートはwrangler.jsoncで管理）
 
-# Workers Route for Custom Domain
-resource "cloudflare_worker_route" "api" {
-  count       = var.custom_domain != "" ? 1 : 0
-  zone_id     = var.cloudflare_zone_id
-  pattern     = "${var.custom_domain}/*"
-  script_name = "inspirehub-api"  # wrangler deploy で作成されるワーカー名
-}
-
-# DNS Record for Custom Domain
+# DNS Record for Custom Domain - Workers用の特別な設定
 resource "cloudflare_record" "api" {
-  count   = var.custom_domain != "" ? 1 : 0
+  count   = var.custom_domain != "" && var.cloudflare_zone_id != "" ? 1 : 0
   zone_id = var.cloudflare_zone_id
-  name    = replace(var.custom_domain, ".wtnqk.org", "")  # "api.inspirehub" を取得
+  name    = "api.inspirehub"  # サブドメイン名
   type    = "AAAA"
   value   = "100::"  # Workers用の特別なIPv6アドレス
   proxied = true

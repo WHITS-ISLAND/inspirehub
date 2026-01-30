@@ -8,11 +8,6 @@ output "d1_database_name" {
   value       = cloudflare_d1_database.inspirehub.name
 }
 
-output "worker_script_name" {
-  description = "The name of the Cloudflare Worker script"
-  value       = "inspirehub-api"
-}
-
 output "custom_domain" {
   description = "The custom domain for the API"
   value       = var.custom_domain
