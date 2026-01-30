@@ -77,6 +77,114 @@ jobs:
           TF_VAR_jwt_refresh_secret: ${{ secrets.JWT_REFRESH_SECRET }}
 
 
+  update-config:
+    name: Update Configuration
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment: develop
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Setup Terraform Cloud
+        run: |
+          cat > ~/.terraformrc << EOF
+          credentials "app.terraform.io" {
+            token = "${{ secrets.TF_API_TOKEN }}"
+          }
+          EOF
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform/environments/develop
+        run: terraform init
+
+      - name: Get Terraform Outputs
+        id: tf_outputs
+        working-directory: infrastructure/terraform/environments/develop
+        run: |
+          D1_DATABASE_ID=$(terraform output -raw d1_database_id)
+          D1_DATABASE_NAME=$(terraform output -raw d1_database_name)
+          echo "d1_database_id=$D1_DATABASE_ID" >> $GITHUB_OUTPUT
+          echo "d1_database_name=$D1_DATABASE_NAME" >> $GITHUB_OUTPUT
+          echo "D1 Database ID: $D1_DATABASE_ID"
+          echo "D1 Database Name: $D1_DATABASE_NAME"
+
+      - name: Update wrangler.jsonc with Configuration
+        run: |
+          # wrangler.jsoncのdevelop環境設定を更新
+          cat > apps/api/wrangler.jsonc << EOF
+          {
+            "\$schema": "node_modules/wrangler/config-schema.json",
+            "name": "inspirehub-api",
+            "main": "./src/index.tsx",
+            "compatibility_date": "2024-09-23",
+            "compatibility_flags": ["nodejs_compat_v2"],
+
+            // ローカル開発用のデフォルトD1設定
+            "d1_databases": [
+              {
+                "binding": "DB",
+                "database_name": "inspirehub",
+                "database_id": "local-inspirehub"
+              }
+            ],
+
+            // ローカル開発用の環境変数
+            "vars": {
+              "CLIENT_URL": "http://localhost:5173"
+            },
+
+            // develop環境（本番）
+            "env": {
+              "develop": {
+                "routes": [
+                  {
+                    "pattern": "api.inspirehub.wtnqk.org/*",
+                    "zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}"
+                  }
+                ],
+                "d1_databases": [
+                  {
+                    "binding": "DB",
+                    "database_name": "${{ steps.tf_outputs.outputs.d1_database_name }}",
+                    "database_id": "${{ steps.tf_outputs.outputs.d1_database_id }}"
+                  }
+                ],
+                "vars": {
+                  "ENVIRONMENT": "develop",
+                  "CLIENT_URL": "https://inspirehub.wtnqk.org"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Commit updated wrangler.jsonc
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add apps/api/wrangler.jsonc
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update wrangler.jsonc with latest configuration
+
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+
+            Co-Authored-By: Claude <noreply@anthropic.com>"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
   terraform-apply:
     name: Terraform Apply
     needs: terraform-plan
@@ -130,8 +238,11 @@ jobs:
         working-directory: infrastructure/terraform/environments/develop
         run: |
           D1_DATABASE_ID=$(terraform output -raw d1_database_id)
+          D1_DATABASE_NAME=$(terraform output -raw d1_database_name)
           echo "d1_database_id=$D1_DATABASE_ID" >> $GITHUB_OUTPUT
+          echo "d1_database_name=$D1_DATABASE_NAME" >> $GITHUB_OUTPUT
           echo "D1 Database ID: $D1_DATABASE_ID"
+          echo "D1 Database Name: $D1_DATABASE_NAME"
 
       - name: Update wrangler.jsonc with D1 Database ID
         run: |
