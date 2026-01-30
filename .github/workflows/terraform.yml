@@ -164,7 +164,7 @@ jobs:
                 "routes": [
                   {
                     "pattern": "api.inspirehub.wtnqk.org/*",
-                    "zone_name": "wtnqk.org"
+                    "zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}"
                   }
                 ],
                 "d1_databases": [
