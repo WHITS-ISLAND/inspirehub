@@ -22,7 +22,6 @@
   // develop環境（本番）
   "env": {
     "develop": {
-      "name": "inspirehub-api-develop",
       "routes": [
         {
           "pattern": "api.inspirehub.wtnqk.org/*",
