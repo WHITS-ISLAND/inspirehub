@@ -23,7 +23,7 @@ export function buildGoogleAuthUrl(params: {
   clientId: string;
   redirectUri: string;
   state?: string;
-  codeChallenge: string;
+  codeChallenge?: string;
 }): string {
   const url = new URL(GOOGLE_AUTH_URL);
   url.searchParams.set("client_id", params.clientId);
@@ -32,8 +32,12 @@ export function buildGoogleAuthUrl(params: {
   url.searchParams.set("scope", "openid email profile");
   url.searchParams.set("access_type", "offline");
   url.searchParams.set("prompt", "consent");
-  url.searchParams.set("code_challenge", params.codeChallenge);
-  url.searchParams.set("code_challenge_method", "S256");
+
+  // PKCEパラメータは提供された場合のみ追加
+  if (params.codeChallenge) {
+    url.searchParams.set("code_challenge", params.codeChallenge);
+    url.searchParams.set("code_challenge_method", "S256");
+  }
 
   if (params.state) {
     url.searchParams.set("state", params.state);
