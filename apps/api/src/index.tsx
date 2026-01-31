@@ -6,6 +6,7 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import { renderer } from "./renderer";
 import { createCorsMiddleware } from "./middleware/cors";
 import auth from "./routes/auth";
+import authCallback from "./routes/auth-callback";
 import nodes from "./routes/nodes";
 import comments from "./routes/comments";
 import tags from "./routes/tags";
@@ -20,6 +21,7 @@ app.use(renderer);
 
 // Routes
 app.route("/auth", auth);
+app.route("/", authCallback);  // OAuth callback page
 app.route("/nodes", nodes);
 app.route("/comments", comments);
 app.route("/tags", tags);
