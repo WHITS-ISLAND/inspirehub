@@ -54,7 +54,7 @@ const createOpenAPIConfig = (env: HonoEnv["Bindings"]): Partial<GenerateSpecOpti
       },
     },
   },
-};
+});
 
 // OpenAPI spec endpoint
 app.get("/openapi.json", async (c) => {
