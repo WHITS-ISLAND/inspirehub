@@ -27,8 +27,8 @@ export const ErrorResponseSchema = type({
 // GET /auth/google/url
 export const GoogleAuthUrlQuerySchema = type({
   redirect_uri: "string",
-  code_challenge: "string",
-  code_challenge_method: "'S256'",
+  "code_challenge?": "string",
+  "code_challenge_method?": "'S256'",
   "state?": "string",
 });
 
@@ -39,7 +39,7 @@ export const GoogleAuthUrlResponseSchema = type({
 // POST /auth/google/callback
 export const GoogleCallbackBodySchema = type({
   code: "string",
-  code_verifier: "string",
+  "code_verifier?": "string",
   redirect_uri: "string",
 });
 
