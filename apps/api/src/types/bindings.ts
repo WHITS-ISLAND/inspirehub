@@ -8,6 +8,7 @@ export interface CloudflareBindings {
   // Environment Variables
   APP_URL: string;
   API_URL: string;
+  ENVIRONMENT?: string;
 
   // Secrets (set via wrangler secret put)
   GOOGLE_CLIENT_ID: string;
