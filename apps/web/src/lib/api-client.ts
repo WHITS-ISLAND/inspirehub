@@ -13,14 +13,12 @@ class ApiClient {
   async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
     const store = useAuthStore.getState();
 
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
-
+    const headers = new Headers(options.headers);
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
     if (store.accessToken) {
-      (headers as Record<string, string>)["Authorization"] =
-        `Bearer ${store.accessToken}`;
+      headers.set("Authorization", `Bearer ${store.accessToken}`);
     }
 
     let response = await fetch(`${this.baseUrl}${path}`, {
@@ -37,8 +35,7 @@ class ApiClient {
         // Retry with new token
         const newStore = useAuthStore.getState();
         if (newStore.accessToken) {
-          (headers as Record<string, string>)["Authorization"] =
-            `Bearer ${newStore.accessToken}`;
+          headers.set("Authorization", `Bearer ${newStore.accessToken}`);
           response = await fetch(`${this.baseUrl}${path}`, {
             ...options,
             headers,
@@ -53,7 +50,7 @@ class ApiClient {
       throw new ApiError(
         response.status,
         error.error?.code || "UNKNOWN_ERROR",
-        error.error?.message || "An error occurred"
+        error.error?.message || "An error occurred",
       );
     }
 
@@ -114,7 +111,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
-    message: string
+    message: string,
   ) {
     super(message);
     this.name = "ApiError";

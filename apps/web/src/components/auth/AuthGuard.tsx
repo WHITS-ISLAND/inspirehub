@@ -13,7 +13,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate({ to: "/login" });
+      void navigate({ to: "/login" });
     }
   }, [isAuthenticated, isLoading, navigate]);
 

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { createRoute, useNavigate, type RootRoute } from "@tanstack/react-router";
+import { createRoute, useNavigate, type AnyRootRoute } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth";
 import { env } from "@/env";
 import { PKCE_STORAGE_KEY } from "@/components/auth/GoogleLoginButton";
-import type { GoogleCallbackResponse } from "@inspirehub/shared/types";
 
 function AuthCallbackPage() {
   const navigate = useNavigate();
@@ -51,17 +50,15 @@ function AuthCallbackPage() {
         setAuth(user, accessToken);
 
         // Redirect to home
-        navigate({ to: "/" });
+        void navigate({ to: "/" });
       } catch (err) {
         setStatus("error");
-        setErrorMessage(
-          err instanceof Error ? err.message : "Authentication failed"
-        );
+        setErrorMessage(err instanceof Error ? err.message : "Authentication failed");
         setError(err instanceof Error ? err.message : "Authentication failed");
       }
     };
 
-    handleCallback();
+    void handleCallback();
   }, [navigate, setAuth, setError]);
 
   if (status === "error") {
@@ -90,7 +87,7 @@ function AuthCallbackPage() {
   );
 }
 
-export default (parentRoute: RootRoute) =>
+export default (parentRoute: AnyRootRoute) =>
   createRoute({
     getParentRoute: () => parentRoute,
     path: "/auth/callback",

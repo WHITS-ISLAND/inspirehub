@@ -7,6 +7,7 @@
     "build": "vite build && tsc",
     "preview": "vite preview",
     "lint": "oxlint --type-aware --type-check src/",
+    "format": "oxfmt src/",
     "format:check": "oxfmt src/",
     "test": "vitest run"
   },

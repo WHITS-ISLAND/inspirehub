@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env";
-import { generatePKCEChallenge } from "@inspirehub/shared/utils";
-import type { GoogleAuthUrlResponse } from "@inspirehub/shared/types";
 
 const PKCE_STORAGE_KEY = "pkce_verifier";
 
@@ -17,12 +15,7 @@ export function GoogleLoginButton() {
   };
 
   return (
-    <Button
-      onClick={handleLogin}
-      disabled={isLoading}
-      variant="outline"
-      className="w-full"
-    >
+    <Button onClick={handleLogin} disabled={isLoading} variant="outline" className="w-full">
       {isLoading ? (
         "Redirecting..."
       ) : (
