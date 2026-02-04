@@ -1,6 +1,12 @@
-```txt
-npm install
-npm run dev
+# InspireHub API
+
+Cloudflare Workers + Hono で構築された API サーバー。
+
+## 開発
+
+```bash
+bun install
+bun run dev
 ```
 
 ## Environment Variables
@@ -28,19 +34,21 @@ wrangler secret put JWT_REFRESH_SECRET
 
 ## Deployment
 
-```txt
-npm run deploy
+```bash
+bun run deploy
 ```
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+## 型生成
 
-```txt
-npm run cf-typegen
+[Cloudflare Workers の型を生成](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+
+```bash
+bun run cf-typegen
 ```
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+`Hono` インスタンス化時に `CloudflareBindings` を指定:
 
 ```ts
 // src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+const app = new Hono<{ Bindings: CloudflareBindings }>();
 ```

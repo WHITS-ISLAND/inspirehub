@@ -21,7 +21,7 @@ app.use(renderer);
 
 // Routes
 app.route("/auth", auth);
-app.route("/", authCallback);  // OAuth callback page
+app.route("/", authCallback); // OAuth callback page
 app.route("/nodes", nodes);
 app.route("/comments", comments);
 app.route("/tags", tags);
@@ -42,7 +42,7 @@ const createOpenAPIConfig = (env: HonoEnv["Bindings"]): Partial<GenerateSpecOpti
     servers: [
       {
         url: env.API_URL || "http://localhost:8787",
-        description: env.ENVIRONMENT === "develop" ? "本番環境" : "ローカル開発環境"
+        description: env.ENVIRONMENT === "develop" ? "本番環境" : "ローカル開発環境",
       },
     ],
     components: {

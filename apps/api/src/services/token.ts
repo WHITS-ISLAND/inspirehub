@@ -4,7 +4,7 @@ import type { Database, RefreshTokenFamiliesTable } from "../lib/db";
 export async function createTokenFamily(
   db: Kysely<Database>,
   userId: string,
-  tokenJti: string
+  tokenJti: string,
 ): Promise<string> {
   const familyId = crypto.randomUUID();
   const now = new Date().toISOString();
@@ -26,7 +26,7 @@ export async function createTokenFamily(
 
 export async function getTokenFamily(
   db: Kysely<Database>,
-  familyId: string
+  familyId: string,
 ): Promise<RefreshTokenFamiliesTable | undefined> {
   return db
     .selectFrom("refresh_token_families")
@@ -38,7 +38,7 @@ export async function getTokenFamily(
 export async function updateTokenFamily(
   db: Kysely<Database>,
   familyId: string,
-  newJti: string
+  newJti: string,
 ): Promise<void> {
   await db
     .updateTable("refresh_token_families")
@@ -50,10 +50,7 @@ export async function updateTokenFamily(
     .execute();
 }
 
-export async function revokeTokenFamily(
-  db: Kysely<Database>,
-  familyId: string
-): Promise<void> {
+export async function revokeTokenFamily(db: Kysely<Database>, familyId: string): Promise<void> {
   await db
     .updateTable("refresh_token_families")
     .set({
@@ -66,7 +63,7 @@ export async function revokeTokenFamily(
 
 export async function revokeAllUserTokenFamilies(
   db: Kysely<Database>,
-  userId: string
+  userId: string,
 ): Promise<void> {
   await db
     .updateTable("refresh_token_families")
@@ -81,7 +78,7 @@ export async function revokeAllUserTokenFamilies(
 export async function validateRefreshToken(
   db: Kysely<Database>,
   familyId: string,
-  tokenJti: string
+  tokenJti: string,
 ): Promise<{ valid: boolean; userId?: string; reason?: string }> {
   const family = await getTokenFamily(db, familyId);
 

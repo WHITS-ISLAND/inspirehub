@@ -20,7 +20,7 @@ export interface RefreshTokenPayload extends JWTPayload {
 export async function generateAccessToken(
   userId: string,
   userEmail: string,
-  secret: string
+  secret: string,
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const payload: AccessTokenPayload = {
@@ -39,7 +39,7 @@ export async function generateRefreshToken(
   userId: string,
   familyId: string,
   jti: string,
-  secret: string
+  secret: string,
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const payload: RefreshTokenPayload = {
@@ -57,7 +57,7 @@ export async function generateRefreshToken(
 // Verify JWT and return payload (returns null if invalid)
 export async function verifyJwt<T extends JWTPayload>(
   token: string,
-  secret: string
+  secret: string,
 ): Promise<T | null> {
   try {
     const payload = await verify(token, secret, "HS256");

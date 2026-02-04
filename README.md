@@ -5,6 +5,7 @@ AIを活用したアイデア管理・ブレインストーミングプラット
 ## 技術スタック
 
 ### Frontend (`/apps/web`)
+
 - **React 19** + **TypeScript** - UIフレームワーク
 - **Vite** - 高速ビルドツール
 - **TanStack Router** - タイプセーフなルーティング
@@ -17,6 +18,7 @@ AIを活用したアイデア管理・ブレインストーミングプラット
 - **Zod** - スキーマバリデーション
 
 ### Backend (`/apps/api`)
+
 - **Cloudflare Workers** - エッジランタイム
 - **Hono** - 軽量Webフレームワーク
 - **Cloudflare D1** - SQLiteベースのエッジDB
@@ -26,6 +28,7 @@ AIを活用したアイデア管理・ブレインストーミングプラット
 - **OpenAPI** - API仕様定義
 
 ### 開発環境
+
 - **Bun** - JavaScript実行環境・パッケージマネージャー
 - **Turborepo** - モノレポ管理
 - **OXC (oxlint + oxfmt)** - Rustベースの高速リンター/フォーマッター
@@ -34,10 +37,12 @@ AIを活用したアイデア管理・ブレインストーミングプラット
 ## セットアップ
 
 ### 前提条件
+
 - Bun 1.3.5以上
 - Node.js 18以上（一部ツール用）
 
 ### インストール
+
 ```bash
 # 依存関係のインストール
 bun install
@@ -48,6 +53,7 @@ cp apps/api/.env.example apps/api/.env
 ```
 
 ### 開発サーバーの起動
+
 ```bash
 # 全サービスを起動（推奨）
 bun run dev
@@ -60,6 +66,7 @@ cd apps/web && bun run dev  # Web: http://localhost:3000
 ## データベース管理
 
 ### D1データベース操作
+
 ```bash
 # ユーザー一覧を確認
 bunx wrangler d1 execute inspirehub-db --local --command="SELECT * FROM users;" --persist-to=./.wrangler/state
@@ -72,6 +79,7 @@ bunx wrangler d1 execute inspirehub-db --local --file=./apps/api/query.sql --per
 ```
 
 ### マイグレーション
+
 ```bash
 cd apps/api
 bunx wrangler d1 migrations apply inspirehub-db --local
@@ -139,6 +147,7 @@ bun run deploy
 ## 環境変数
 
 ### API (`apps/api/.env`)
+
 ```env
 # Google OAuth
 GOOGLE_CLIENT_ID=your-client-id
@@ -153,6 +162,7 @@ CLIENT_URL=http://localhost:3000
 ```
 
 ### Web (`apps/web/.env`)
+
 ```env
 VITE_API_URL=http://localhost:8787
 ```

@@ -195,7 +195,7 @@ export class NodeService {
           like_count: Number(likeCount?.count || 0),
           comment_count: Number(commentCount?.count || 0),
         };
-      })
+      }),
     );
 
     return nodesWithDetails;
@@ -207,7 +207,7 @@ export class NodeService {
       title?: string;
       content?: string;
       tags?: string[];
-    }
+    },
   ) {
     const now = new Date().toISOString();
 
@@ -225,19 +225,12 @@ export class NodeService {
         updateData.content = params.content;
       }
 
-      await trx
-        .updateTable("nodes")
-        .set(updateData)
-        .where("id", "=", id)
-        .execute();
+      await trx.updateTable("nodes").set(updateData).where("id", "=", id).execute();
 
       // Update tags if provided
       if (params.tags !== undefined) {
         // Remove existing tags
-        await trx
-          .deleteFrom("node_tags")
-          .where("node_id", "=", id)
-          .execute();
+        await trx.deleteFrom("node_tags").where("node_id", "=", id).execute();
 
         // Add new tags
         for (const tagName of params.tags) {
@@ -317,8 +310,6 @@ export class NodeService {
       .execute();
 
     const likedNodeIds = new Set(likes.map((l) => l.node_id));
-    return Object.fromEntries(
-      nodeIds.map((id) => [id, likedNodeIds.has(id)])
-    );
+    return Object.fromEntries(nodeIds.map((id) => [id, likedNodeIds.has(id)]));
   }
 }

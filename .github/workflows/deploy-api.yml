@@ -14,9 +14,9 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: "Environment to deploy"
         required: true
-        default: 'develop'
+        default: "develop"
         type: choice
         options:
           - develop
