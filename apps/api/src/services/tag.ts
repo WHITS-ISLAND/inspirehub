@@ -1,5 +1,5 @@
 import type { Kysely } from "kysely";
-import type { Database, TagsTable } from "../lib/db";
+import type { Database } from "../lib/db";
 
 export class TagService {
   constructor(private db: Kysely<Database>) {}
@@ -31,22 +31,12 @@ export class TagService {
     return { id: tagId, created: true };
   }
 
-  async list(params?: {
-    search?: string;
-    limit?: number;
-    offset?: number;
-  }) {
+  async list(params?: { search?: string; limit?: number; offset?: number }) {
     let query = this.db
       .selectFrom("tags")
       .leftJoin("node_tags", "tags.id", "node_tags.tag_id")
-      .select([
-        "tags.id",
-        "tags.name",
-        "tags.created_at",
-      ])
-      .select((eb) => [
-        eb.fn.count<number>("node_tags.node_id").as("usage_count"),
-      ])
+      .select(["tags.id", "tags.name", "tags.created_at"])
+      .select((eb) => [eb.fn.count<number>("node_tags.node_id").as("usage_count")])
       .groupBy(["tags.id", "tags.name", "tags.created_at"]);
 
     if (params?.search) {
@@ -65,7 +55,7 @@ export class TagService {
 
     const tags = await query.execute();
 
-    return tags.map(tag => ({
+    return tags.map((tag) => ({
       ...tag,
       usage_count: Number(tag.usage_count),
     }));
@@ -75,14 +65,8 @@ export class TagService {
     const tag = await this.db
       .selectFrom("tags")
       .leftJoin("node_tags", "tags.id", "node_tags.tag_id")
-      .select([
-        "tags.id",
-        "tags.name",
-        "tags.created_at",
-      ])
-      .select((eb) => [
-        eb.fn.count<number>("node_tags.node_id").as("usage_count"),
-      ])
+      .select(["tags.id", "tags.name", "tags.created_at"])
+      .select((eb) => [eb.fn.count<number>("node_tags.node_id").as("usage_count")])
       .where("tags.id", "=", id)
       .groupBy(["tags.id", "tags.name", "tags.created_at"])
       .executeTakeFirst();
@@ -99,14 +83,8 @@ export class TagService {
     const tag = await this.db
       .selectFrom("tags")
       .leftJoin("node_tags", "tags.id", "node_tags.tag_id")
-      .select([
-        "tags.id",
-        "tags.name",
-        "tags.created_at",
-      ])
-      .select((eb) => [
-        eb.fn.count<number>("node_tags.node_id").as("usage_count"),
-      ])
+      .select(["tags.id", "tags.name", "tags.created_at"])
+      .select((eb) => [eb.fn.count<number>("node_tags.node_id").as("usage_count")])
       .where("tags.name", "=", name)
       .groupBy(["tags.id", "tags.name", "tags.created_at"])
       .executeTakeFirst();
@@ -123,21 +101,15 @@ export class TagService {
     const tags = await this.db
       .selectFrom("tags")
       .leftJoin("node_tags", "tags.id", "node_tags.tag_id")
-      .select([
-        "tags.id",
-        "tags.name",
-        "tags.created_at",
-      ])
-      .select((eb) => [
-        eb.fn.count<number>("node_tags.node_id").as("usage_count"),
-      ])
+      .select(["tags.id", "tags.name", "tags.created_at"])
+      .select((eb) => [eb.fn.count<number>("node_tags.node_id").as("usage_count")])
       .groupBy(["tags.id", "tags.name", "tags.created_at"])
       .having((eb) => eb.fn.count("node_tags.node_id"), ">", 0)
       .orderBy("usage_count", "desc")
       .limit(limit)
       .execute();
 
-    return tags.map(tag => ({
+    return tags.map((tag) => ({
       ...tag,
       usage_count: Number(tag.usage_count),
     }));
@@ -148,7 +120,7 @@ export class TagService {
     params?: {
       limit?: number;
       offset?: number;
-    }
+    },
   ) {
     const nodes = await this.db
       .selectFrom("nodes")
@@ -202,7 +174,7 @@ export class TagService {
           like_count: Number(likeCount?.count || 0),
           comment_count: Number(commentCount?.count || 0),
         };
-      })
+      }),
     );
 
     return nodesWithDetails;
@@ -238,10 +210,6 @@ export class TagService {
       throw new Error("Tag with this name already exists");
     }
 
-    await this.db
-      .updateTable("tags")
-      .set({ name: newName })
-      .where("id", "=", id)
-      .execute();
+    await this.db.updateTable("tags").set({ name: newName }).where("id", "=", id).execute();
   }
 }

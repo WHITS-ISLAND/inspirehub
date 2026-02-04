@@ -1,6 +1,6 @@
 import { test, expect, describe } from "bun:test";
 import { Hono } from "hono";
-import { authRoutes } from "./auth";
+import authRoutes from "./auth";
 
 // モックのCloudflareバインディング
 const mockEnv = {
@@ -9,10 +9,10 @@ const mockEnv = {
       bind: () => ({
         first: () => null,
         all: () => [],
-        run: () => ({ success: true })
-      })
-    })
-  }
+        run: () => ({ success: true }),
+      }),
+    }),
+  },
 };
 
 describe("Auth Routes", () => {
@@ -20,9 +20,13 @@ describe("Auth Routes", () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
-    const res = await app.request("/auth/me", {
-      method: "GET"
-    }, mockEnv);
+    const res = await app.request(
+      "/auth/me",
+      {
+        method: "GET",
+      },
+      mockEnv,
+    );
 
     expect(res.status).toBe(401);
   });
@@ -31,9 +35,13 @@ describe("Auth Routes", () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
-    const res = await app.request("/auth/google", {
-      method: "GET"
-    }, mockEnv);
+    const res = await app.request(
+      "/auth/google",
+      {
+        method: "GET",
+      },
+      mockEnv,
+    );
 
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toContain("accounts.google.com");
@@ -43,12 +51,16 @@ describe("Auth Routes", () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
-    const res = await app.request("/auth/logout", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer invalid-token"
-      }
-    }, mockEnv);
+    const res = await app.request(
+      "/auth/logout",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer invalid-token",
+        },
+      },
+      mockEnv,
+    );
 
     expect(res.status).toBe(200);
   });

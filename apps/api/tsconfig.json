@@ -5,10 +5,8 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
-    "lib": [
-      "ESNext"
-    ],
-    "types": ["vite/client", "@cloudflare/workers-types"],
+    "lib": ["ESNext"],
+    "types": ["vite/client", "@cloudflare/workers-types", "bun"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }

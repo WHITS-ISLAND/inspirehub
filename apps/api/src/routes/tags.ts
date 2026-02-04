@@ -59,7 +59,7 @@ tags.get(
       tags: tagsList,
       total: tagsList.length,
     });
-  }
+  },
 );
 
 // GET /tags/popular - Get popular tags
@@ -90,7 +90,7 @@ tags.get(
       tags: popularTags,
       total: popularTags.length,
     });
-  }
+  },
 );
 
 // GET /tags/suggest - Suggest tags based on partial input
@@ -117,13 +117,10 @@ tags.get(
     const db = createDb(c.env.DB);
     const tagService = new TagService(db);
 
-    const suggestions = await tagService.suggestTags(
-      query.q,
-      query.limit || 5
-    );
+    const suggestions = await tagService.suggestTags(query.q, query.limit || 5);
 
     return c.json({ suggestions });
-  }
+  },
 );
 
 // GET /tags/:id - Get a specific tag
@@ -165,12 +162,12 @@ tags.get(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Tag not found" },
         },
-        404
+        404,
       );
     }
 
     return c.json({ tag });
-  }
+  },
 );
 
 // GET /tags/name/:name - Get tag by name
@@ -212,12 +209,12 @@ tags.get(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Tag not found" },
         },
-        404
+        404,
       );
     }
 
     return c.json({ tag });
-  }
+  },
 );
 
 // GET /tags/:name/nodes - Get nodes by tag
@@ -261,7 +258,7 @@ tags.get(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Tag not found" },
         },
-        404
+        404,
       );
     }
 
@@ -274,7 +271,7 @@ tags.get(
       nodes,
       total: nodes.length,
     });
-  }
+  },
 );
 
 // POST /tags - Create a new tag
@@ -325,14 +322,12 @@ tags.post(
     return c.json(
       {
         id: result.id,
-        message: result.created
-          ? "Tag created successfully"
-          : "Tag already exists",
+        message: result.created ? "Tag created successfully" : "Tag already exists",
         created: result.created,
       },
-      201
+      201,
     );
-  }
+  },
 );
 
 // PUT /tags/:id - Update a tag (rename)
@@ -387,14 +382,14 @@ tags.put(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Tag not found" },
         },
-        404
+        404,
       );
     }
 
     try {
       await tagService.rename(id, body.name);
       return c.json({ message: "Tag updated successfully" });
-    } catch (error) {
+    } catch {
       return c.json(
         {
           success: false as const,
@@ -403,10 +398,10 @@ tags.put(
             message: "Tag with this name already exists",
           },
         },
-        400
+        400,
       );
     }
-  }
+  },
 );
 
 // DELETE /tags/:id - Delete a tag
@@ -451,14 +446,14 @@ tags.delete(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Tag not found" },
         },
-        404
+        404,
       );
     }
 
     await tagService.delete(id);
 
     return c.json({ message: "Tag deleted successfully" });
-  }
+  },
 );
 
 export default tags;

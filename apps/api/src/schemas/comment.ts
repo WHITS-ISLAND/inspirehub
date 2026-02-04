@@ -12,7 +12,7 @@ export const UpdateCommentSchema = type({
 });
 
 export const ListCommentsQuerySchema = type({
-  "limit?": "number >= 1 <= 100",
+  "limit?": "1 <= number <= 100",
   "offset?": "number >= 0",
 });
 
@@ -26,10 +26,10 @@ export const MentionSchema = type({
 export const CommentSchema = type({
   id: "string",
   node_id: "string",
-  "parent_id": "string | null",
+  parent_id: "string | null",
   author_id: "string",
-  "author_name": "string | null",
-  "author_picture": "string | null",
+  author_name: "string | null",
+  author_picture: "string | null",
   content: "string",
   created_at: "string",
   updated_at: "string",

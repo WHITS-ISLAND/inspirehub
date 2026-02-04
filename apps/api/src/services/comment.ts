@@ -1,5 +1,25 @@
 import type { Kysely } from "kysely";
-import type { Database, CommentsTable } from "../lib/db";
+import type { Database } from "../lib/db";
+
+interface CommentMention {
+  id: string;
+  name: string | null;
+  picture: string | null;
+}
+
+interface CommentReply {
+  id: string;
+  node_id: string;
+  parent_id: string | null;
+  author_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  author_name: string | null;
+  author_picture: string | null;
+  mentions: CommentMention[];
+  replies: CommentReply[];
+}
 
 export class CommentService {
   constructor(private db: Kysely<Database>) {}
@@ -37,10 +57,7 @@ export class CommentService {
           created_at: now,
         }));
 
-        await trx
-          .insertInto("comment_mentions")
-          .values(mentionValues)
-          .execute();
+        await trx.insertInto("comment_mentions").values(mentionValues).execute();
       }
     });
 
@@ -52,7 +69,7 @@ export class CommentService {
     params?: {
       limit?: number;
       offset?: number;
-    }
+    },
   ) {
     // Get top-level comments
     const topLevelComments = await this.db
@@ -87,13 +104,13 @@ export class CommentService {
           mentions,
           replies,
         };
-      })
+      }),
     );
 
     return commentsWithReplies;
   }
 
-  async getReplies(parentId: string) {
+  async getReplies(parentId: string): Promise<CommentReply[]> {
     const replies = await this.db
       .selectFrom("comments")
       .leftJoin("users", "comments.author_id", "users.id")
@@ -123,7 +140,7 @@ export class CommentService {
           mentions,
           replies: nestedReplies,
         };
-      })
+      }),
     );
 
     return repliesWithNested;
@@ -133,11 +150,7 @@ export class CommentService {
     const mentions = await this.db
       .selectFrom("comment_mentions")
       .innerJoin("users", "comment_mentions.mentioned_user_id", "users.id")
-      .select([
-        "users.id",
-        "users.name",
-        "users.picture",
-      ])
+      .select(["users.id", "users.name", "users.picture"])
       .where("comment_mentions.comment_id", "=", commentId)
       .execute();
 
@@ -149,7 +162,7 @@ export class CommentService {
     params: {
       content: string;
       mentions?: string[];
-    }
+    },
   ) {
     const now = new Date().toISOString();
 
@@ -167,10 +180,7 @@ export class CommentService {
       // Update mentions if provided
       if (params.mentions !== undefined) {
         // Remove existing mentions
-        await trx
-          .deleteFrom("comment_mentions")
-          .where("comment_id", "=", id)
-          .execute();
+        await trx.deleteFrom("comment_mentions").where("comment_id", "=", id).execute();
 
         // Add new mentions
         if (params.mentions.length > 0) {
@@ -180,10 +190,7 @@ export class CommentService {
             created_at: now,
           }));
 
-          await trx
-            .insertInto("comment_mentions")
-            .values(mentionValues)
-            .execute();
+          await trx.insertInto("comment_mentions").values(mentionValues).execute();
         }
       }
     });
@@ -229,7 +236,7 @@ export class CommentService {
 
     if (!matches) return [];
 
-    const usernames = matches.map(match => match.substring(1)); // Remove @
+    const usernames = matches.map((match) => match.substring(1)); // Remove @
 
     // Get user IDs from usernames
     const users = await this.db
@@ -238,6 +245,6 @@ export class CommentService {
       .where("name", "in", usernames)
       .execute();
 
-    return users.map(user => user.id);
+    return users.map((user) => user.id);
   }
 }

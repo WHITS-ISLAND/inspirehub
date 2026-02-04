@@ -2,11 +2,7 @@ import { Hono } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import type { HonoEnv } from "../types/bindings";
-import {
-  buildGoogleAuthUrl,
-  exchangeCodeForTokens,
-  getGoogleUserInfo,
-} from "../services/google";
+import { buildGoogleAuthUrl, exchangeCodeForTokens, getGoogleUserInfo } from "../services/google";
 import { findOrCreateUser, findUserById } from "../services/user";
 import {
   createTokenFamily,
@@ -25,7 +21,6 @@ import { authMiddleware } from "../middleware/auth";
 import {
   GoogleAuthUrlQuerySchema,
   GoogleAuthUrlResponseSchema,
-  GoogleCallbackBodySchema,
   GoogleCallbackResponseSchema,
   RefreshTokenBodySchema,
   RefreshTokenResponseSchema,
@@ -63,7 +58,7 @@ auth.get("/google", (c) => {
     prompt: "consent",
   });
 
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   return c.redirect(url);
 });
 
@@ -105,7 +100,7 @@ auth.get(
     });
 
     return c.json({ url });
-  }
+  },
 );
 
 // GET /auth/google/callback - Exchange code for tokens
@@ -136,7 +131,7 @@ auth.get(
   }),
   async (c) => {
     const code = c.req.query("code");
-    const state = c.req.query("state");
+    const _state = c.req.query("state");
 
     if (!code) {
       return c.json({ error: "Missing authorization code" }, 400);
@@ -167,11 +162,7 @@ auth.get(
       });
 
       // Generate JWT tokens
-      const accessToken = await generateAccessToken(
-        user.id,
-        user.email,
-        c.env.JWT_ACCESS_SECRET
-      );
+      const accessToken = await generateAccessToken(user.id, user.email, c.env.JWT_ACCESS_SECRET);
 
       // Create token family for refresh token
       const familyId = crypto.randomUUID();
@@ -180,7 +171,7 @@ auth.get(
         user.id,
         familyId,
         jti,
-        c.env.JWT_REFRESH_SECRET
+        c.env.JWT_REFRESH_SECRET,
       );
 
       await createTokenFamily(db, user.id, jti);
@@ -208,7 +199,7 @@ auth.get(
         access_token: accessToken,
         expires_in: "900", // 15 minutes in seconds
       });
-      return c.redirect(`${frontendUrl}/auth/callback?${params}`);
+      return c.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error) {
       console.error("OAuth callback error:", error);
       return c.json(
@@ -216,16 +207,13 @@ auth.get(
           success: false as const,
           error: {
             code: "OAUTH_FAILED",
-            message:
-              error instanceof Error
-                ? error.message
-                : "OAuth authentication failed",
+            message: error instanceof Error ? error.message : "OAuth authentication failed",
           },
         },
-        400
+        400,
       );
     }
-  }
+  },
 );
 
 // POST /auth/refresh - Refresh access token
@@ -266,15 +254,15 @@ auth.post(
           success: false as const,
           error: { code: "UNAUTHORIZED", message: "Refresh token required" },
         },
-        401
+        401,
       );
     }
 
     // Verify refresh token
-    const payload = await verifyJwt(
+    const payload = (await verifyJwt(
       refreshToken,
-      c.env.JWT_REFRESH_SECRET
-    ) as RefreshTokenPayload | null;
+      c.env.JWT_REFRESH_SECRET,
+    )) as RefreshTokenPayload | null;
 
     if (!payload || payload.type !== "refresh") {
       return c.json(
@@ -285,17 +273,13 @@ auth.post(
             message: "Invalid refresh token",
           },
         },
-        401
+        401,
       );
     }
 
     // Validate token family
     const db = createDb(c.env.DB);
-    const validation = await validateRefreshToken(
-      db,
-      payload.family_id,
-      payload.jti
-    );
+    const validation = await validateRefreshToken(db, payload.family_id, payload.jti);
 
     if (!validation.valid) {
       deleteCookie(c, "refresh_token");
@@ -307,7 +291,7 @@ auth.post(
             message: validation.reason || "Invalid refresh token",
           },
         },
-        401
+        401,
       );
     }
 
@@ -319,22 +303,18 @@ auth.post(
           success: false as const,
           error: { code: "USER_NOT_FOUND", message: "User not found" },
         },
-        404
+        404,
       );
     }
 
     // Generate new tokens
-    const accessToken = await generateAccessToken(
-      user.id,
-      user.email,
-      c.env.JWT_ACCESS_SECRET
-    );
+    const accessToken = await generateAccessToken(user.id, user.email, c.env.JWT_ACCESS_SECRET);
     const newJti = crypto.randomUUID();
     const newRefreshToken = await generateRefreshToken(
       user.id,
       payload.family_id,
       newJti,
-      c.env.JWT_REFRESH_SECRET
+      c.env.JWT_REFRESH_SECRET,
     );
 
     // Update token family
@@ -354,7 +334,7 @@ auth.post(
       refresh_token: newRefreshToken,
       expires_in: 15 * 60,
     });
-  }
+  },
 );
 
 // GET /auth/me - Get current user
@@ -394,7 +374,7 @@ auth.get(
           success: false as const,
           error: { code: "UNAUTHORIZED", message: "Not authenticated" },
         },
-        401
+        401,
       );
     }
 
@@ -407,12 +387,12 @@ auth.get(
           success: false as const,
           error: { code: "USER_NOT_FOUND", message: "User not found" },
         },
-        404
+        404,
       );
     }
 
     return c.json({ user });
-  }
+  },
 );
 
 // POST /auth/logout - Logout user
@@ -439,10 +419,10 @@ auth.post(
     const refreshToken = getCookie(c, "refresh_token");
 
     if (refreshToken) {
-      const payload = await verifyJwt(
+      const payload = (await verifyJwt(
         refreshToken,
-        c.env.JWT_REFRESH_SECRET
-      ) as RefreshTokenPayload | null;
+        c.env.JWT_REFRESH_SECRET,
+      )) as RefreshTokenPayload | null;
 
       if (payload) {
         const db = createDb(c.env.DB);
@@ -453,7 +433,7 @@ auth.post(
     deleteCookie(c, "refresh_token");
 
     return c.json({ success: true as const });
-  }
+  },
 );
 
 export default auth;

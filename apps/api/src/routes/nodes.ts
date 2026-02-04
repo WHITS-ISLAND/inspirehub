@@ -120,7 +120,7 @@ nodes.get(
       nodes: nodesWithLikeStatus,
       total: nodesWithLikeStatus.length,
     });
-  }
+  },
 );
 
 // GET /nodes/:id - Get a specific node
@@ -162,7 +162,7 @@ nodes.get(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Node not found" },
         },
-        404
+        404,
       );
     }
 
@@ -173,10 +173,7 @@ nodes.get(
       try {
         const userId = c.get("userId");
         if (userId) {
-          const likeStatuses = await nodeService.getUserLikeStatus(
-            [id],
-            userId
-          );
+          const likeStatuses = await nodeService.getUserLikeStatus([id], userId);
           isLiked = likeStatuses[id] || false;
         }
       } catch {
@@ -188,7 +185,7 @@ nodes.get(
       ...node,
       is_liked: isLiked,
     });
-  }
+  },
 );
 
 // POST /nodes - Create a new node
@@ -230,6 +227,9 @@ nodes.post(
   validator("json", CreateNodeSchema),
   async (c) => {
     const userId = c.get("userId");
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
     const body = c.req.valid("json") as CreateNodeInput;
 
     const db = createDb(c.env.DB);
@@ -245,9 +245,9 @@ nodes.post(
         id: nodeId,
         message: "Node created successfully",
       },
-      201
+      201,
     );
-  }
+  },
 );
 
 // PUT /nodes/:id - Update a node
@@ -263,7 +263,7 @@ nodes.put(
         description: "ノード更新成功",
         content: {
           "application/json": {
-            schema: type({ message: "string" }),
+            schema: resolver(type({ message: "string" })),
           },
         },
       },
@@ -303,7 +303,7 @@ nodes.put(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Node not found" },
         },
-        404
+        404,
       );
     }
 
@@ -316,14 +316,14 @@ nodes.put(
             message: "You can only edit your own nodes",
           },
         },
-        403
+        403,
       );
     }
 
     await nodeService.update(id, body);
 
     return c.json({ message: "Node updated successfully" });
-  }
+  },
 );
 
 // DELETE /nodes/:id - Delete a node
@@ -339,7 +339,7 @@ nodes.delete(
         description: "ノード削除成功",
         content: {
           "application/json": {
-            schema: type({ message: "string" }),
+            schema: resolver(type({ message: "string" })),
           },
         },
       },
@@ -377,7 +377,7 @@ nodes.delete(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Node not found" },
         },
-        404
+        404,
       );
     }
 
@@ -390,14 +390,14 @@ nodes.delete(
             message: "You can only delete your own nodes",
           },
         },
-        403
+        403,
       );
     }
 
     await nodeService.delete(id);
 
     return c.json({ message: "Node deleted successfully" });
-  }
+  },
 );
 
 // POST /nodes/:id/like - Toggle like on a node
@@ -431,6 +431,9 @@ nodes.post(
   async (c) => {
     const nodeId = c.req.param("id");
     const userId = c.get("userId");
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
 
     const db = createDb(c.env.DB);
     const nodeService = new NodeService(db);
@@ -443,7 +446,7 @@ nodes.post(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Node not found" },
         },
-        404
+        404,
       );
     }
 
@@ -456,7 +459,7 @@ nodes.post(
       liked: result.liked,
       like_count: updatedNode?.like_count || 0,
     });
-  }
+  },
 );
 
 // GET /nodes/:nodeId/comments - List comments for a node
@@ -502,7 +505,7 @@ nodes.get(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Node not found" },
         },
-        404
+        404,
       );
     }
 
@@ -515,7 +518,7 @@ nodes.get(
       comments: commentsList,
       total: commentsList.length,
     });
-  }
+  },
 );
 
 // POST /nodes/:nodeId/comments - Create a new comment
@@ -566,6 +569,9 @@ nodes.post(
   async (c) => {
     const nodeId = c.req.param("nodeId");
     const userId = c.get("userId");
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
     const body = c.req.valid("json") as CreateCommentInput;
 
     const db = createDb(c.env.DB);
@@ -580,7 +586,7 @@ nodes.post(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Node not found" },
         },
-        404
+        404,
       );
     }
 
@@ -593,7 +599,7 @@ nodes.post(
             success: false as const,
             error: { code: "NOT_FOUND", message: "Parent comment not found" },
           },
-          404
+          404,
         );
       }
     }
@@ -617,9 +623,9 @@ nodes.post(
         id: commentId,
         message: "Comment created successfully",
       },
-      201
+      201,
     );
-  }
+  },
 );
 
 export default nodes;
