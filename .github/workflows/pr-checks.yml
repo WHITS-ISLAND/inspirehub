@@ -6,7 +6,7 @@ on:
       - develop
     paths:
       - "apps/api/**"
-      - "apps/client/**"
+      - "apps/web/**"
       - ".github/workflows/pr-checks.yml"
 
 env:
@@ -32,10 +32,7 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Type check
-        run: bun run typecheck
-
-      - name: Lint
+      - name: Lint & Type check
         run: bun run lint
 
       - name: Format check
@@ -64,13 +61,13 @@ jobs:
           bunx wrangler d1 migrations apply DB --local
           bunx wrangler d1 execute DB --local --command "SELECT name FROM sqlite_master WHERE type='table';"
 
-  client-checks:
-    name: Client Checks
+  web-checks:
+    name: Web Checks
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'apps/client/')
+    if: contains(github.event.pull_request.changed_files, 'apps/web/')
     defaults:
       run:
-        working-directory: apps/client
+        working-directory: apps/web
 
     steps:
       - name: Checkout
@@ -84,10 +81,7 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Type check
-        run: bun run typecheck
-
-      - name: Lint
+      - name: Lint & Type check
         run: bun run lint
 
       - name: Format check
@@ -153,7 +147,7 @@ jobs:
 
   pr-summary:
     name: PR Summary
-    needs: [api-checks, client-checks, security-scan, dependency-review]
+    needs: [api-checks, web-checks, security-scan, dependency-review]
     runs-on: ubuntu-latest
     if: always()
     permissions:
@@ -170,7 +164,7 @@ jobs:
 
             const jobs = [
               { name: 'API Checks', key: 'api-checks', emoji: '🔧' },
-              { name: 'Client Checks', key: 'client-checks', emoji: '💻' },
+              { name: 'Web Checks', key: 'web-checks', emoji: '💻' },
               { name: 'Security Scan', key: 'security-scan', emoji: '🔒' },
               { name: 'Dependency Review', key: 'dependency-review', emoji: '📦' }
             ];
