@@ -1,19 +1,7 @@
 import { test, expect, describe } from "bun:test";
 import { Hono } from "hono";
 import nodeRoutes from "./nodes";
-
-// モックのCloudflareバインディング
-const mockEnv = {
-  DB: {
-    prepare: () => ({
-      bind: () => ({
-        first: () => null,
-        all: () => [],
-        run: () => ({ success: true }),
-      }),
-    }),
-  },
-};
+import { mockEnv } from "../test/mock-env";
 
 describe("Node Routes", () => {
   test("GET /nodes should return nodes list", async () => {

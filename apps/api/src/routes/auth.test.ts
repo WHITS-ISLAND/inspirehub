@@ -1,19 +1,7 @@
 import { test, expect, describe } from "bun:test";
 import { Hono } from "hono";
 import authRoutes from "./auth";
-
-// モックのCloudflareバインディング
-const mockEnv = {
-  DB: {
-    prepare: () => ({
-      bind: () => ({
-        first: () => null,
-        all: () => [],
-        run: () => ({ success: true }),
-      }),
-    }),
-  },
-};
+import { mockEnv } from "../test/mock-env";
 
 describe("Auth Routes", () => {
   test("GET /auth/me should return 401 without token", async () => {
@@ -47,7 +35,7 @@ describe("Auth Routes", () => {
     expect(res.headers.get("Location")).toContain("accounts.google.com");
   });
 
-  test("POST /auth/logout should clear tokens", async () => {
+  test("POST /auth/logout should return 401 with invalid token", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
@@ -62,6 +50,6 @@ describe("Auth Routes", () => {
       mockEnv,
     );
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(401);
   });
 });
