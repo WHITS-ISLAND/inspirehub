@@ -103,3 +103,6 @@ bun.lock
 # JWT decode utility (temporary files)
 decode-jwt.js
 query.sql
+
+# MCP
+.serena
