@@ -10,13 +10,13 @@ export const UpdateTagSchema = type({
 
 export const ListTagsQuerySchema = type({
   "search?": "string",
-  "limit?": "number >= 1 <= 100",
+  "limit?": "1 <= number <= 100",
   "offset?": "number >= 0",
 });
 
 export const TagSuggestQuerySchema = type({
   q: "string > 0",
-  "limit?": "number >= 1 <= 10",
+  "limit?": "1 <= number <= 10",
 });
 
 // Response schemas for OpenAPI
@@ -66,8 +66,8 @@ export const NodesByTagResponseSchema = type({
       type: "'issue' | 'idea' | 'project'",
       title: "string",
       author_id: "string",
-      "author_name": "string | null",
-      "author_picture": "string | null",
+      author_name: "string | null",
+      author_picture: "string | null",
       created_at: "string",
       updated_at: "string",
       tags: type([

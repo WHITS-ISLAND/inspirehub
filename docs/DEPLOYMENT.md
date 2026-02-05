@@ -7,23 +7,28 @@
 以下のシークレットをGitHubリポジトリに設定してください：
 
 #### Cloudflare関連
+
 - `CLOUDFLARE_API_TOKEN` - Cloudflare APIトークン
 - `CLOUDFLARE_ACCOUNT_ID` - CloudflareアカウントID
 - `CLOUDFLARE_ZONE_ID` - Cloudflareゾーン ID（カスタムドメイン使用時）
 
 #### Google OAuth関連
+
 - `GOOGLE_CLIENT_ID` - Google OAuth クライアントID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth クライアントシークレット
 
 #### JWT関連（強力なランダム文字列を生成）
+
 - `JWT_ACCESS_SECRET` - JWTアクセストークン用シークレット
 - `JWT_REFRESH_SECRET` - JWTリフレッシュトークン用シークレット
 
 #### アプリケーション設定
+
 - `CLIENT_URL` - フロントエンドURL（例: https://inspirehub.example.com）
 - `CUSTOM_DOMAIN` - APIカスタムドメイン（オプション、例: api.inspirehub.example.com）
 
 #### Terraform State管理（S3）
+
 - `TF_STATE_BUCKET` - Terraform state用S3バケット名
 - `TF_STATE_REGION` - S3バケットのリージョン
 - `AWS_ACCESS_KEY_ID` - AWS アクセスキーID
@@ -63,6 +68,7 @@ git push origin feature/new-feature
 ### 手動デプロイ
 
 GitHub Actionsから手動実行も可能：
+
 1. GitHub リポジトリの Actions タブを開く
 2. "Deploy API to Cloudflare Workers" を選択
 3. "Run workflow" をクリック
@@ -125,13 +131,13 @@ wrangler tail --format json | grep error
 
 ## 環境変数一覧
 
-| 変数名 | 説明 | 必須 | 例 |
-|--------|------|------|-----|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare APIトークン | ✅ | - |
-| `CLOUDFLARE_ACCOUNT_ID` | CloudflareアカウントID | ✅ | - |
-| `GOOGLE_CLIENT_ID` | Google OAuth クライアントID | ✅ | xxx.apps.googleusercontent.com |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth クライアントシークレット | ✅ | - |
-| `JWT_ACCESS_SECRET` | JWTアクセストークン用シークレット | ✅ | ランダム文字列 |
-| `JWT_REFRESH_SECRET` | JWTリフレッシュトークン用シークレット | ✅ | ランダム文字列 |
-| `CLIENT_URL` | フロントエンドURL | ✅ | https://inspirehub.example.com |
-| `CUSTOM_DOMAIN` | APIカスタムドメイン | ❌ | api.inspirehub.example.com |
+| 変数名                  | 説明                                  | 必須 | 例                             |
+| ----------------------- | ------------------------------------- | ---- | ------------------------------ |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare APIトークン                | ✅   | -                              |
+| `CLOUDFLARE_ACCOUNT_ID` | CloudflareアカウントID                | ✅   | -                              |
+| `GOOGLE_CLIENT_ID`      | Google OAuth クライアントID           | ✅   | xxx.apps.googleusercontent.com |
+| `GOOGLE_CLIENT_SECRET`  | Google OAuth クライアントシークレット | ✅   | -                              |
+| `JWT_ACCESS_SECRET`     | JWTアクセストークン用シークレット     | ✅   | ランダム文字列                 |
+| `JWT_REFRESH_SECRET`    | JWTリフレッシュトークン用シークレット | ✅   | ランダム文字列                 |
+| `CLIENT_URL`            | フロントエンドURL                     | ✅   | https://inspirehub.example.com |
+| `CUSTOM_DOMAIN`         | APIカスタムドメイン                   | ❌   | api.inspirehub.example.com     |

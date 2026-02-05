@@ -8,7 +8,7 @@ env:
   TF_IN_AUTOMATION: true
 
 permissions:
-  contents: write  # git pushのために必要
+  contents: write # git pushのために必要
   pull-requests: write
   issues: write
 
@@ -75,7 +75,6 @@ jobs:
           TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           TF_VAR_jwt_access_secret: ${{ secrets.JWT_ACCESS_SECRET }}
           TF_VAR_jwt_refresh_secret: ${{ secrets.JWT_REFRESH_SECRET }}
-
 
   update-config:
     name: Update Configuration

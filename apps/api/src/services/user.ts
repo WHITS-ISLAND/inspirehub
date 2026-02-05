@@ -15,7 +15,7 @@ function rowToUser(row: UsersTable): User {
 
 export async function findUserByGoogleId(
   db: Kysely<Database>,
-  googleId: string
+  googleId: string,
 ): Promise<User | null> {
   const row = await db
     .selectFrom("users")
@@ -26,15 +26,8 @@ export async function findUserByGoogleId(
   return row ? rowToUser(row) : null;
 }
 
-export async function findUserById(
-  db: Kysely<Database>,
-  id: string
-): Promise<User | null> {
-  const row = await db
-    .selectFrom("users")
-    .selectAll()
-    .where("id", "=", id)
-    .executeTakeFirst();
+export async function findUserById(db: Kysely<Database>, id: string): Promise<User | null> {
+  const row = await db.selectFrom("users").selectAll().where("id", "=", id).executeTakeFirst();
 
   return row ? rowToUser(row) : null;
 }
@@ -46,7 +39,7 @@ export async function createUser(
     email: string;
     name: string;
     picture: string | null;
-  }
+  },
 ): Promise<User> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
@@ -78,7 +71,7 @@ export async function updateUser(
   params: {
     name?: string;
     picture?: string | null;
-  }
+  },
 ): Promise<User | null> {
   const updates: Partial<UsersTable> = {
     updated_at: new Date().toISOString(),
@@ -104,7 +97,7 @@ export async function findOrCreateUser(
     email: string;
     name: string;
     picture: string | null;
-  }
+  },
 ): Promise<User> {
   const existing = await findUserByGoogleId(db, params.googleId);
 

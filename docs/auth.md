@@ -8,15 +8,15 @@
 
 ## 技術選定
 
-| 項目 | 選定 |
-|------|------|
-| ユーザー保存 | D1 (SQLite) |
-| クエリビルダー | Kysely (型安全) |
-| マイグレーション | Atlas |
-| 一時データ | KV |
-| JWT署名 | ES256 (ECDSA P-256) |
-| Web Token保存 | HttpOnly Cookie |
-| API認証ヘッダー | Authorization: Bearer |
+| 項目             | 選定                  |
+| ---------------- | --------------------- |
+| ユーザー保存     | D1 (SQLite)           |
+| クエリビルダー   | Kysely (型安全)       |
+| マイグレーション | Atlas                 |
+| 一時データ       | KV                    |
+| JWT署名          | HS256 (HMAC)          |
+| Web Token保存    | HttpOnly Cookie       |
+| API認証ヘッダー  | Authorization: Bearer |
 
 ## 認証フロー
 
@@ -31,13 +31,13 @@
 
 ## APIエンドポイント
 
-| Method | Path | 説明 |
-|--------|------|------|
-| GET | `/auth/google/url` | Google OAuth URL取得 |
-| POST | `/auth/google/callback` | コード→トークン交換 |
-| POST | `/auth/refresh` | トークンリフレッシュ |
-| GET | `/auth/me` | 現在のユーザー取得 |
-| POST | `/auth/logout` | ログアウト |
+| Method | Path                    | 説明                 |
+| ------ | ----------------------- | -------------------- |
+| GET    | `/auth/google/url`      | Google OAuth URL取得 |
+| POST   | `/auth/google/callback` | コード→トークン交換  |
+| POST   | `/auth/refresh`         | トークンリフレッシュ |
+| GET    | `/auth/me`              | 現在のユーザー取得   |
+| POST   | `/auth/logout`          | ログアウト           |
 
 ## JWT構造
 
@@ -96,15 +96,14 @@ CREATE TABLE refresh_token_families (
 ```
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
-JWT_PRIVATE_KEY
-JWT_PUBLIC_KEY
+JWT_ACCESS_SECRET
+JWT_REFRESH_SECRET
 ```
 
 ### Web (.env.local)
 
 ```
 VITE_API_URL=http://localhost:8787
-VITE_GOOGLE_CLIENT_ID=xxx
 ```
 
 ## セットアップ手順
@@ -124,14 +123,11 @@ wrangler kv namespace create KV
 # 出力されたidをwrangler.jsoncに設定
 ```
 
-### 3. JWT鍵ペア生成
+### 3. JWTシークレット生成
 
-```typescript
-// 一度だけ実行
-import { generateKeyPair } from './src/lib/jwt';
-const keys = await generateKeyPair();
-console.log('Private Key:', keys.privateKey);
-console.log('Public Key:', keys.publicKey);
+```bash
+# ランダムな文字列を生成（例）
+openssl rand -base64 32
 ```
 
 ### 4. シークレット設定
@@ -139,13 +135,14 @@ console.log('Public Key:', keys.publicKey);
 ```bash
 wrangler secret put GOOGLE_CLIENT_ID
 wrangler secret put GOOGLE_CLIENT_SECRET
-wrangler secret put JWT_PRIVATE_KEY
-wrangler secret put JWT_PUBLIC_KEY
+wrangler secret put JWT_ACCESS_SECRET
+wrangler secret put JWT_REFRESH_SECRET
 ```
 
 ### 5. マイグレーション実行
 
 **Atlas を使用する場合:**
+
 ```bash
 # Atlas CLIをインストール
 curl -sSf https://atlasgo.sh | sh
@@ -158,6 +155,7 @@ wrangler d1 execute inspirehub-db --file=./migrations/XXX_initial.sql
 ```
 
 **手動の場合:**
+
 ```bash
 wrangler d1 execute inspirehub-db --file=./schema.sql
 ```

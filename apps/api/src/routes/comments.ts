@@ -5,22 +5,15 @@ import { createDb } from "../lib/db";
 import { CommentService } from "../services/comment";
 import { authMiddleware } from "../middleware/auth";
 import {
-  CreateCommentSchema,
   UpdateCommentSchema,
-  ListCommentsQuerySchema,
   CommentResponseSchema,
-  CommentsListResponseSchema,
-  CreateCommentResponseSchema,
   UpdateCommentResponseSchema,
   DeleteCommentResponseSchema,
-  type CreateCommentInput,
   type UpdateCommentInput,
-  type ListCommentsQuery,
 } from "../schemas/comment";
 import { ErrorResponseSchema } from "../schemas/auth";
 
 const comments = new Hono<HonoEnv>();
-
 
 // GET /comments/:id - Get a specific comment
 comments.get(
@@ -61,14 +54,13 @@ comments.get(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Comment not found" },
         },
-        404
+        404,
       );
     }
 
     return c.json({ comment });
-  }
+  },
 );
-
 
 // PUT /comments/:id - Update a comment
 comments.put(
@@ -123,7 +115,7 @@ comments.put(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Comment not found" },
         },
-        404
+        404,
       );
     }
 
@@ -136,7 +128,7 @@ comments.put(
             message: "You can only edit your own comments",
           },
         },
-        403
+        403,
       );
     }
 
@@ -152,7 +144,7 @@ comments.put(
     });
 
     return c.json({ message: "Comment updated successfully" });
-  }
+  },
 );
 
 // DELETE /comments/:id - Delete a comment
@@ -206,7 +198,7 @@ comments.delete(
           success: false as const,
           error: { code: "NOT_FOUND", message: "Comment not found" },
         },
-        404
+        404,
       );
     }
 
@@ -219,14 +211,14 @@ comments.delete(
             message: "You can only delete your own comments",
           },
         },
-        403
+        403,
       );
     }
 
     await commentService.delete(id);
 
     return c.json({ message: "Comment deleted successfully" });
-  }
+  },
 );
 
 export default comments;

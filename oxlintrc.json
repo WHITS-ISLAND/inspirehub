@@ -15,11 +15,5 @@
     "eqeqeq": "error",
     "no-unused-vars": "warn"
   },
-  "ignorePatterns": [
-    "node_modules",
-    "dist",
-    ".output",
-    "*.config.js",
-    "*.config.ts"
-  ]
+  "ignorePatterns": ["node_modules", "dist", ".output", "*.config.js", "*.config.ts"]
 }

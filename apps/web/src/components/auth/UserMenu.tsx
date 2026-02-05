@@ -23,11 +23,7 @@ export function UserMenu() {
     <div className="flex items-center gap-4">
       <div className="flex items-center gap-2">
         {user.picture && (
-          <img
-            src={user.picture}
-            alt={user.name}
-            className="h-8 w-8 rounded-full"
-          />
+          <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full" />
         )}
         <span className="text-sm font-medium">{user.name}</span>
       </div>

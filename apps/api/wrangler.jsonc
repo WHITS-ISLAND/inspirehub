@@ -10,15 +10,15 @@
     {
       "binding": "DB",
       "database_name": "inspirehub",
-      "database_id": "local-inspirehub"
-    }
+      "database_id": "local-inspirehub",
+    },
   ],
 
   // ローカル開発用の環境変数
   "vars": {
     "ENVIRONMENT": "local",
     "CLIENT_URL": "http://localhost:5173",
-    "API_URL": "http://localhost:8787"
+    "API_URL": "http://localhost:8787",
   },
 
   // develop環境（本番）
@@ -28,21 +28,21 @@
       "routes": [
         {
           "pattern": "api.inspirehub.wtnqk.org/*",
-          "zone_id": "b04f9b32997d6009031966d002e66551"
-        }
+          "zone_id": "b04f9b32997d6009031966d002e66551",
+        },
       ],
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "inspirehub-d1",
-          "database_id": "17c33eda-5d8d-4166-a1ac-b2278ec834a5"
-        }
+          "database_id": "17c33eda-5d8d-4166-a1ac-b2278ec834a5",
+        },
       ],
       "vars": {
         "ENVIRONMENT": "develop",
         "CLIENT_URL": "https://inspirehub.wtnqk.org",
-        "API_URL": "https://api.inspirehub.wtnqk.org"
-      }
-    }
-  }
+        "API_URL": "https://api.inspirehub.wtnqk.org",
+      },
+    },
+  },
 }

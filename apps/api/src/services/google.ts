@@ -82,9 +82,7 @@ export async function exchangeCodeForTokens(params: {
   return response.json();
 }
 
-export async function getGoogleUserInfo(
-  accessToken: string
-): Promise<GoogleUserInfo> {
+export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
   const response = await fetch(GOOGLE_USERINFO_URL, {
     headers: {
       Authorization: `Bearer ${accessToken}`,

@@ -1,28 +1,20 @@
 import { test, expect, describe } from "bun:test";
 import { Hono } from "hono";
-import { authRoutes } from "./auth";
-
-// モックのCloudflareバインディング
-const mockEnv = {
-  DB: {
-    prepare: () => ({
-      bind: () => ({
-        first: () => null,
-        all: () => [],
-        run: () => ({ success: true })
-      })
-    })
-  }
-};
+import authRoutes from "./auth";
+import { mockEnv } from "../test/mock-env";
 
 describe("Auth Routes", () => {
   test("GET /auth/me should return 401 without token", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
-    const res = await app.request("/auth/me", {
-      method: "GET"
-    }, mockEnv);
+    const res = await app.request(
+      "/auth/me",
+      {
+        method: "GET",
+      },
+      mockEnv,
+    );
 
     expect(res.status).toBe(401);
   });
@@ -31,25 +23,33 @@ describe("Auth Routes", () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
-    const res = await app.request("/auth/google", {
-      method: "GET"
-    }, mockEnv);
+    const res = await app.request(
+      "/auth/google",
+      {
+        method: "GET",
+      },
+      mockEnv,
+    );
 
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toContain("accounts.google.com");
   });
 
-  test("POST /auth/logout should clear tokens", async () => {
+  test("POST /auth/logout should return 401 with invalid token", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
-    const res = await app.request("/auth/logout", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer invalid-token"
-      }
-    }, mockEnv);
+    const res = await app.request(
+      "/auth/logout",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer invalid-token",
+        },
+      },
+      mockEnv,
+    );
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(401);
   });
 });

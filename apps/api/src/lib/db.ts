@@ -34,7 +34,7 @@ export interface RefreshTokenFamiliesTable {
 
 export interface NodesTable {
   id: string;
-  type: 'issue' | 'idea' | 'project';
+  type: "issue" | "idea" | "project";
   title: string;
   content: string;
   author_id: string;

@@ -1,4 +1,4 @@
-import { createRoute, type RootRoute } from "@tanstack/react-router";
+import { createRoute, type AnyRootRoute } from "@tanstack/react-router";
 import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
 import { useAuthStore } from "@/stores/auth";
 import { useEffect } from "react";
@@ -10,7 +10,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: "/" });
+      void navigate({ to: "/" });
     }
   }, [isAuthenticated, navigate]);
 
@@ -27,7 +27,7 @@ function LoginPage() {
   );
 }
 
-export default (parentRoute: RootRoute) =>
+export default (parentRoute: AnyRootRoute) =>
   createRoute({
     getParentRoute: () => parentRoute,
     path: "/login",
