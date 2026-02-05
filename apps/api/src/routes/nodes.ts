@@ -25,6 +25,17 @@ import { ErrorResponseSchema } from "../schemas/auth";
 import { type } from "arktype";
 
 // Response schemas
+const ReactionStatusSchema = type({
+  count: "number",
+  "is_reacted?": "boolean",
+});
+
+const ReactionsSchema = type({
+  like: ReactionStatusSchema,
+  interested: ReactionStatusSchema,
+  want_to_try: ReactionStatusSchema,
+});
+
 const NodeResponseSchema = type({
   id: "string",
   type: "'issue' | 'idea' | 'project'",
@@ -41,9 +52,8 @@ const NodeResponseSchema = type({
       name: "string",
     },
   ]),
-  like_count: "number",
+  reactions: ReactionsSchema,
   comment_count: "number",
-  "is_liked?": "boolean",
 });
 
 const CreateNodeResponseSchema = type({
@@ -56,10 +66,10 @@ const ListNodesResponseSchema = type({
   total: "number",
 });
 
-const LikeResponseSchema = type({
-  liked: "boolean",
-  like_count: "number",
-});
+const ReactionToggleResponseSchema = type({
+  is_reacted: "boolean",
+  count: "number",
+});;
 
 const nodes = new Hono<HonoEnv>();
 
@@ -95,30 +105,49 @@ nodes.get(
       offset: query.offset || 0,
     });
 
-    // Get user's like status if authenticated
+    // Get user's reaction statuses if authenticated
     const authHeader = c.req.header("Authorization");
     let likeStatuses: Record<string, boolean> = {};
+    let interestedStatuses: Record<string, boolean> = {};
+    let wantToTryStatuses: Record<string, boolean> = {};
 
     if (authHeader) {
       try {
         const userId = c.get("userId");
         if (userId) {
           const nodeIds = nodesList.map((n) => n.id);
-          likeStatuses = await nodeService.getUserLikeStatus(nodeIds, userId);
+          [likeStatuses, interestedStatuses, wantToTryStatuses] = await Promise.all([
+            nodeService.getUserLikeStatus(nodeIds, userId),
+            nodeService.getUserInterestedStatus(nodeIds, userId),
+            nodeService.getUserWantToTryStatus(nodeIds, userId),
+          ]);
         }
       } catch {
         // Optional auth, ignore errors
       }
     }
 
-    const nodesWithLikeStatus = nodesList.map((node) => ({
+    const nodesWithReactionStatus = nodesList.map((node) => ({
       ...node,
-      is_liked: likeStatuses[node.id] || false,
+      reactions: {
+        like: {
+          count: node.reactions.like.count,
+          is_reacted: likeStatuses[node.id] || false,
+        },
+        interested: {
+          count: node.reactions.interested.count,
+          is_reacted: interestedStatuses[node.id] || false,
+        },
+        want_to_try: {
+          count: node.reactions.want_to_try.count,
+          is_reacted: wantToTryStatuses[node.id] || false,
+        },
+      },
     }));
 
     return c.json({
-      nodes: nodesWithLikeStatus,
-      total: nodesWithLikeStatus.length,
+      nodes: nodesWithReactionStatus,
+      total: nodesWithReactionStatus.length,
     });
   },
 );
@@ -166,15 +195,23 @@ nodes.get(
       );
     }
 
-    // Check if user has liked this node
-    let isLiked = false;
+    // Check user's reaction statuses
+    let likeStatus = false;
+    let interestedStatus = false;
+    let wantToTryStatus = false;
     const authHeader = c.req.header("Authorization");
     if (authHeader) {
       try {
         const userId = c.get("userId");
         if (userId) {
-          const likeStatuses = await nodeService.getUserLikeStatus([id], userId);
-          isLiked = likeStatuses[id] || false;
+          const [likeStatuses, interestedStatuses, wantToTryStatuses] = await Promise.all([
+            nodeService.getUserLikeStatus([id], userId),
+            nodeService.getUserInterestedStatus([id], userId),
+            nodeService.getUserWantToTryStatus([id], userId),
+          ]);
+          likeStatus = likeStatuses[id] || false;
+          interestedStatus = interestedStatuses[id] || false;
+          wantToTryStatus = wantToTryStatuses[id] || false;
         }
       } catch {
         // Optional auth, ignore errors
@@ -183,7 +220,20 @@ nodes.get(
 
     return c.json({
       ...node,
-      is_liked: isLiked,
+      reactions: {
+        like: {
+          count: node.reactions.like.count,
+          is_reacted: likeStatus,
+        },
+        interested: {
+          count: node.reactions.interested.count,
+          is_reacted: interestedStatus,
+        },
+        want_to_try: {
+          count: node.reactions.want_to_try.count,
+          is_reacted: wantToTryStatus,
+        },
+      },
     });
   },
 );
@@ -413,7 +463,7 @@ nodes.post(
         description: "いいね切り替え成功",
         content: {
           "application/json": {
-            schema: resolver(LikeResponseSchema),
+            schema: resolver(ReactionToggleResponseSchema),
           },
         },
       },
@@ -451,13 +501,131 @@ nodes.post(
     }
 
     const result = await nodeService.toggleLike(nodeId, userId);
-
-    // Get updated like count
-    const updatedNode = await nodeService.getById(nodeId);
+    const count = await nodeService.getReactionCount(nodeId, "like");
 
     return c.json({
-      liked: result.liked,
-      like_count: updatedNode?.like_count || 0,
+      is_reacted: result.liked,
+      count,
+    });
+  },
+);
+
+// POST /nodes/:id/interested - Toggle interested on a node
+nodes.post(
+  "/:id/interested",
+  describeRoute({
+    tags: ["Nodes"],
+    summary: "気になる切り替え",
+    description: "ノードの気になる状態を切り替え",
+    security: [{ Bearer: [] }],
+    responses: {
+      200: {
+        description: "気になる切り替え成功",
+        content: {
+          "application/json": {
+            schema: resolver(ReactionToggleResponseSchema),
+          },
+        },
+      },
+      404: {
+        description: "ノードが見つかりません",
+        content: {
+          "application/json": {
+            schema: resolver(ErrorResponseSchema),
+          },
+        },
+      },
+    },
+  }),
+  authMiddleware,
+  async (c) => {
+    const nodeId = c.req.param("id");
+    const userId = c.get("userId");
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const db = createDb(c.env.DB);
+    const nodeService = new NodeService(db);
+
+    // Check if node exists
+    const node = await nodeService.getById(nodeId);
+    if (!node) {
+      return c.json(
+        {
+          success: false as const,
+          error: { code: "NOT_FOUND", message: "Node not found" },
+        },
+        404,
+      );
+    }
+
+    const result = await nodeService.toggleInterested(nodeId, userId);
+    const count = await nodeService.getReactionCount(nodeId, "interested");
+
+    return c.json({
+      is_reacted: result.is_reacted,
+      count,
+    });
+  },
+);
+
+// POST /nodes/:id/want-to-try - Toggle want-to-try on a node
+nodes.post(
+  "/:id/want-to-try",
+  describeRoute({
+    tags: ["Nodes"],
+    summary: "やってみたい切り替え",
+    description: "ノードのやってみたい状態を切り替え",
+    security: [{ Bearer: [] }],
+    responses: {
+      200: {
+        description: "やってみたい切り替え成功",
+        content: {
+          "application/json": {
+            schema: resolver(ReactionToggleResponseSchema),
+          },
+        },
+      },
+      404: {
+        description: "ノードが見つかりません",
+        content: {
+          "application/json": {
+            schema: resolver(ErrorResponseSchema),
+          },
+        },
+      },
+    },
+  }),
+  authMiddleware,
+  async (c) => {
+    const nodeId = c.req.param("id");
+    const userId = c.get("userId");
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const db = createDb(c.env.DB);
+    const nodeService = new NodeService(db);
+
+    // Check if node exists
+    const node = await nodeService.getById(nodeId);
+    if (!node) {
+      return c.json(
+        {
+          success: false as const,
+          error: { code: "NOT_FOUND", message: "Node not found" },
+        },
+        404,
+      );
+    }
+
+    const result = await nodeService.toggleWantToTry(nodeId, userId);
+    const count = await nodeService.getReactionCount(nodeId, "want_to_try");
+
+    return c.json({
+      is_reacted: result.is_reacted,
+      count,
     });
   },
 );

@@ -116,3 +116,31 @@ CREATE TABLE likes (
 CREATE INDEX idx_likes_node_id ON likes(node_id);
 CREATE INDEX idx_likes_user_id ON likes(user_id);
 CREATE INDEX idx_likes_created_at ON likes(created_at);
+
+-- Interested table (気になる機能)
+CREATE TABLE interested (
+  node_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (node_id, user_id),
+  FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_interested_node_id ON interested(node_id);
+CREATE INDEX idx_interested_user_id ON interested(user_id);
+CREATE INDEX idx_interested_created_at ON interested(created_at);
+
+-- Want to try table (やってみたい機能)
+CREATE TABLE want_to_try (
+  node_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (node_id, user_id),
+  FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_want_to_try_node_id ON want_to_try(node_id);
+CREATE INDEX idx_want_to_try_user_id ON want_to_try(user_id);
+CREATE INDEX idx_want_to_try_created_at ON want_to_try(created_at);

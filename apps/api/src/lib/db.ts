@@ -11,6 +11,8 @@ export interface Database {
   comments: CommentsTable;
   comment_mentions: CommentMentionsTable;
   likes: LikesTable;
+  interested: InterestedTable;
+  want_to_try: WantToTryTable;
 }
 
 export interface UsersTable {
@@ -71,6 +73,18 @@ export interface CommentMentionsTable {
 }
 
 export interface LikesTable {
+  node_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface InterestedTable {
+  node_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface WantToTryTable {
   node_id: string;
   user_id: string;
   created_at: string;

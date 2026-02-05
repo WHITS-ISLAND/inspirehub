@@ -97,24 +97,38 @@ export class NodeService {
       .where("node_tags.node_id", "=", id)
       .execute();
 
-    // Get like count
-    const likeCount = await this.db
-      .selectFrom("likes")
-      .select((eb) => eb.fn.countAll().as("count"))
-      .where("node_id", "=", id)
-      .executeTakeFirst();
-
-    // Get comment count
-    const commentCount = await this.db
-      .selectFrom("comments")
-      .select((eb) => eb.fn.countAll().as("count"))
-      .where("node_id", "=", id)
-      .executeTakeFirst();
+    // Get reaction counts
+    const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
+      this.db
+        .selectFrom("likes")
+        .select((eb) => eb.fn.countAll().as("count"))
+        .where("node_id", "=", id)
+        .executeTakeFirst(),
+      this.db
+        .selectFrom("interested")
+        .select((eb) => eb.fn.countAll().as("count"))
+        .where("node_id", "=", id)
+        .executeTakeFirst(),
+      this.db
+        .selectFrom("want_to_try")
+        .select((eb) => eb.fn.countAll().as("count"))
+        .where("node_id", "=", id)
+        .executeTakeFirst(),
+      this.db
+        .selectFrom("comments")
+        .select((eb) => eb.fn.countAll().as("count"))
+        .where("node_id", "=", id)
+        .executeTakeFirst(),
+    ]);
 
     return {
       ...node,
       tags,
-      like_count: Number(likeCount?.count || 0),
+      reactions: {
+        like: { count: Number(likeCount?.count || 0) },
+        interested: { count: Number(interestedCount?.count || 0) },
+        want_to_try: { count: Number(wantToTryCount?.count || 0) },
+      },
       comment_count: Number(commentCount?.count || 0),
     };
   }
@@ -177,22 +191,37 @@ export class NodeService {
           .where("node_tags.node_id", "=", node.id)
           .execute();
 
-        const likeCount = await this.db
-          .selectFrom("likes")
-          .select((eb) => eb.fn.countAll().as("count"))
-          .where("node_id", "=", node.id)
-          .executeTakeFirst();
-
-        const commentCount = await this.db
-          .selectFrom("comments")
-          .select((eb) => eb.fn.countAll().as("count"))
-          .where("node_id", "=", node.id)
-          .executeTakeFirst();
+        const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
+          this.db
+            .selectFrom("likes")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+          this.db
+            .selectFrom("interested")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+          this.db
+            .selectFrom("want_to_try")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+          this.db
+            .selectFrom("comments")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+        ]);
 
         return {
           ...node,
           tags,
-          like_count: Number(likeCount?.count || 0),
+          reactions: {
+            like: { count: Number(likeCount?.count || 0) },
+            interested: { count: Number(interestedCount?.count || 0) },
+            want_to_try: { count: Number(wantToTryCount?.count || 0) },
+          },
           comment_count: Number(commentCount?.count || 0),
         };
       }),
@@ -302,6 +331,7 @@ export class NodeService {
   }
 
   async getUserLikeStatus(nodeIds: string[], userId: string) {
+    if (nodeIds.length === 0) return {};
     const likes = await this.db
       .selectFrom("likes")
       .select("node_id")
@@ -311,5 +341,101 @@ export class NodeService {
 
     const likedNodeIds = new Set(likes.map((l) => l.node_id));
     return Object.fromEntries(nodeIds.map((id) => [id, likedNodeIds.has(id)]));
+  }
+
+  async toggleInterested(nodeId: string, userId: string) {
+    const existing = await this.db
+      .selectFrom("interested")
+      .select("node_id")
+      .where("node_id", "=", nodeId)
+      .where("user_id", "=", userId)
+      .executeTakeFirst();
+
+    if (existing) {
+      // Remove interested
+      await this.db
+        .deleteFrom("interested")
+        .where("node_id", "=", nodeId)
+        .where("user_id", "=", userId)
+        .execute();
+      return { is_reacted: false };
+    } else {
+      // Add interested
+      await this.db
+        .insertInto("interested")
+        .values({
+          node_id: nodeId,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+        })
+        .execute();
+      return { is_reacted: true };
+    }
+  }
+
+  async toggleWantToTry(nodeId: string, userId: string) {
+    const existing = await this.db
+      .selectFrom("want_to_try")
+      .select("node_id")
+      .where("node_id", "=", nodeId)
+      .where("user_id", "=", userId)
+      .executeTakeFirst();
+
+    if (existing) {
+      // Remove want_to_try
+      await this.db
+        .deleteFrom("want_to_try")
+        .where("node_id", "=", nodeId)
+        .where("user_id", "=", userId)
+        .execute();
+      return { is_reacted: false };
+    } else {
+      // Add want_to_try
+      await this.db
+        .insertInto("want_to_try")
+        .values({
+          node_id: nodeId,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+        })
+        .execute();
+      return { is_reacted: true };
+    }
+  }
+
+  async getUserInterestedStatus(nodeIds: string[], userId: string) {
+    if (nodeIds.length === 0) return {};
+    const rows = await this.db
+      .selectFrom("interested")
+      .select("node_id")
+      .where("node_id", "in", nodeIds)
+      .where("user_id", "=", userId)
+      .execute();
+
+    const interestedNodeIds = new Set(rows.map((r) => r.node_id));
+    return Object.fromEntries(nodeIds.map((id) => [id, interestedNodeIds.has(id)]));
+  }
+
+  async getUserWantToTryStatus(nodeIds: string[], userId: string) {
+    if (nodeIds.length === 0) return {};
+    const rows = await this.db
+      .selectFrom("want_to_try")
+      .select("node_id")
+      .where("node_id", "in", nodeIds)
+      .where("user_id", "=", userId)
+      .execute();
+
+    const wantToTryNodeIds = new Set(rows.map((r) => r.node_id));
+    return Object.fromEntries(nodeIds.map((id) => [id, wantToTryNodeIds.has(id)]));
+  }
+
+  async getReactionCount(nodeId: string, reactionType: "like" | "interested" | "want_to_try") {
+    const table = reactionType === "like" ? "likes" : reactionType;
+    const result = await this.db
+      .selectFrom(table)
+      .select((eb) => eb.fn.countAll().as("count"))
+      .where("node_id", "=", nodeId)
+      .executeTakeFirst();
+    return Number(result?.count || 0);
   }
 }

@@ -2,7 +2,7 @@
   "name": "api",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev src/index.tsx --local --port 8787 --persist-to=./.wrangler/state",
+    "dev": "wrangler dev --local --port 8787 --persist-to=./.wrangler/state",
     "build": "vite build",
     "preview": "$npm_execpath run build && vite preview",
     "deploy": "$npm_execpath run build && wrangler deploy",
@@ -14,7 +14,9 @@
     "format:check": "oxfmt src/",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "test:coverage": "bun test --coverage"
+    "test:coverage": "bun test --coverage",
+    "db:diff": "atlas migrate diff --env local",
+    "db:apply": "wrangler d1 migrations apply DB --local"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260118.0",
