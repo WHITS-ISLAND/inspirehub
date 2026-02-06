@@ -6,6 +6,7 @@ export interface Database {
   users: UsersTable;
   refresh_token_families: RefreshTokenFamiliesTable;
   nodes: NodesTable;
+  edges: EdgesTable;
   tags: TagsTable;
   node_tags: NodeTagsTable;
   comments: CommentsTable;
@@ -40,6 +41,14 @@ export interface NodesTable {
   title: string;
   content: string;
   author_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EdgesTable {
+  id: string;
+  source: string;
+  target: string;
   created_at: string;
   updated_at: string;
 }
