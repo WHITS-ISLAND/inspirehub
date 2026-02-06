@@ -10,6 +10,7 @@ export class NodeService {
     content: string;
     author_id: string;
     tags?: string[];
+    parentNodeId?: string;
   }) {
     const nodeId = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -28,6 +29,20 @@ export class NodeService {
           updated_at: now,
         })
         .execute();
+
+      // Create edge if parentNodeId is provided
+      if (params.parentNodeId) {
+        await trx
+          .insertInto("edges")
+          .values({
+            id: crypto.randomUUID(),
+            source: params.parentNodeId,
+            target: nodeId,
+            created_at: now,
+            updated_at: now,
+          })
+          .execute();
+      }
 
       // Handle tags if provided
       if (params.tags && params.tags.length > 0) {
@@ -97,6 +112,14 @@ export class NodeService {
       .where("node_tags.node_id", "=", id)
       .execute();
 
+    // Get parent node
+    const parentNode = await this.db
+      .selectFrom("edges")
+      .innerJoin("nodes", "edges.source", "nodes.id")
+      .select(["nodes.id", "nodes.title", "nodes.content"])
+      .where("edges.target", "=", id)
+      .executeTakeFirst();
+
     // Get reaction counts
     const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
       this.db
@@ -130,6 +153,7 @@ export class NodeService {
         want_to_try: { count: Number(wantToTryCount?.count || 0) },
       },
       comment_count: Number(commentCount?.count || 0),
+      parentNode: parentNode ?? null,
     };
   }
 
@@ -181,7 +205,7 @@ export class NodeService {
 
     const nodes = await query.execute();
 
-    // Get tags and counts for each node
+    // Get tags, parent node, and counts for each node
     const nodesWithDetails = await Promise.all(
       nodes.map(async (node) => {
         const tags = await this.db
@@ -190,6 +214,13 @@ export class NodeService {
           .select(["tags.id", "tags.name"])
           .where("node_tags.node_id", "=", node.id)
           .execute();
+
+        const parentNode = await this.db
+          .selectFrom("edges")
+          .innerJoin("nodes", "edges.source", "nodes.id")
+          .select(["nodes.id", "nodes.title", "nodes.content"])
+          .where("edges.target", "=", node.id)
+          .executeTakeFirst();
 
         const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
           this.db
@@ -223,6 +254,7 @@ export class NodeService {
             want_to_try: { count: Number(wantToTryCount?.count || 0) },
           },
           comment_count: Number(commentCount?.count || 0),
+          parentNode: parentNode ?? null,
         };
       }),
     );

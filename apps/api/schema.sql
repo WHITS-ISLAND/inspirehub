@@ -49,6 +49,17 @@ CREATE INDEX idx_nodes_updated_at ON nodes(updated_at);
 CREATE INDEX idx_nodes_type_created_at ON nodes(type, created_at);
 CREATE INDEX idx_nodes_author_type ON nodes(author_id, type);
 
+-- Edges table
+CREATE TABLE edges (
+  id TEXT PRIMARY KEY,
+  source TEXT NOT NULL,
+  target TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (source) REFERENCES nodes(id) ON DELETE CASCADE,
+  FOREIGN KEY (target) REFERENCES nodes(id) ON DELETE CASCADE
+);
+
 -- Tags table
 CREATE TABLE tags (
   id TEXT PRIMARY KEY,

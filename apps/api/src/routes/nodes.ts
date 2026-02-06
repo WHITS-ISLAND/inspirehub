@@ -36,6 +36,12 @@ const ReactionsSchema = type({
   want_to_try: ReactionStatusSchema,
 });
 
+const ParentNodeSchema = type({
+  id: "string",
+  title: "string",
+  content: "string",
+});
+
 const NodeResponseSchema = type({
   id: "string",
   type: "'issue' | 'idea' | 'project'",
@@ -54,6 +60,7 @@ const NodeResponseSchema = type({
   ]),
   reactions: ReactionsSchema,
   comment_count: "number",
+  "parentNode?": ParentNodeSchema.or("null"),
 });
 
 const CreateNodeResponseSchema = type({
