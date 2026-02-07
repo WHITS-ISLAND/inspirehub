@@ -1,65 +1,30 @@
 import { useEffect, useState } from "react";
 import { createRoute, useNavigate, type AnyRootRoute } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth";
-import { env } from "@/env";
-import { PKCE_STORAGE_KEY } from "@/components/auth/GoogleLoginButton";
 
 function AuthCallbackPage() {
   const navigate = useNavigate();
-  const { setAuth, setError } = useAuthStore();
+  const { setError } = useAuthStore();
   const [status, setStatus] = useState<"loading" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const accessToken = params.get("access_token");
-      const error = params.get("error");
+    // This callback page is deprecated.
+    // Authentication now happens via Google Sign-In SDK directly.
+    // Redirect to login page.
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
 
-      if (error) {
-        setStatus("error");
-        setErrorMessage(`Authentication failed: ${error}`);
-        setError(error);
-        return;
-      }
+    if (error) {
+      setStatus("error");
+      setErrorMessage(`Authentication failed: ${error}`);
+      setError(error);
+      return;
+    }
 
-      if (!accessToken) {
-        setStatus("error");
-        setErrorMessage("No access token received");
-        return;
-      }
-
-      try {
-        // Clear PKCE storage (no longer needed)
-        sessionStorage.removeItem(PKCE_STORAGE_KEY);
-
-        // Get user info using the access token
-        const response = await fetch(`${env.VITE_API_URL}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to get user information");
-        }
-
-        const user = await response.json();
-
-        // Store auth state
-        setAuth(user, accessToken);
-
-        // Redirect to home
-        void navigate({ to: "/" });
-      } catch (err) {
-        setStatus("error");
-        setErrorMessage(err instanceof Error ? err.message : "Authentication failed");
-        setError(err instanceof Error ? err.message : "Authentication failed");
-      }
-    };
-
-    void handleCallback();
-  }, [navigate, setAuth, setError]);
+    // Redirect to home
+    void navigate({ to: "/" });
+  }, [navigate, setError]);
 
   if (status === "error") {
     return (

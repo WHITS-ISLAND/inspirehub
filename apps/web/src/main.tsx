@@ -8,6 +8,7 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import LoginRoute from "./routes/login.tsx";
 import AuthCallbackRoute from "./routes/auth/callback.tsx";
 
@@ -19,6 +20,7 @@ import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 
 import App from "./App.tsx";
+import { env } from "./env.ts";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -65,9 +67,11 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-        <RouterProvider router={router} />
-      </TanStackQueryProvider.Provider>
+      <GoogleOAuthProvider clientId={env.VITE_GOOGLE_CLIENT_ID}>
+        <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+          <RouterProvider router={router} />
+        </TanStackQueryProvider.Provider>
+      </GoogleOAuthProvider>
     </StrictMode>,
   );
 }

@@ -19,20 +19,23 @@ describe("Auth Routes", () => {
     expect(res.status).toBe(401);
   });
 
-  test("GET /auth/google should redirect to Google OAuth", async () => {
+  test("POST /auth/verify should return 401 with invalid id_token", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
     const res = await app.request(
-      "/auth/google",
+      "/auth/verify",
       {
-        method: "GET",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id_token: "invalid-token" }),
       },
       mockEnv,
     );
 
-    expect(res.status).toBe(302);
-    expect(res.headers.get("Location")).toContain("accounts.google.com");
+    expect(res.status).toBe(401);
   });
 
   test("POST /auth/logout should return 401 with invalid token", async () => {
