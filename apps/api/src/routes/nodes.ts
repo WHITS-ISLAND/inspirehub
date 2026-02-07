@@ -4,7 +4,7 @@ import type { HonoEnv } from "../types/bindings";
 import { createDb } from "../lib/db";
 import { NodeService } from "../services/node";
 import { CommentService } from "../services/comment";
-import { authMiddleware } from "../middleware/auth";
+import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth";
 import {
   CreateNodeSchema,
   UpdateNodeSchema,
@@ -88,6 +88,7 @@ nodes.get(
     tags: ["Nodes"],
     summary: "ノード一覧取得",
     description: "ノードの一覧を取得（フィルタオプション付き）",
+    security: [{ Bearer: [] }, {}],
     responses: {
       200: {
         description: "ノード一覧",
@@ -99,6 +100,7 @@ nodes.get(
       },
     },
   }),
+  optionalAuthMiddleware,
   validator("query", ListNodesQuerySchema),
   async (c) => {
     const query = c.req.valid("query") as ListNodesQuery;
@@ -115,25 +117,18 @@ nodes.get(
     });
 
     // Get user's reaction statuses if authenticated
-    const authHeader = c.req.header("Authorization");
+    const userId = c.get("userId");
     let likeStatuses: Record<string, boolean> = {};
     let interestedStatuses: Record<string, boolean> = {};
     let wantToTryStatuses: Record<string, boolean> = {};
 
-    if (authHeader) {
-      try {
-        const userId = c.get("userId");
-        if (userId) {
-          const nodeIds = nodesList.map((n) => n.id);
-          [likeStatuses, interestedStatuses, wantToTryStatuses] = await Promise.all([
-            nodeService.getUserLikeStatus(nodeIds, userId),
-            nodeService.getUserInterestedStatus(nodeIds, userId),
-            nodeService.getUserWantToTryStatus(nodeIds, userId),
-          ]);
-        }
-      } catch {
-        // Optional auth, ignore errors
-      }
+    if (userId) {
+      const nodeIds = nodesList.map((n) => n.id);
+      [likeStatuses, interestedStatuses, wantToTryStatuses] = await Promise.all([
+        nodeService.getUserLikeStatus(nodeIds, userId),
+        nodeService.getUserInterestedStatus(nodeIds, userId),
+        nodeService.getUserWantToTryStatus(nodeIds, userId),
+      ]);
     }
 
     const nodesWithReactionStatus = nodesList.map((node) => ({
@@ -168,6 +163,7 @@ nodes.get(
     tags: ["Nodes"],
     summary: "ノード詳細取得",
     description: "IDを指定してノードの詳細情報を取得",
+    security: [{ Bearer: [] }, {}],
     responses: {
       200: {
         description: "ノード詳細",
@@ -187,6 +183,7 @@ nodes.get(
       },
     },
   }),
+  optionalAuthMiddleware,
   async (c) => {
     const id = c.req.param("id");
     const db = createDb(c.env.DB);
@@ -205,26 +202,20 @@ nodes.get(
     }
 
     // Check user's reaction statuses
+    const userId = c.get("userId");
     let likeStatus = false;
     let interestedStatus = false;
     let wantToTryStatus = false;
-    const authHeader = c.req.header("Authorization");
-    if (authHeader) {
-      try {
-        const userId = c.get("userId");
-        if (userId) {
-          const [likeStatuses, interestedStatuses, wantToTryStatuses] = await Promise.all([
-            nodeService.getUserLikeStatus([id], userId),
-            nodeService.getUserInterestedStatus([id], userId),
-            nodeService.getUserWantToTryStatus([id], userId),
-          ]);
-          likeStatus = likeStatuses[id] || false;
-          interestedStatus = interestedStatuses[id] || false;
-          wantToTryStatus = wantToTryStatuses[id] || false;
-        }
-      } catch {
-        // Optional auth, ignore errors
-      }
+
+    if (userId) {
+      const [likeStatuses, interestedStatuses, wantToTryStatuses] = await Promise.all([
+        nodeService.getUserLikeStatus([id], userId),
+        nodeService.getUserInterestedStatus([id], userId),
+        nodeService.getUserWantToTryStatus([id], userId),
+      ]);
+      likeStatus = likeStatuses[id] || false;
+      interestedStatus = interestedStatuses[id] || false;
+      wantToTryStatus = wantToTryStatuses[id] || false;
     }
 
     return c.json({
