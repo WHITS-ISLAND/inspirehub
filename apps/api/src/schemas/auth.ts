@@ -52,6 +52,15 @@ export const GetMeResponseSchema = type({
   user: UserSchema,
 });
 
+// PATCH /auth/me
+export const UpdateMeBodySchema = type({
+  name: "string > 0",
+});
+
+export const UpdateMeResponseSchema = type({
+  user: UserSchema,
+});
+
 // POST /auth/logout
 export const LogoutResponseSchema = type({
   success: "true",
