@@ -49,15 +49,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: d1 migrations apply DB --remote --env develop
-          workingDirectory: apps/api
-
-      - name: Set Worker Secrets
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: secret list --env develop
+          command: d1 migrations apply DB --remote
           workingDirectory: apps/api
 
       - name: Deploy to Cloudflare Workers
@@ -65,7 +57,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --env develop --var GOOGLE_CLIENT_ID:${{ secrets.GOOGLE_CLIENT_ID }} --var GOOGLE_CLIENT_SECRET:${{ secrets.GOOGLE_CLIENT_SECRET }}
+          command: deploy --var GOOGLE_CLIENT_ID:${{ secrets.GOOGLE_CLIENT_ID }} --var GOOGLE_CLIENT_SECRET:${{ secrets.GOOGLE_CLIENT_SECRET }}
           workingDirectory: apps/api
           secrets: |
             JWT_ACCESS_SECRET
