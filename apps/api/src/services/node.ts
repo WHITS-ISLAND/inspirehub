@@ -15,71 +15,69 @@ export class NodeService {
     const nodeId = crypto.randomUUID();
     const now = new Date().toISOString();
 
-    await this.db.transaction().execute(async (trx) => {
-      // Create node
-      await trx
-        .insertInto("nodes")
+    // Create node
+    await this.db
+      .insertInto("nodes")
+      .values({
+        id: nodeId,
+        type: params.type,
+        title: params.title,
+        content: params.content,
+        author_id: params.author_id,
+        created_at: now,
+        updated_at: now,
+      })
+      .execute();
+
+    // Create edge if parentNodeId is provided
+    if (params.parentNodeId) {
+      await this.db
+        .insertInto("edges")
         .values({
-          id: nodeId,
-          type: params.type,
-          title: params.title,
-          content: params.content,
-          author_id: params.author_id,
+          id: crypto.randomUUID(),
+          source: params.parentNodeId,
+          target: nodeId,
           created_at: now,
           updated_at: now,
         })
         .execute();
+    }
 
-      // Create edge if parentNodeId is provided
-      if (params.parentNodeId) {
-        await trx
-          .insertInto("edges")
-          .values({
-            id: crypto.randomUUID(),
-            source: params.parentNodeId,
-            target: nodeId,
-            created_at: now,
-            updated_at: now,
-          })
-          .execute();
-      }
+    // Handle tags if provided
+    if (params.tags && params.tags.length > 0) {
+      for (const tagName of params.tags) {
+        // Upsert tag
+        let tagId = crypto.randomUUID();
+        const existingTag = await this.db
+          .selectFrom("tags")
+          .select("id")
+          .where("name", "=", tagName)
+          .executeTakeFirst();
 
-      // Handle tags if provided
-      if (params.tags && params.tags.length > 0) {
-        for (const tagName of params.tags) {
-          // Upsert tag
-          let tagId = crypto.randomUUID();
-          const existingTag = await trx
-            .selectFrom("tags")
-            .select("id")
-            .where("name", "=", tagName)
-            .executeTakeFirst();
-
-          if (existingTag) {
-            tagId = existingTag.id;
-          } else {
-            await trx
-              .insertInto("tags")
-              .values({
-                id: tagId,
-                name: tagName,
-                created_at: now,
-              })
-              .execute();
-          }
-
-          // Create node-tag relation
-          await trx
-            .insertInto("node_tags")
+        if (existingTag) {
+          tagId = existingTag.id;
+        } else {
+          await this.db
+            .insertInto("tags")
             .values({
-              node_id: nodeId,
-              tag_id: tagId,
+              id: tagId,
+              name: tagName,
               created_at: now,
             })
             .execute();
         }
+
+        // Create node-tag relation
+        await this.db
+          .insertInto("node_tags")
+          .values({
+            node_id: nodeId,
+            tag_id: tagId,
+            created_at: now,
+          })
+          .execute();
       }
-    });
+    }
 
     return nodeId;
   }
@@ -272,60 +270,58 @@ export class NodeService {
   ) {
     const now = new Date().toISOString();
 
-    await this.db.transaction().execute(async (trx) => {
-      // Update node
-      const updateData: Partial<NodesTable> = {
-        updated_at: now,
-      };
+    // Update node
+    const updateData: Partial<NodesTable> = {
+      updated_at: now,
+    };
 
-      if (params.title !== undefined) {
-        updateData.title = params.title;
-      }
+    if (params.title !== undefined) {
+      updateData.title = params.title;
+    }
 
-      if (params.content !== undefined) {
-        updateData.content = params.content;
-      }
+    if (params.content !== undefined) {
+      updateData.content = params.content;
+    }
 
-      await trx.updateTable("nodes").set(updateData).where("id", "=", id).execute();
+    await this.db.updateTable("nodes").set(updateData).where("id", "=", id).execute();
 
-      // Update tags if provided
-      if (params.tags !== undefined) {
-        // Remove existing tags
-        await trx.deleteFrom("node_tags").where("node_id", "=", id).execute();
+    // Update tags if provided
+    if (params.tags !== undefined) {
+      // Remove existing tags
+      await this.db.deleteFrom("node_tags").where("node_id", "=", id).execute();
 
-        // Add new tags
-        for (const tagName of params.tags) {
-          let tagId = crypto.randomUUID();
-          const existingTag = await trx
-            .selectFrom("tags")
-            .select("id")
-            .where("name", "=", tagName)
-            .executeTakeFirst();
+      // Add new tags
+      for (const tagName of params.tags) {
+        let tagId = crypto.randomUUID();
+        const existingTag = await this.db
+          .selectFrom("tags")
+          .select("id")
+          .where("name", "=", tagName)
+          .executeTakeFirst();
 
-          if (existingTag) {
-            tagId = existingTag.id;
-          } else {
-            await trx
-              .insertInto("tags")
-              .values({
-                id: tagId,
-                name: tagName,
-                created_at: now,
-              })
-              .execute();
-          }
-
-          await trx
-            .insertInto("node_tags")
+        if (existingTag) {
+          tagId = existingTag.id;
+        } else {
+          await this.db
+            .insertInto("tags")
             .values({
-              node_id: id,
-              tag_id: tagId,
+              id: tagId,
+              name: tagName,
               created_at: now,
             })
             .execute();
         }
+
+        await this.db
+          .insertInto("node_tags")
+          .values({
+            node_id: id,
+            tag_id: tagId,
+            created_at: now,
+          })
+          .execute();
       }
-    });
+    }
   }
 
   async delete(id: string) {
