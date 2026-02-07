@@ -26,6 +26,12 @@ variable "custom_domain" {
   default     = ""
 }
 
+variable "web_custom_domain" {
+  description = "Custom domain for the Web (optional)"
+  type        = string
+  default     = ""
+}
+
 # Secrets (from GitHub Secrets)
 variable "google_client_id" {
   description = "Google OAuth Client ID"

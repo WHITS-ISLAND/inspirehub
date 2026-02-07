@@ -30,3 +30,18 @@ resource "cloudflare_workers_domain" "api" {
   service    = "inspirehub-api-develop"
   zone_id    = var.cloudflare_zone_id
 }
+
+# Pages Project
+resource "cloudflare_pages_project" "web" {
+  account_id        = var.cloudflare_account_id
+  name              = "inspirehub-web"
+  production_branch = "develop"
+}
+
+# Pages Custom Domain
+resource "cloudflare_pages_domain" "web" {
+  count        = var.web_custom_domain != "" ? 1 : 0
+  account_id   = var.cloudflare_account_id
+  project_name = cloudflare_pages_project.web.name
+  domain       = var.web_custom_domain
+}
