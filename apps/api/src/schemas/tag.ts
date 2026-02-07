@@ -59,12 +59,29 @@ export const TagSuggestResponseSchema = type({
   ]),
 });
 
+const ReactionStatusSchema = type({
+  count: "number",
+});
+
+const ReactionsSchema = type({
+  like: ReactionStatusSchema,
+  interested: ReactionStatusSchema,
+  want_to_try: ReactionStatusSchema,
+});
+
+const ParentNodeSchema = type({
+  id: "string",
+  type: "'issue' | 'idea' | 'project'",
+  title: "string",
+});
+
 export const NodesByTagResponseSchema = type({
   nodes: type([
     {
       id: "string",
       type: "'issue' | 'idea' | 'project'",
       title: "string",
+      content: "string",
       author_id: "string",
       author_name: "string | null",
       author_picture: "string | null",
@@ -76,8 +93,9 @@ export const NodesByTagResponseSchema = type({
           name: "string",
         },
       ]),
-      like_count: "number",
+      reactions: ReactionsSchema,
       comment_count: "number",
+      "parent_node?": ParentNodeSchema.or("null"),
     },
   ]),
   total: "number",

@@ -131,6 +131,7 @@ export class TagService {
         "nodes.id",
         "nodes.type",
         "nodes.title",
+        "nodes.content",
         "nodes.author_id",
         "nodes.created_at",
         "nodes.updated_at",
@@ -143,10 +144,8 @@ export class TagService {
       .offset(params?.offset || 0)
       .execute();
 
-    // Get additional details for each node
     const nodesWithDetails = await Promise.all(
       nodes.map(async (node) => {
-        // Get all tags for this node
         const tags = await this.db
           .selectFrom("node_tags")
           .innerJoin("tags", "node_tags.tag_id", "tags.id")
@@ -154,25 +153,46 @@ export class TagService {
           .where("node_tags.node_id", "=", node.id)
           .execute();
 
-        // Get like count
-        const likeCount = await this.db
-          .selectFrom("likes")
-          .select((eb) => eb.fn.countAll().as("count"))
-          .where("node_id", "=", node.id)
+        const parentNode = await this.db
+          .selectFrom("edges")
+          .innerJoin("nodes", "edges.source", "nodes.id")
+          .select(["nodes.id", "nodes.type", "nodes.title"])
+          .where("edges.target", "=", node.id)
           .executeTakeFirst();
 
-        // Get comment count
-        const commentCount = await this.db
-          .selectFrom("comments")
-          .select((eb) => eb.fn.countAll().as("count"))
-          .where("node_id", "=", node.id)
-          .executeTakeFirst();
+        const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
+          this.db
+            .selectFrom("likes")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+          this.db
+            .selectFrom("interested")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+          this.db
+            .selectFrom("want_to_try")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+          this.db
+            .selectFrom("comments")
+            .select((eb) => eb.fn.countAll().as("count"))
+            .where("node_id", "=", node.id)
+            .executeTakeFirst(),
+        ]);
 
         return {
           ...node,
           tags,
-          like_count: Number(likeCount?.count || 0),
+          reactions: {
+            like: { count: Number(likeCount?.count || 0) },
+            interested: { count: Number(interestedCount?.count || 0) },
+            want_to_try: { count: Number(wantToTryCount?.count || 0) },
+          },
           comment_count: Number(commentCount?.count || 0),
+          parent_node: parentNode ?? null,
         };
       }),
     );
