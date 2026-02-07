@@ -12,8 +12,8 @@ export const UpdateCommentSchema = type({
 });
 
 export const ListCommentsQuerySchema = type({
-  "limit?": "1 <= number <= 100",
-  "offset?": "number >= 0",
+  "limit?": type("string.numeric.parse").to("1 <= number <= 100"),
+  "offset?": type("string.numeric.parse").to("number >= 0"),
 });
 
 // Response schemas for OpenAPI
