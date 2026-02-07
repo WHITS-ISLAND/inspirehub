@@ -88,6 +88,7 @@ nodes.get(
     tags: ["Nodes"],
     summary: "ノード一覧取得",
     description: "ノードの一覧を取得（フィルタオプション付き）",
+    security: [{ Bearer: [] }, {}],
     responses: {
       200: {
         description: "ノード一覧",
@@ -162,6 +163,7 @@ nodes.get(
     tags: ["Nodes"],
     summary: "ノード詳細取得",
     description: "IDを指定してノードの詳細情報を取得",
+    security: [{ Bearer: [] }, {}],
     responses: {
       200: {
         description: "ノード詳細",
