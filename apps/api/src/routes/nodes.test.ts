@@ -119,6 +119,47 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
+  test("GET /nodes with string limit/offset should return 200", async () => {
+    const app = new Hono();
+    app.route("/nodes", nodeRoutes);
+
+    const res = await app.request(
+      "/nodes?limit=20&offset=0",
+      { method: "GET" },
+      mockEnv,
+    );
+
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { nodes: unknown[] };
+    expect(Array.isArray(data.nodes)).toBe(true);
+  });
+
+  test("GET /nodes with non-numeric limit should return 400", async () => {
+    const app = new Hono();
+    app.route("/nodes", nodeRoutes);
+
+    const res = await app.request(
+      "/nodes?limit=abc",
+      { method: "GET" },
+      mockEnv,
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  test("GET /nodes with out-of-range limit should return 400", async () => {
+    const app = new Hono();
+    app.route("/nodes", nodeRoutes);
+
+    const res = await app.request(
+      "/nodes?limit=0",
+      { method: "GET" },
+      mockEnv,
+    );
+
+    expect(res.status).toBe(400);
+  });
+
   test("GET /nodes/:id should return 404 for non-existent node", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
