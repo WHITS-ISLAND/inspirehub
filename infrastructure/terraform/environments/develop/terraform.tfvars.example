@@ -1,7 +1,8 @@
 cloudflare_account_id = "your-account-id"
 cloudflare_zone_id    = "your-zone-id"  # wtnqk.org のZone ID
-client_url            = "https://inspirehub.wtnqk.org"
+client_url            = "https://web.inspirehub.wtnqk.org"
 custom_domain         = "api.inspirehub.wtnqk.org"
+web_custom_domain     = "web.inspirehub.wtnqk.org"
 
 # Secrets should be set via environment variables or GitHub Secrets:
 # TF_VAR_google_client_id
