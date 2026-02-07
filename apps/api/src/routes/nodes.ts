@@ -10,7 +10,10 @@ import {
   CreateNodeSchema,
   UpdateNodeSchema,
   ListNodesQuerySchema,
-  NodeType,
+  ReactionToggleResponseSchema,
+  NodeResponseSchema,
+  CreateNodeResponseSchema,
+  ListNodesResponseSchema,
   type CreateNodeInput,
   type UpdateNodeInput,
   type ListNodesQuery,
@@ -25,60 +28,6 @@ import {
 } from "../schemas/comment";
 import { ErrorResponseSchema } from "../schemas/auth";
 import { type } from "arktype";
-
-// Response schemas
-const ReactionStatusSchema = type({
-  count: "number",
-  "is_reacted?": "boolean",
-});
-
-const ReactionsSchema = type({
-  like: ReactionStatusSchema,
-  interested: ReactionStatusSchema,
-  want_to_try: ReactionStatusSchema,
-});
-
-const ParentNodeSchema = type({
-  id: "string",
-  type: NodeType,
-  title: "string",
-});
-
-const NodeResponseSchema = type({
-  id: "string",
-  type: "'issue' | 'idea' | 'project'",
-  title: "string",
-  content: "string",
-  author_id: "string",
-  author_name: "string | null",
-  author_picture: "string | null",
-  created_at: "string",
-  updated_at: "string",
-  tags: type([
-    {
-      id: "string",
-      name: "string",
-    },
-  ]),
-  reactions: ReactionsSchema,
-  comment_count: "number",
-  "parent_node?": ParentNodeSchema.or("null"),
-});
-
-const CreateNodeResponseSchema = type({
-  id: "string",
-  message: "string",
-});
-
-const ListNodesResponseSchema = type({
-  nodes: type([NodeResponseSchema]),
-  total: "number",
-});
-
-const ReactionToggleResponseSchema = type({
-  is_reacted: "boolean",
-  count: "number",
-});
 
 const nodes = new Hono<HonoEnv>();
 

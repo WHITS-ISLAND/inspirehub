@@ -59,48 +59,6 @@ export const TagSuggestResponseSchema = type({
   ]),
 });
 
-const ReactionStatusSchema = type({
-  count: "number",
-});
-
-const ReactionsSchema = type({
-  like: ReactionStatusSchema,
-  interested: ReactionStatusSchema,
-  want_to_try: ReactionStatusSchema,
-});
-
-const ParentNodeSchema = type({
-  id: "string",
-  type: "'issue' | 'idea' | 'project'",
-  title: "string",
-});
-
-export const NodesByTagResponseSchema = type({
-  nodes: type([
-    {
-      id: "string",
-      type: "'issue' | 'idea' | 'project'",
-      title: "string",
-      content: "string",
-      author_id: "string",
-      author_name: "string | null",
-      author_picture: "string | null",
-      created_at: "string",
-      updated_at: "string",
-      tags: type([
-        {
-          id: "string",
-          name: "string",
-        },
-      ]),
-      reactions: ReactionsSchema,
-      comment_count: "number",
-      "parent_node?": ParentNodeSchema.or("null"),
-    },
-  ]),
-  total: "number",
-});
-
 export type CreateTagInput = typeof CreateTagSchema.infer;
 export type UpdateTagInput = typeof UpdateTagSchema.infer;
 export type ListTagsQuery = typeof ListTagsQuerySchema.infer;

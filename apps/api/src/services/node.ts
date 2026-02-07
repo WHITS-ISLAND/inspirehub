@@ -102,57 +102,8 @@ export class NodeService {
 
     if (!node) return null;
 
-    // Get tags
-    const tags = await this.db
-      .selectFrom("node_tags")
-      .innerJoin("tags", "node_tags.tag_id", "tags.id")
-      .select(["tags.id", "tags.name"])
-      .where("node_tags.node_id", "=", id)
-      .execute();
-
-    // Get parent node
-    const parentNode = await this.db
-      .selectFrom("edges")
-      .innerJoin("nodes", "edges.source", "nodes.id")
-      .select(["nodes.id", "nodes.type", "nodes.title"])
-      .where("edges.target", "=", id)
-      .executeTakeFirst();
-
-    // Get reaction counts
-    const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
-      this.db
-        .selectFrom("likes")
-        .select((eb) => eb.fn.countAll().as("count"))
-        .where("node_id", "=", id)
-        .executeTakeFirst(),
-      this.db
-        .selectFrom("interested")
-        .select((eb) => eb.fn.countAll().as("count"))
-        .where("node_id", "=", id)
-        .executeTakeFirst(),
-      this.db
-        .selectFrom("want_to_try")
-        .select((eb) => eb.fn.countAll().as("count"))
-        .where("node_id", "=", id)
-        .executeTakeFirst(),
-      this.db
-        .selectFrom("comments")
-        .select((eb) => eb.fn.countAll().as("count"))
-        .where("node_id", "=", id)
-        .executeTakeFirst(),
-    ]);
-
-    return {
-      ...node,
-      tags,
-      reactions: {
-        like: { count: Number(likeCount?.count || 0) },
-        interested: { count: Number(interestedCount?.count || 0) },
-        want_to_try: { count: Number(wantToTryCount?.count || 0) },
-      },
-      comment_count: Number(commentCount?.count || 0),
-      parent_node: parentNode ?? null,
-    };
+    const [enriched] = await this.enrichNodes([node]);
+    return enriched;
   }
 
   async list(params?: {
@@ -216,61 +167,115 @@ export class NodeService {
     }
 
     const nodes = await query.execute();
+    const data = await this.enrichNodes(nodes);
 
-    const nodesWithDetails = await Promise.all(
-      nodes.map(async (node) => {
-        const tags = await this.db
+    return { data, total };
+  }
+
+  private async enrichNodes(
+    nodes: {
+      id: string;
+      type: string;
+      title: string;
+      content: string;
+      author_id: string;
+      created_at: string;
+      updated_at: string;
+      author_name: string | null;
+      author_picture: string | null;
+    }[],
+  ) {
+    if (nodes.length === 0) return [];
+
+    const nodeIds = nodes.map((n) => n.id);
+
+    const [tagRows, parentRows, likeCounts, interestedCounts, wantToTryCounts, commentCounts] =
+      await Promise.all([
+        this.db
           .selectFrom("node_tags")
           .innerJoin("tags", "node_tags.tag_id", "tags.id")
-          .select(["tags.id", "tags.name"])
-          .where("node_tags.node_id", "=", node.id)
-          .execute();
-
-        const parentNode = await this.db
+          .select(["node_tags.node_id", "tags.id", "tags.name"])
+          .where("node_tags.node_id", "in", nodeIds)
+          .execute(),
+        this.db
           .selectFrom("edges")
           .innerJoin("nodes", "edges.source", "nodes.id")
-          .select(["nodes.id", "nodes.type", "nodes.title"])
-          .where("edges.target", "=", node.id)
-          .executeTakeFirst();
+          .select(["edges.target", "nodes.id", "nodes.type", "nodes.title"])
+          .where("edges.target", "in", nodeIds)
+          .execute(),
+        this.db
+          .selectFrom("likes")
+          .select("node_id")
+          .select((eb) => eb.fn.countAll().as("count"))
+          .where("node_id", "in", nodeIds)
+          .groupBy("node_id")
+          .execute(),
+        this.db
+          .selectFrom("interested")
+          .select("node_id")
+          .select((eb) => eb.fn.countAll().as("count"))
+          .where("node_id", "in", nodeIds)
+          .groupBy("node_id")
+          .execute(),
+        this.db
+          .selectFrom("want_to_try")
+          .select("node_id")
+          .select((eb) => eb.fn.countAll().as("count"))
+          .where("node_id", "in", nodeIds)
+          .groupBy("node_id")
+          .execute(),
+        this.db
+          .selectFrom("comments")
+          .select("node_id")
+          .select((eb) => eb.fn.countAll().as("count"))
+          .where("node_id", "in", nodeIds)
+          .groupBy("node_id")
+          .execute(),
+      ]);
 
-        const [likeCount, interestedCount, wantToTryCount, commentCount] = await Promise.all([
-          this.db
-            .selectFrom("likes")
-            .select((eb) => eb.fn.countAll().as("count"))
-            .where("node_id", "=", node.id)
-            .executeTakeFirst(),
-          this.db
-            .selectFrom("interested")
-            .select((eb) => eb.fn.countAll().as("count"))
-            .where("node_id", "=", node.id)
-            .executeTakeFirst(),
-          this.db
-            .selectFrom("want_to_try")
-            .select((eb) => eb.fn.countAll().as("count"))
-            .where("node_id", "=", node.id)
-            .executeTakeFirst(),
-          this.db
-            .selectFrom("comments")
-            .select((eb) => eb.fn.countAll().as("count"))
-            .where("node_id", "=", node.id)
-            .executeTakeFirst(),
-        ]);
+    const tagsByNode = new Map<string, { id: string; name: string }[]>();
+    for (const row of tagRows) {
+      const list = tagsByNode.get(row.node_id) ?? [];
+      list.push({ id: row.id, name: row.name });
+      tagsByNode.set(row.node_id, list);
+    }
 
-        return {
-          ...node,
-          tags,
-          reactions: {
-            like: { count: Number(likeCount?.count || 0) },
-            interested: { count: Number(interestedCount?.count || 0) },
-            want_to_try: { count: Number(wantToTryCount?.count || 0) },
-          },
-          comment_count: Number(commentCount?.count || 0),
-          parent_node: parentNode ?? null,
-        };
-      }),
-    );
+    const parentByNode = new Map<string, { id: string; type: string; title: string }>();
+    for (const row of parentRows) {
+      parentByNode.set(row.target, { id: row.id, type: row.type, title: row.title });
+    }
 
-    return { data: nodesWithDetails, total };
+    const likeByNode = new Map<string, number>();
+    for (const row of likeCounts) {
+      likeByNode.set(row.node_id, Number(row.count));
+    }
+
+    const interestedByNode = new Map<string, number>();
+    for (const row of interestedCounts) {
+      interestedByNode.set(row.node_id, Number(row.count));
+    }
+
+    const wantToTryByNode = new Map<string, number>();
+    for (const row of wantToTryCounts) {
+      wantToTryByNode.set(row.node_id, Number(row.count));
+    }
+
+    const commentByNode = new Map<string, number>();
+    for (const row of commentCounts) {
+      commentByNode.set(row.node_id, Number(row.count));
+    }
+
+    return nodes.map((node) => ({
+      ...node,
+      tags: tagsByNode.get(node.id) ?? [],
+      reactions: {
+        like: { count: likeByNode.get(node.id) ?? 0 },
+        interested: { count: interestedByNode.get(node.id) ?? 0 },
+        want_to_try: { count: wantToTryByNode.get(node.id) ?? 0 },
+      },
+      comment_count: commentByNode.get(node.id) ?? 0,
+      parent_node: parentByNode.get(node.id) ?? null,
+    }));
   }
 
   async update(
