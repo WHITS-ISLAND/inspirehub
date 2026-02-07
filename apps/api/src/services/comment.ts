@@ -34,32 +34,30 @@ export class CommentService {
     const commentId = crypto.randomUUID();
     const now = new Date().toISOString();
 
-    await this.db.transaction().execute(async (trx) => {
-      // Create comment
-      await trx
-        .insertInto("comments")
-        .values({
-          id: commentId,
-          node_id: params.node_id,
-          parent_id: params.parent_id || null,
-          author_id: params.author_id,
-          content: params.content,
-          created_at: now,
-          updated_at: now,
-        })
-        .execute();
+    // Create comment
+    await this.db
+      .insertInto("comments")
+      .values({
+        id: commentId,
+        node_id: params.node_id,
+        parent_id: params.parent_id || null,
+        author_id: params.author_id,
+        content: params.content,
+        created_at: now,
+        updated_at: now,
+      })
+      .execute();
 
-      // Handle mentions if provided
-      if (params.mentions && params.mentions.length > 0) {
-        const mentionValues = params.mentions.map((userId) => ({
-          comment_id: commentId,
-          mentioned_user_id: userId,
-          created_at: now,
-        }));
+    // Handle mentions if provided
+    if (params.mentions && params.mentions.length > 0) {
+      const mentionValues = params.mentions.map((userId) => ({
+        comment_id: commentId,
+        mentioned_user_id: userId,
+        created_at: now,
+      }));
 
-        await trx.insertInto("comment_mentions").values(mentionValues).execute();
-      }
-    });
+      await this.db.insertInto("comment_mentions").values(mentionValues).execute();
+    }
 
     return commentId;
   }
@@ -166,34 +164,32 @@ export class CommentService {
   ) {
     const now = new Date().toISOString();
 
-    await this.db.transaction().execute(async (trx) => {
-      // Update comment
-      await trx
-        .updateTable("comments")
-        .set({
-          content: params.content,
-          updated_at: now,
-        })
-        .where("id", "=", id)
-        .execute();
+    // Update comment
+    await this.db
+      .updateTable("comments")
+      .set({
+        content: params.content,
+        updated_at: now,
+      })
+      .where("id", "=", id)
+      .execute();
 
-      // Update mentions if provided
-      if (params.mentions !== undefined) {
-        // Remove existing mentions
-        await trx.deleteFrom("comment_mentions").where("comment_id", "=", id).execute();
+    // Update mentions if provided
+    if (params.mentions !== undefined) {
+      // Remove existing mentions
+      await this.db.deleteFrom("comment_mentions").where("comment_id", "=", id).execute();
 
-        // Add new mentions
-        if (params.mentions.length > 0) {
-          const mentionValues = params.mentions.map((userId) => ({
-            comment_id: id,
-            mentioned_user_id: userId,
-            created_at: now,
-          }));
+      // Add new mentions
+      if (params.mentions.length > 0) {
+        const mentionValues = params.mentions.map((userId) => ({
+          comment_id: id,
+          mentioned_user_id: userId,
+          created_at: now,
+        }));
 
-          await trx.insertInto("comment_mentions").values(mentionValues).execute();
-        }
+        await this.db.insertInto("comment_mentions").values(mentionValues).execute();
       }
-    });
+    }
   }
 
   async delete(id: string) {

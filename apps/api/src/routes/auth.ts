@@ -89,16 +89,14 @@ auth.post(
     const accessToken = await generateAccessToken(user.id, user.email, c.env.JWT_ACCESS_SECRET);
 
     // Create token family for refresh token
-    const familyId = crypto.randomUUID();
     const jti = crypto.randomUUID();
+    const familyId = await createTokenFamily(db, user.id, jti);
     const refreshToken = await generateRefreshToken(
       user.id,
       familyId,
       jti,
       c.env.JWT_REFRESH_SECRET,
     );
-
-    await createTokenFamily(db, user.id, jti);
 
     // Set tokens in HttpOnly cookies
     setCookie(c, "refresh_token", refreshToken, {
