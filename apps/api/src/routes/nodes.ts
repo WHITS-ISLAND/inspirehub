@@ -76,7 +76,7 @@ const ListNodesResponseSchema = type({
 const ReactionToggleResponseSchema = type({
   is_reacted: "boolean",
   count: "number",
-});;
+});
 
 const nodes = new Hono<HonoEnv>();
 
@@ -108,6 +108,7 @@ nodes.get(
       type: query.type,
       author_id: query.author_id,
       tag: query.tag,
+      q: query.q,
       limit: query.limit || 20,
       offset: query.offset || 0,
     });

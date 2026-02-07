@@ -159,6 +159,7 @@ export class NodeService {
     type?: NodesTable["type"];
     author_id?: string;
     tag?: string;
+    q?: string;
     limit?: number;
     offset?: number;
   }) {
@@ -189,6 +190,13 @@ export class NodeService {
         .innerJoin("node_tags", "nodes.id", "node_tags.node_id")
         .innerJoin("tags", "node_tags.tag_id", "tags.id")
         .where("tags.name", "=", params.tag);
+    }
+
+    if (params?.q) {
+      const pattern = `%${params.q}%`;
+      query = query.where((eb) =>
+        eb.or([eb("nodes.title", "like", pattern), eb("nodes.content", "like", pattern)]),
+      );
     }
 
     query = query.orderBy("nodes.created_at", "desc");
