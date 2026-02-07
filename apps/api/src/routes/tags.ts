@@ -4,6 +4,7 @@ import type { HonoEnv } from "../types/bindings";
 import { createDb } from "../lib/db";
 import { arktypeQueryValidator } from "../lib/validators";
 import { TagService } from "../services/tag";
+import { NodeService } from "../services/node";
 import { authMiddleware } from "../middleware/auth";
 import {
   CreateTagSchema,
@@ -16,12 +17,12 @@ import {
   UpdateTagResponseSchema,
   DeleteTagResponseSchema,
   TagSuggestResponseSchema,
-  NodesByTagResponseSchema,
   type CreateTagInput,
   type UpdateTagInput,
   type ListTagsQuery,
   type TagSuggestQuery,
 } from "../schemas/tag";
+import { ListNodesResponseSchema } from "../schemas/node";
 import { ErrorResponseSchema } from "../schemas/auth";
 
 const tags = new Hono<HonoEnv>();
@@ -55,7 +56,7 @@ tags.get(
     const db = createDb(c.env.DB);
     const tagService = new TagService(db);
 
-    const tagsList = await tagService.list({
+    const { data: tagsList, total } = await tagService.list({
       search: query.search,
       limit: query.limit || 50,
       offset: query.offset || 0,
@@ -63,7 +64,7 @@ tags.get(
 
     return c.json({
       tags: tagsList,
-      total: tagsList.length,
+      total,
     });
   },
 );
@@ -243,7 +244,7 @@ tags.get(
         description: "タグ付きノード一覧",
         content: {
           "application/json": {
-            schema: resolver(NodesByTagResponseSchema),
+            schema: resolver(ListNodesResponseSchema),
           },
         },
       },
@@ -264,7 +265,6 @@ tags.get(
     const db = createDb(c.env.DB);
     const tagService = new TagService(db);
 
-    // Check if tag exists
     const tag = await tagService.getByName(name);
     if (!tag) {
       return c.json(
@@ -276,14 +276,16 @@ tags.get(
       );
     }
 
-    const nodes = await tagService.getNodesByTag(name, {
+    const nodeService = new NodeService(db);
+    const { data: nodes, total } = await nodeService.list({
+      tag: name,
       limit: query.limit || 20,
       offset: query.offset || 0,
     });
 
     return c.json({
       nodes,
-      total: nodes.length,
+      total,
     });
   },
 );

@@ -59,30 +59,6 @@ export const TagSuggestResponseSchema = type({
   ]),
 });
 
-export const NodesByTagResponseSchema = type({
-  nodes: type([
-    {
-      id: "string",
-      type: "'issue' | 'idea' | 'project'",
-      title: "string",
-      author_id: "string",
-      author_name: "string | null",
-      author_picture: "string | null",
-      created_at: "string",
-      updated_at: "string",
-      tags: type([
-        {
-          id: "string",
-          name: "string",
-        },
-      ]),
-      like_count: "number",
-      comment_count: "number",
-    },
-  ]),
-  total: "number",
-});
-
 export type CreateTagInput = typeof CreateTagSchema.infer;
 export type UpdateTagInput = typeof UpdateTagSchema.infer;
 export type ListTagsQuery = typeof ListTagsQuerySchema.infer;

@@ -10,7 +10,10 @@ import {
   CreateNodeSchema,
   UpdateNodeSchema,
   ListNodesQuerySchema,
-  NodeType,
+  ReactionToggleResponseSchema,
+  NodeResponseSchema,
+  CreateNodeResponseSchema,
+  ListNodesResponseSchema,
   type CreateNodeInput,
   type UpdateNodeInput,
   type ListNodesQuery,
@@ -25,60 +28,6 @@ import {
 } from "../schemas/comment";
 import { ErrorResponseSchema } from "../schemas/auth";
 import { type } from "arktype";
-
-// Response schemas
-const ReactionStatusSchema = type({
-  count: "number",
-  "is_reacted?": "boolean",
-});
-
-const ReactionsSchema = type({
-  like: ReactionStatusSchema,
-  interested: ReactionStatusSchema,
-  want_to_try: ReactionStatusSchema,
-});
-
-const ParentNodeSchema = type({
-  id: "string",
-  type: NodeType,
-  title: "string",
-});
-
-const NodeResponseSchema = type({
-  id: "string",
-  type: "'issue' | 'idea' | 'project'",
-  title: "string",
-  content: "string",
-  author_id: "string",
-  author_name: "string | null",
-  author_picture: "string | null",
-  created_at: "string",
-  updated_at: "string",
-  tags: type([
-    {
-      id: "string",
-      name: "string",
-    },
-  ]),
-  reactions: ReactionsSchema,
-  comment_count: "number",
-  "parentNode?": ParentNodeSchema.or("null"),
-});
-
-const CreateNodeResponseSchema = type({
-  id: "string",
-  message: "string",
-});
-
-const ListNodesResponseSchema = type({
-  nodes: type([NodeResponseSchema]),
-  total: "number",
-});
-
-const ReactionToggleResponseSchema = type({
-  is_reacted: "boolean",
-  count: "number",
-});
 
 const nodes = new Hono<HonoEnv>();
 
@@ -116,7 +65,7 @@ nodes.get(
     const db = createDb(c.env.DB);
     const nodeService = new NodeService(db);
 
-    const nodesList = await nodeService.list({
+    const { data: nodesList, total } = await nodeService.list({
       type: query.type,
       author_id: query.author_id,
       tag: query.tag,
@@ -160,7 +109,7 @@ nodes.get(
 
     return c.json({
       nodes: nodesWithReactionStatus,
-      total: nodesWithReactionStatus.length,
+      total,
     });
   },
 );
@@ -690,14 +639,14 @@ nodes.get(
       );
     }
 
-    const commentsList = await commentService.getByNodeId(nodeId, {
+    const { data: commentsList, total } = await commentService.getByNodeId(nodeId, {
       limit: query.limit || 50,
       offset: query.offset || 0,
     });
 
     return c.json({
       comments: commentsList,
-      total: commentsList.length,
+      total,
     });
   },
 );
