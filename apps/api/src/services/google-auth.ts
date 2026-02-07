@@ -94,7 +94,7 @@ async function importRsaPublicKey(jwk: JWK): Promise<CryptoKey> {
 
 export async function verifyGoogleIdToken(
   idToken: string,
-  clientId: string,
+  clientIds: string | string[],
 ): Promise<GoogleIdTokenPayload | null> {
   const parts = idToken.split(".");
   if (parts.length !== 3) {
@@ -150,8 +150,9 @@ export async function verifyGoogleIdToken(
     return null;
   }
 
-  // Validate audience
-  if (payload.aud !== clientId) {
+  // Validate audience (supports multiple client IDs for web/iOS/Android)
+  const allowedIds = Array.isArray(clientIds) ? clientIds : [clientIds];
+  if (!allowedIds.includes(payload.aud)) {
     return null;
   }
 

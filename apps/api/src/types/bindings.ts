@@ -13,6 +13,7 @@ export interface CloudflareBindings {
   // Secrets (set via wrangler secret put)
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_IOS_CLIENT_ID: string;
   JWT_ACCESS_SECRET: string;
   JWT_REFRESH_SECRET: string;
   CLIENT_URL: string;
