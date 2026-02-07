@@ -121,7 +121,6 @@ jobs:
 
       - name: Update wrangler.jsonc with Configuration
         run: |
-          # wrangler.jsoncのdevelop環境設定を更新
           cat > apps/api/wrangler.jsonc << EOF
           {
             "\$schema": "node_modules/wrangler/config-schema.json",
@@ -130,41 +129,25 @@ jobs:
             "compatibility_date": "2024-09-23",
             "compatibility_flags": ["nodejs_compat_v2"],
 
-            // ローカル開発用のデフォルトD1設定
-            "d1_databases": [
+            "routes": [
               {
-                "binding": "DB",
-                "database_name": "inspirehub",
-                "database_id": "local-inspirehub"
+                "pattern": "api.inspirehub.wtnqk.org/*",
+                "zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}"
               }
             ],
 
-            // ローカル開発用の環境変数
-            "vars": {
-              "CLIENT_URL": "http://localhost:5173"
-            },
-
-            // develop環境（本番）
-            "env": {
-              "develop": {
-                "routes": [
-                  {
-                    "pattern": "api.inspirehub.wtnqk.org/*",
-                    "zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}"
-                  }
-                ],
-                "d1_databases": [
-                  {
-                    "binding": "DB",
-                    "database_name": "${{ steps.tf_outputs.outputs.d1_database_name }}",
-                    "database_id": "${{ steps.tf_outputs.outputs.d1_database_id }}"
-                  }
-                ],
-                "vars": {
-                  "ENVIRONMENT": "develop",
-                  "CLIENT_URL": "${{ secrets.CLIENT_URL }}"
-                }
+            "d1_databases": [
+              {
+                "binding": "DB",
+                "database_name": "${{ steps.tf_outputs.outputs.d1_database_name }}",
+                "database_id": "${{ steps.tf_outputs.outputs.d1_database_id }}"
               }
+            ],
+
+            "vars": {
+              "ENVIRONMENT": "develop",
+              "CLIENT_URL": "${{ secrets.CLIENT_URL }}",
+              "API_URL": "https://api.inspirehub.wtnqk.org"
             }
           }
           EOF
@@ -247,7 +230,6 @@ jobs:
 
       - name: Update wrangler.jsonc with D1 Database ID
         run: |
-          # wrangler.jsoncのdevelop環境にdatabase_idを設定
           cat > apps/api/wrangler.jsonc << EOF
           {
             "\$schema": "node_modules/wrangler/config-schema.json",
@@ -256,41 +238,25 @@ jobs:
             "compatibility_date": "2024-09-23",
             "compatibility_flags": ["nodejs_compat_v2"],
 
-            // ローカル開発用のデフォルトD1設定
-            "d1_databases": [
+            "routes": [
               {
-                "binding": "DB",
-                "database_name": "inspirehub",
-                "database_id": "local-inspirehub"
+                "pattern": "api.inspirehub.wtnqk.org/*",
+                "zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}"
               }
             ],
 
-            // ローカル開発用の環境変数
-            "vars": {
-              "CLIENT_URL": "http://localhost:5173"
-            },
-
-            // develop環境（本番）
-            "env": {
-              "develop": {
-                "routes": [
-                  {
-                    "pattern": "api.inspirehub.wtnqk.org/*",
-                    "zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}"
-                  }
-                ],
-                "d1_databases": [
-                  {
-                    "binding": "DB",
-                    "database_name": "${{ steps.tf_outputs.outputs.d1_database_name }}",
-                    "database_id": "${{ steps.tf_outputs.outputs.d1_database_id }}"
-                  }
-                ],
-                "vars": {
-                  "ENVIRONMENT": "develop",
-                  "CLIENT_URL": "${{ secrets.CLIENT_URL }}"
-                }
+            "d1_databases": [
+              {
+                "binding": "DB",
+                "database_name": "${{ steps.tf_outputs.outputs.d1_database_name }}",
+                "database_id": "${{ steps.tf_outputs.outputs.d1_database_id }}"
               }
+            ],
+
+            "vars": {
+              "ENVIRONMENT": "develop",
+              "CLIENT_URL": "${{ secrets.CLIENT_URL }}",
+              "API_URL": "https://api.inspirehub.wtnqk.org"
             }
           }
           EOF
