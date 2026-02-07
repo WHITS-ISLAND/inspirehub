@@ -10,13 +10,13 @@ export const UpdateTagSchema = type({
 
 export const ListTagsQuerySchema = type({
   "search?": "string",
-  "limit?": "1 <= number <= 100",
-  "offset?": "number >= 0",
+  "limit?": type("string.numeric.parse").to("1 <= number <= 100"),
+  "offset?": type("string.numeric.parse").to("number >= 0"),
 });
 
 export const TagSuggestQuerySchema = type({
   q: "string > 0",
-  "limit?": "1 <= number <= 10",
+  "limit?": type("string.numeric.parse").to("1 <= number <= 10"),
 });
 
 // Response schemas for OpenAPI

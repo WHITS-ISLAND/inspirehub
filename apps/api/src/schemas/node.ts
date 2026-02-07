@@ -21,8 +21,8 @@ export const ListNodesQuerySchema = type({
   "author_id?": "string",
   "tag?": "string",
   "q?": "string",
-  "limit?": "1 <= number <= 100",
-  "offset?": "number >= 0",
+  "limit?": type("string.numeric.parse").to("1 <= number <= 100"),
+  "offset?": type("string.numeric.parse").to("number >= 0"),
 });
 
 export type CreateNodeInput = typeof CreateNodeSchema.infer;
