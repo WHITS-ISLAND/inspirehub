@@ -1,12 +1,5 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "inspirehub-web",
-  "pages_build_output_dir": "dist",
-
-  // develop環境（本番）
-  "env": {
-    "develop": {
-      "name": "inspirehub-web-develop"
-    }
-  }
+  "pages_build_output_dir": "dist"
 }
