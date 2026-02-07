@@ -57,7 +57,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --var GOOGLE_CLIENT_ID:${{ secrets.GOOGLE_CLIENT_ID }} --var GOOGLE_CLIENT_SECRET:${{ secrets.GOOGLE_CLIENT_SECRET }}
+          command: deploy --var GOOGLE_CLIENT_ID:${{ secrets.GOOGLE_CLIENT_ID }} --var GOOGLE_CLIENT_SECRET:${{ secrets.GOOGLE_CLIENT_SECRET }} --var GOOGLE_IOS_CLIENT_ID:${{ secrets.GOOGLE_IOS_CLIENT_ID }}
           workingDirectory: apps/api
           secrets: |
             JWT_ACCESS_SECRET
