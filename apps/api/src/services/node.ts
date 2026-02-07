@@ -114,7 +114,7 @@ export class NodeService {
     const parentNode = await this.db
       .selectFrom("edges")
       .innerJoin("nodes", "edges.source", "nodes.id")
-      .select(["nodes.id", "nodes.title", "nodes.content"])
+      .select(["nodes.id", "nodes.type", "nodes.title"])
       .where("edges.target", "=", id)
       .executeTakeFirst();
 
@@ -224,7 +224,7 @@ export class NodeService {
         const parentNode = await this.db
           .selectFrom("edges")
           .innerJoin("nodes", "edges.source", "nodes.id")
-          .select(["nodes.id", "nodes.title", "nodes.content"])
+          .select(["nodes.id", "nodes.type", "nodes.title"])
           .where("edges.target", "=", node.id)
           .executeTakeFirst();
 

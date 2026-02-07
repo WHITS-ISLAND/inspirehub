@@ -9,6 +9,7 @@ import {
   CreateNodeSchema,
   UpdateNodeSchema,
   ListNodesQuerySchema,
+  NodeType,
   type CreateNodeInput,
   type UpdateNodeInput,
   type ListNodesQuery,
@@ -38,8 +39,8 @@ const ReactionsSchema = type({
 
 const ParentNodeSchema = type({
   id: "string",
+  type: NodeType,
   title: "string",
-  content: "string",
 });
 
 const NodeResponseSchema = type({
