@@ -206,6 +206,11 @@ jobs:
         working-directory: infrastructure/terraform/environments/develop
         continue-on-error: true
         run: |
+          # Import Workers custom domain if not in state
+          if ! terraform state show 'cloudflare_workers_domain.api[0]' 2>/dev/null; then
+            echo "Importing cloudflare_workers_domain.api[0]..."
+            terraform import 'cloudflare_workers_domain.api[0]' "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/${{ secrets.CLOUDFLARE_ZONE_ID }}/${{ secrets.CUSTOM_DOMAIN }}" || true
+          fi
           # Import Pages custom domain if not in state
           if ! terraform state show 'cloudflare_pages_domain.web[0]' 2>/dev/null; then
             echo "Importing cloudflare_pages_domain.web[0]..."
