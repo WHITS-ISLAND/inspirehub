@@ -90,6 +90,23 @@ export async function updateUser(
   return findUserById(db, id);
 }
 
+export async function updateUserName(
+  db: Kysely<Database>,
+  id: string,
+  name: string,
+): Promise<User | null> {
+  await db
+    .updateTable("users")
+    .set({
+      name,
+      updated_at: new Date().toISOString(),
+    })
+    .where("id", "=", id)
+    .execute();
+
+  return findUserById(db, id);
+}
+
 export async function findOrCreateUser(
   db: Kysely<Database>,
   params: {

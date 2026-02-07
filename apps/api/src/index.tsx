@@ -9,6 +9,7 @@ import auth from "./routes/auth";
 import nodes from "./routes/nodes";
 import comments from "./routes/comments";
 import tags from "./routes/tags";
+import users from "./routes/users";
 import type { HonoEnv } from "./types/bindings";
 
 const app = new Hono<HonoEnv>();
@@ -23,6 +24,7 @@ app.route("/auth", auth);
 app.route("/nodes", nodes);
 app.route("/comments", comments);
 app.route("/tags", tags);
+app.route("/users", users);
 
 // Health check
 app.get("/", (c) => {
