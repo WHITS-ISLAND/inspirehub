@@ -69,7 +69,14 @@ export class CommentService {
       offset?: number;
     },
   ) {
-    // Get top-level comments
+    const countResult = await this.db
+      .selectFrom("comments")
+      .select((eb) => eb.fn.countAll().as("count"))
+      .where("comments.node_id", "=", nodeId)
+      .where("comments.parent_id", "is", null)
+      .executeTakeFirst();
+    const total = Number(countResult?.count || 0);
+
     const topLevelComments = await this.db
       .selectFrom("comments")
       .leftJoin("users", "comments.author_id", "users.id")
@@ -91,7 +98,6 @@ export class CommentService {
       .offset(params?.offset || 0)
       .execute();
 
-    // Get replies for each top-level comment
     const commentsWithReplies = await Promise.all(
       topLevelComments.map(async (comment) => {
         const replies = await this.getReplies(comment.id);
@@ -105,7 +111,7 @@ export class CommentService {
       }),
     );
 
-    return commentsWithReplies;
+    return { data: commentsWithReplies, total };
   }
 
   async getReplies(parentId: string): Promise<CommentReply[]> {

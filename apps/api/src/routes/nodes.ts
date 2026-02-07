@@ -116,7 +116,7 @@ nodes.get(
     const db = createDb(c.env.DB);
     const nodeService = new NodeService(db);
 
-    const nodesList = await nodeService.list({
+    const { data: nodesList, total } = await nodeService.list({
       type: query.type,
       author_id: query.author_id,
       tag: query.tag,
@@ -160,7 +160,7 @@ nodes.get(
 
     return c.json({
       nodes: nodesWithReactionStatus,
-      total: nodesWithReactionStatus.length,
+      total,
     });
   },
 );
@@ -690,14 +690,14 @@ nodes.get(
       );
     }
 
-    const commentsList = await commentService.getByNodeId(nodeId, {
+    const { data: commentsList, total } = await commentService.getByNodeId(nodeId, {
       limit: query.limit || 50,
       offset: query.offset || 0,
     });
 
     return c.json({
       comments: commentsList,
-      total: commentsList.length,
+      total,
     });
   },
 );

@@ -32,18 +32,24 @@ export class TagService {
   }
 
   async list(params?: { search?: string; limit?: number; offset?: number }) {
-    let query = this.db
-      .selectFrom("tags")
+    let baseQuery = this.db.selectFrom("tags");
+
+    if (params?.search) {
+      baseQuery = baseQuery.where("tags.name", "like", `%${params.search}%`);
+    }
+
+    const countResult = await baseQuery
+      .select((eb) => eb.fn.countAll().as("count"))
+      .executeTakeFirst();
+    const total = Number(countResult?.count || 0);
+
+    let query = baseQuery
       .leftJoin("node_tags", "tags.id", "node_tags.tag_id")
       .select(["tags.id", "tags.name", "tags.created_at"])
       .select((eb) => [eb.fn.count<number>("node_tags.node_id").as("usage_count")])
-      .groupBy(["tags.id", "tags.name", "tags.created_at"]);
-
-    if (params?.search) {
-      query = query.where("tags.name", "like", `%${params.search}%`);
-    }
-
-    query = query.orderBy("usage_count", "desc").orderBy("tags.name", "asc");
+      .groupBy(["tags.id", "tags.name", "tags.created_at"])
+      .orderBy("usage_count", "desc")
+      .orderBy("tags.name", "asc");
 
     if (params?.limit) {
       query = query.limit(params.limit);
@@ -55,10 +61,13 @@ export class TagService {
 
     const tags = await query.execute();
 
-    return tags.map((tag) => ({
-      ...tag,
-      usage_count: Number(tag.usage_count),
-    }));
+    return {
+      data: tags.map((tag) => ({
+        ...tag,
+        usage_count: Number(tag.usage_count),
+      })),
+      total,
+    };
   }
 
   async getById(id: string) {
@@ -122,10 +131,18 @@ export class TagService {
       offset?: number;
     },
   ) {
-    const nodes = await this.db
+    const baseQuery = this.db
       .selectFrom("nodes")
       .innerJoin("node_tags", "nodes.id", "node_tags.node_id")
       .innerJoin("tags", "node_tags.tag_id", "tags.id")
+      .where("tags.name", "=", tagName);
+
+    const countResult = await baseQuery
+      .select((eb) => eb.fn.countAll().as("count"))
+      .executeTakeFirst();
+    const total = Number(countResult?.count || 0);
+
+    const nodes = await baseQuery
       .leftJoin("users", "nodes.author_id", "users.id")
       .select([
         "nodes.id",
@@ -138,7 +155,6 @@ export class TagService {
         "users.name as author_name",
         "users.picture as author_picture",
       ])
-      .where("tags.name", "=", tagName)
       .orderBy("nodes.created_at", "desc")
       .limit(params?.limit || 20)
       .offset(params?.offset || 0)
@@ -197,7 +213,7 @@ export class TagService {
       }),
     );
 
-    return nodesWithDetails;
+    return { data: nodesWithDetails, total };
   }
 
   async suggestTags(partial: string, limit: number = 5) {

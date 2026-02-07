@@ -163,8 +163,36 @@ export class NodeService {
     limit?: number;
     offset?: number;
   }) {
-    let query = this.db
-      .selectFrom("nodes")
+    let baseQuery = this.db.selectFrom("nodes");
+
+    if (params?.tag) {
+      baseQuery = baseQuery
+        .innerJoin("node_tags", "nodes.id", "node_tags.node_id")
+        .innerJoin("tags", "node_tags.tag_id", "tags.id")
+        .where("tags.name", "=", params.tag);
+    }
+
+    if (params?.type) {
+      baseQuery = baseQuery.where("nodes.type", "=", params.type);
+    }
+
+    if (params?.author_id) {
+      baseQuery = baseQuery.where("nodes.author_id", "=", params.author_id);
+    }
+
+    if (params?.q) {
+      const pattern = `%${params.q}%`;
+      baseQuery = baseQuery.where((eb) =>
+        eb.or([eb("nodes.title", "like", pattern), eb("nodes.content", "like", pattern)]),
+      );
+    }
+
+    const countResult = await baseQuery
+      .select((eb) => eb.fn.countAll().as("count"))
+      .executeTakeFirst();
+    const total = Number(countResult?.count || 0);
+
+    let query = baseQuery
       .leftJoin("users", "nodes.author_id", "users.id")
       .select([
         "nodes.id",
@@ -176,31 +204,8 @@ export class NodeService {
         "nodes.updated_at",
         "users.name as author_name",
         "users.picture as author_picture",
-      ]);
-
-    if (params?.type) {
-      query = query.where("nodes.type", "=", params.type);
-    }
-
-    if (params?.author_id) {
-      query = query.where("nodes.author_id", "=", params.author_id);
-    }
-
-    if (params?.tag) {
-      query = query
-        .innerJoin("node_tags", "nodes.id", "node_tags.node_id")
-        .innerJoin("tags", "node_tags.tag_id", "tags.id")
-        .where("tags.name", "=", params.tag);
-    }
-
-    if (params?.q) {
-      const pattern = `%${params.q}%`;
-      query = query.where((eb) =>
-        eb.or([eb("nodes.title", "like", pattern), eb("nodes.content", "like", pattern)]),
-      );
-    }
-
-    query = query.orderBy("nodes.created_at", "desc");
+      ])
+      .orderBy("nodes.created_at", "desc");
 
     if (params?.limit) {
       query = query.limit(params.limit);
@@ -212,7 +217,6 @@ export class NodeService {
 
     const nodes = await query.execute();
 
-    // Get tags, parent node, and counts for each node
     const nodesWithDetails = await Promise.all(
       nodes.map(async (node) => {
         const tags = await this.db
@@ -266,7 +270,7 @@ export class NodeService {
       }),
     );
 
-    return nodesWithDetails;
+    return { data: nodesWithDetails, total };
   }
 
   async update(

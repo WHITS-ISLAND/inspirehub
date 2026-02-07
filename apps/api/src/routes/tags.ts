@@ -55,7 +55,7 @@ tags.get(
     const db = createDb(c.env.DB);
     const tagService = new TagService(db);
 
-    const tagsList = await tagService.list({
+    const { data: tagsList, total } = await tagService.list({
       search: query.search,
       limit: query.limit || 50,
       offset: query.offset || 0,
@@ -63,7 +63,7 @@ tags.get(
 
     return c.json({
       tags: tagsList,
-      total: tagsList.length,
+      total,
     });
   },
 );
@@ -276,14 +276,14 @@ tags.get(
       );
     }
 
-    const nodes = await tagService.getNodesByTag(name, {
+    const { data: nodes, total } = await tagService.getNodesByTag(name, {
       limit: query.limit || 20,
       offset: query.offset || 0,
     });
 
     return c.json({
       nodes,
-      total: nodes.length,
+      total,
     });
   },
 );
