@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import type { HonoEnv } from "../types/bindings";
 import { createDb } from "../lib/db";
+import { arktypeQueryValidator } from "../lib/validators";
 import { TagService } from "../services/tag";
 import { authMiddleware } from "../middleware/auth";
 import {
@@ -32,6 +33,11 @@ tags.get(
     tags: ["Tags"],
     summary: "タグ一覧取得",
     description: "すべてのタグを使用回数と共に取得",
+    parameters: [
+      { name: "search", in: "query", required: false, schema: { type: "string" } },
+      { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100 } },
+      { name: "offset", in: "query", required: false, schema: { type: "integer", minimum: 0 } },
+    ],
     responses: {
       200: {
         description: "タグ一覧",
@@ -43,7 +49,7 @@ tags.get(
       },
     },
   }),
-  validator("query", ListTagsQuerySchema),
+  arktypeQueryValidator(ListTagsQuerySchema),
   async (c) => {
     const query = c.req.valid("query") as ListTagsQuery;
     const db = createDb(c.env.DB);
@@ -100,6 +106,10 @@ tags.get(
     tags: ["Tags"],
     summary: "タグサジェスト",
     description: "部分入力に基づいてタグ候補を取得",
+    parameters: [
+      { name: "q", in: "query", required: true, schema: { type: "string", minLength: 1 } },
+      { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 10 } },
+    ],
     responses: {
       200: {
         description: "タグ候補",
@@ -111,7 +121,7 @@ tags.get(
       },
     },
   }),
-  validator("query", TagSuggestQuerySchema),
+  arktypeQueryValidator(TagSuggestQuerySchema),
   async (c) => {
     const query = c.req.valid("query") as TagSuggestQuery;
     const db = createDb(c.env.DB);
@@ -224,6 +234,10 @@ tags.get(
     tags: ["Tags"],
     summary: "タグ別ノード取得",
     description: "指定したタグを持つすべてのノードを取得",
+    parameters: [
+      { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100 } },
+      { name: "offset", in: "query", required: false, schema: { type: "integer", minimum: 0 } },
+    ],
     responses: {
       200: {
         description: "タグ付きノード一覧",
@@ -243,7 +257,7 @@ tags.get(
       },
     },
   }),
-  validator("query", ListTagsQuerySchema),
+  arktypeQueryValidator(ListTagsQuerySchema),
   async (c) => {
     const name = c.req.param("name");
     const query = c.req.valid("query") as ListTagsQuery;

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import type { HonoEnv } from "../types/bindings";
 import { createDb } from "../lib/db";
+import { arktypeQueryValidator } from "../lib/validators";
 import { NodeService } from "../services/node";
 import { CommentService } from "../services/comment";
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth";
@@ -89,6 +90,14 @@ nodes.get(
     summary: "ノード一覧取得",
     description: "ノードの一覧を取得（フィルタオプション付き）",
     security: [{ Bearer: [] }, {}],
+    parameters: [
+      { name: "type", in: "query", required: false, schema: { type: "string", enum: ["issue", "idea", "project"] } },
+      { name: "author_id", in: "query", required: false, schema: { type: "string" } },
+      { name: "tag", in: "query", required: false, schema: { type: "string" } },
+      { name: "q", in: "query", required: false, schema: { type: "string" } },
+      { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100 } },
+      { name: "offset", in: "query", required: false, schema: { type: "integer", minimum: 0 } },
+    ],
     responses: {
       200: {
         description: "ノード一覧",
@@ -101,7 +110,7 @@ nodes.get(
     },
   }),
   optionalAuthMiddleware,
-  validator("query", ListNodesQuerySchema),
+  arktypeQueryValidator(ListNodesQuerySchema),
   async (c) => {
     const query = c.req.valid("query") as ListNodesQuery;
     const db = createDb(c.env.DB);
@@ -637,6 +646,10 @@ nodes.get(
     tags: ["Comments"],
     summary: "コメント一覧取得",
     description: "指定したノードのコメントをネストされたリプライと共に取得",
+    parameters: [
+      { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100 } },
+      { name: "offset", in: "query", required: false, schema: { type: "integer", minimum: 0 } },
+    ],
     responses: {
       200: {
         description: "コメント一覧",
@@ -656,7 +669,7 @@ nodes.get(
       },
     },
   }),
-  validator("query", ListCommentsQuerySchema),
+  arktypeQueryValidator(ListCommentsQuerySchema),
   async (c) => {
     const nodeId = c.req.param("nodeId");
     const query = c.req.valid("query") as ListCommentsQuery;
