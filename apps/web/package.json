@@ -7,7 +7,6 @@
     "build": "vite build && tsc",
     "preview": "vite preview",
     "deploy": "bun run build && wrangler pages deploy dist",
-    "deploy:develop": "bun run build && wrangler pages deploy dist --env develop",
     "lint": "oxlint --type-aware --type-check src/",
     "format": "oxfmt src/",
     "format:check": "oxfmt src/",
