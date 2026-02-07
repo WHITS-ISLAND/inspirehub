@@ -10,7 +10,7 @@ export class NodeService {
     content: string;
     author_id: string;
     tags?: string[];
-    parentNodeId?: string;
+    parent_node_id?: string;
   }) {
     const nodeId = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -29,13 +29,13 @@ export class NodeService {
       })
       .execute();
 
-    // Create edge if parentNodeId is provided
-    if (params.parentNodeId) {
+    // Create edge if parent_node_id is provided
+    if (params.parent_node_id) {
       await this.db
         .insertInto("edges")
         .values({
           id: crypto.randomUUID(),
-          source: params.parentNodeId,
+          source: params.parent_node_id,
           target: nodeId,
           created_at: now,
           updated_at: now,
@@ -170,6 +170,7 @@ export class NodeService {
         "nodes.id",
         "nodes.type",
         "nodes.title",
+        "nodes.content",
         "nodes.author_id",
         "nodes.created_at",
         "nodes.updated_at",

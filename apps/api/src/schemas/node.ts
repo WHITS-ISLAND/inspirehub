@@ -7,7 +7,7 @@ export const CreateNodeSchema = type({
   title: "string > 0",
   content: "string",
   "tags?": "string[]",
-  "parentNodeId?": "string",
+  "parent_node_id?": "string",
 });
 
 export const UpdateNodeSchema = type({
