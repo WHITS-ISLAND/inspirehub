@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import type { HonoEnv } from "../types/bindings";
-import { buildGoogleAuthUrl, exchangeCodeForTokens, getGoogleUserInfo } from "../services/google";
+import { verifyGoogleIdToken } from "../services/google-auth";
 import { findOrCreateUser, findUserById } from "../services/user";
 import {
   createTokenFamily,
@@ -19,108 +19,35 @@ import {
 import { createDb } from "../lib/db";
 import { authMiddleware } from "../middleware/auth";
 import {
-  GoogleAuthUrlQuerySchema,
-  GoogleAuthUrlResponseSchema,
-  GoogleCallbackResponseSchema,
   RefreshTokenBodySchema,
   RefreshTokenResponseSchema,
   GetMeResponseSchema,
   LogoutResponseSchema,
   ErrorResponseSchema,
+  VerifyIdTokenBodySchema,
+  VerifyIdTokenResponseSchema,
 } from "../schemas/auth";
 
 const auth = new Hono<HonoEnv>();
 
-// GET /auth/google - Redirect to Google OAuth
-auth.get("/google", (c) => {
-  // Build the callback URL for this API server
-  const apiOrigin = new URL(c.req.url).origin;
-  const redirectUri = `${apiOrigin}/auth/google/callback`;
-
-  // Generate state for CSRF protection
-  const state = crypto.randomUUID();
-
-  // Store state in cookie for validation
-  setCookie(c, "oauth_state", state, {
-    httpOnly: true,
-    secure: false, // false for localhost
-    sameSite: "lax",
-    maxAge: 60 * 10, // 10 minutes
-  });
-
-  const params = new URLSearchParams({
-    client_id: c.env.GOOGLE_CLIENT_ID,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: "openid email profile",
-    state: state,
-    access_type: "offline",
-    prompt: "consent",
-  });
-
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  return c.redirect(url);
-});
-
-// GET /auth/google/url - Get Google OAuth URL
-auth.get(
-  "/google/url",
+// POST /auth/verify - Verify Google ID Token
+auth.post(
+  "/verify",
   describeRoute({
     tags: ["Auth"],
-    summary: "Get Google OAuth URL",
-    description: "Returns the URL to redirect user to Google OAuth",
-    responses: {
-      200: {
-        description: "Google OAuth URL",
-        content: {
-          "application/json": {
-            schema: resolver(GoogleAuthUrlResponseSchema),
-          },
-        },
-      },
-      400: {
-        description: "Bad request",
-        content: {
-          "application/json": {
-            schema: resolver(ErrorResponseSchema),
-          },
-        },
-      },
-    },
-  }),
-  validator("query", GoogleAuthUrlQuerySchema),
-  (c) => {
-    const query = c.req.valid("query");
-
-    const url = buildGoogleAuthUrl({
-      clientId: c.env.GOOGLE_CLIENT_ID,
-      redirectUri: query.redirect_uri,
-      state: query.state,
-      codeChallenge: query.code_challenge,
-    });
-
-    return c.json({ url });
-  },
-);
-
-// GET /auth/google/callback - Exchange code for tokens
-auth.get(
-  "/google/callback",
-  describeRoute({
-    tags: ["Auth"],
-    summary: "Google OAuth callback",
-    description: "Exchange authorization code for tokens",
+    summary: "Verify Google ID Token",
+    description: "Verify Google ID Token and return access/refresh tokens",
     responses: {
       200: {
         description: "Authentication successful",
         content: {
           "application/json": {
-            schema: resolver(GoogleCallbackResponseSchema),
+            schema: resolver(VerifyIdTokenResponseSchema),
           },
         },
       },
-      400: {
-        description: "OAuth failed",
+      401: {
+        description: "Invalid ID Token",
         content: {
           "application/json": {
             schema: resolver(ErrorResponseSchema),
@@ -129,90 +56,78 @@ auth.get(
       },
     },
   }),
+  validator("json", VerifyIdTokenBodySchema),
   async (c) => {
-    const code = c.req.query("code");
-    const _state = c.req.query("state");
+    const { id_token } = c.req.valid("json");
 
-    if (!code) {
-      return c.json({ error: "Missing authorization code" }, 400);
-    }
+    // Verify Google ID Token
+    const googlePayload = await verifyGoogleIdToken(id_token, c.env.GOOGLE_CLIENT_ID);
 
-    try {
-      // Build redirect URI (should match the one used in /google endpoint)
-      const redirectUri = `${new URL(c.req.url).origin}/auth/google/callback`;
-
-      // Exchange code for Google tokens (no PKCE for server-side OAuth flow)
-      const googleTokens = await exchangeCodeForTokens({
-        code,
-        redirectUri,
-        clientId: c.env.GOOGLE_CLIENT_ID,
-        clientSecret: c.env.GOOGLE_CLIENT_SECRET,
-      });
-
-      // Get user info from Google
-      const googleUser = await getGoogleUserInfo(googleTokens.access_token);
-
-      // Find or create user in D1
-      const db = createDb(c.env.DB);
-      const user = await findOrCreateUser(db, {
-        googleId: googleUser.sub,
-        email: googleUser.email,
-        name: googleUser.name,
-        picture: googleUser.picture,
-      });
-
-      // Generate JWT tokens
-      const accessToken = await generateAccessToken(user.id, user.email, c.env.JWT_ACCESS_SECRET);
-
-      // Create token family for refresh token
-      const familyId = crypto.randomUUID();
-      const jti = crypto.randomUUID();
-      const refreshToken = await generateRefreshToken(
-        user.id,
-        familyId,
-        jti,
-        c.env.JWT_REFRESH_SECRET,
-      );
-
-      await createTokenFamily(db, user.id, jti);
-
-      // Set tokens in HttpOnly cookies
-      setCookie(c, "refresh_token", refreshToken, {
-        httpOnly: true,
-        secure: false, // false for localhost development
-        sameSite: "Lax",
-        path: "/",
-        maxAge: 30 * 24 * 60 * 60,
-      });
-
-      setCookie(c, "access_token", accessToken, {
-        httpOnly: true,
-        secure: false, // false for localhost development
-        sameSite: "Lax",
-        path: "/",
-        maxAge: 15 * 60, // 15 minutes
-      });
-
-      // Redirect to frontend with tokens in URL parameters (temporary for client to store)
-      const frontendUrl = c.env.CLIENT_URL || "http://localhost:3000";
-      const params = new URLSearchParams({
-        access_token: accessToken,
-        expires_in: "900", // 15 minutes in seconds
-      });
-      return c.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
-    } catch (error) {
-      console.error("OAuth callback error:", error);
+    if (!googlePayload) {
       return c.json(
         {
           success: false as const,
           error: {
-            code: "OAUTH_FAILED",
-            message: error instanceof Error ? error.message : "OAuth authentication failed",
+            code: "INVALID_ID_TOKEN",
+            message: "Invalid or expired ID token",
           },
         },
-        400,
+        401,
       );
     }
+
+    // Find or create user in D1
+    const db = createDb(c.env.DB);
+    const user = await findOrCreateUser(db, {
+      googleId: googlePayload.sub,
+      email: googlePayload.email,
+      name: googlePayload.name,
+      picture: googlePayload.picture,
+    });
+
+    // Generate JWT tokens
+    const accessToken = await generateAccessToken(user.id, user.email, c.env.JWT_ACCESS_SECRET);
+
+    // Create token family for refresh token
+    const familyId = crypto.randomUUID();
+    const jti = crypto.randomUUID();
+    const refreshToken = await generateRefreshToken(
+      user.id,
+      familyId,
+      jti,
+      c.env.JWT_REFRESH_SECRET,
+    );
+
+    await createTokenFamily(db, user.id, jti);
+
+    // Set tokens in HttpOnly cookies
+    setCookie(c, "refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: c.env.ENVIRONMENT !== "development",
+      sameSite: "Lax",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+    });
+
+    setCookie(c, "access_token", accessToken, {
+      httpOnly: true,
+      secure: c.env.ENVIRONMENT !== "development",
+      sameSite: "Lax",
+      path: "/",
+      maxAge: 15 * 60,
+    });
+
+    return c.json({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: 15 * 60,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
+      },
+    });
   },
 );
 

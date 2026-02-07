@@ -24,26 +24,12 @@ export const ErrorResponseSchema = type({
   },
 });
 
-// GET /auth/google/url
-export const GoogleAuthUrlQuerySchema = type({
-  redirect_uri: "string",
-  "code_challenge?": "string",
-  "code_challenge_method?": "'S256'",
-  "state?": "string",
+// POST /auth/verify (ID Token verification)
+export const VerifyIdTokenBodySchema = type({
+  id_token: "string",
 });
 
-export const GoogleAuthUrlResponseSchema = type({
-  url: "string",
-});
-
-// POST /auth/google/callback
-export const GoogleCallbackBodySchema = type({
-  code: "string",
-  "code_verifier?": "string",
-  redirect_uri: "string",
-});
-
-export const GoogleCallbackResponseSchema = type({
+export const VerifyIdTokenResponseSchema = type({
   access_token: "string",
   refresh_token: "string",
   expires_in: "number",
