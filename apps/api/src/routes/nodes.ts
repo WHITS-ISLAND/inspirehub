@@ -62,7 +62,7 @@ const NodeResponseSchema = type({
   ]),
   reactions: ReactionsSchema,
   comment_count: "number",
-  "parentNode?": ParentNodeSchema.or("null"),
+  "parent_node?": ParentNodeSchema.or("null"),
 });
 
 const CreateNodeResponseSchema = type({

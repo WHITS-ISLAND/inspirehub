@@ -151,7 +151,7 @@ export class NodeService {
         want_to_try: { count: Number(wantToTryCount?.count || 0) },
       },
       comment_count: Number(commentCount?.count || 0),
-      parentNode: parentNode ?? null,
+      parent_node: parentNode ?? null,
     };
   }
 
@@ -261,7 +261,7 @@ export class NodeService {
             want_to_try: { count: Number(wantToTryCount?.count || 0) },
           },
           comment_count: Number(commentCount?.count || 0),
-          parentNode: parentNode ?? null,
+          parent_node: parentNode ?? null,
         };
       }),
     );
