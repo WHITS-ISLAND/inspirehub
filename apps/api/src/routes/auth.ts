@@ -61,7 +61,10 @@ auth.post(
     const { id_token } = c.req.valid("json");
 
     // Verify Google ID Token
-    const googlePayload = await verifyGoogleIdToken(id_token, c.env.GOOGLE_CLIENT_ID);
+    const googlePayload = await verifyGoogleIdToken(id_token, [
+      c.env.GOOGLE_CLIENT_ID,
+      c.env.GOOGLE_IOS_CLIENT_ID,
+    ]);
 
     if (!googlePayload) {
       return c.json(
