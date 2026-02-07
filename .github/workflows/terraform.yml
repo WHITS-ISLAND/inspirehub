@@ -202,6 +202,27 @@ jobs:
         working-directory: infrastructure/terraform/environments/develop
         run: terraform init
 
+      - name: Import existing resources
+        working-directory: infrastructure/terraform/environments/develop
+        continue-on-error: true
+        run: |
+          # Import Pages custom domain if not in state
+          if ! terraform state show 'cloudflare_pages_domain.web[0]' 2>/dev/null; then
+            echo "Importing cloudflare_pages_domain.web[0]..."
+            terraform import 'cloudflare_pages_domain.web[0]' "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/inspirehub-web/${{ secrets.WEB_CUSTOM_DOMAIN }}" || true
+          fi
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_client_url: ${{ secrets.CLIENT_URL }}
+          TF_VAR_custom_domain: ${{ secrets.CUSTOM_DOMAIN }}
+          TF_VAR_web_custom_domain: ${{ secrets.WEB_CUSTOM_DOMAIN }}
+          TF_VAR_google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          TF_VAR_jwt_access_secret: ${{ secrets.JWT_ACCESS_SECRET }}
+          TF_VAR_jwt_refresh_secret: ${{ secrets.JWT_REFRESH_SECRET }}
+
       - name: Terraform Apply
         working-directory: infrastructure/terraform/environments/develop
         run: terraform apply -auto-approve
