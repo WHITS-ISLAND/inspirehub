@@ -162,7 +162,7 @@ jobs:
                 ],
                 "vars": {
                   "ENVIRONMENT": "develop",
-                  "CLIENT_URL": "https://inspirehub.wtnqk.org"
+                  "CLIENT_URL": "${{ secrets.CLIENT_URL }}"
                 }
               }
             }
@@ -288,7 +288,7 @@ jobs:
                 ],
                 "vars": {
                   "ENVIRONMENT": "develop",
-                  "CLIENT_URL": "https://inspirehub.wtnqk.org"
+                  "CLIENT_URL": "${{ secrets.CLIENT_URL }}"
                 }
               }
             }
