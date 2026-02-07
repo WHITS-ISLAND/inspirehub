@@ -20,6 +20,7 @@ export const ListNodesQuerySchema = type({
   "type?": NodeType,
   "author_id?": "string",
   "tag?": "string",
+  "q?": "string",
   "limit?": "1 <= number <= 100",
   "offset?": "number >= 0",
 });
