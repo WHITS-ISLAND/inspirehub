@@ -37,9 +37,8 @@
       ],
       "vars": {
         "ENVIRONMENT": "develop",
-        "CLIENT_URL": "https://web.inspirehub.wtnqk.org",
-        "API_URL": "https://api.inspirehub.wtnqk.org",
-      },
-    },
-  },
+        "CLIENT_URL": "https://web.inspirehub.wtnqk.org"
+      }
+    }
+  }
 }
