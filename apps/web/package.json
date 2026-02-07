@@ -6,6 +6,8 @@
     "dev": "vite --port 3000",
     "build": "vite build && tsc",
     "preview": "vite preview",
+    "deploy": "bun run build && wrangler pages deploy dist",
+    "deploy:develop": "bun run build && wrangler pages deploy dist --env develop",
     "lint": "oxlint --type-aware --type-check src/",
     "format": "oxfmt src/",
     "format:check": "oxfmt src/",
@@ -39,6 +41,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "wrangler": "^4.0.0",
     "@tanstack/devtools-vite": "^0.3.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
