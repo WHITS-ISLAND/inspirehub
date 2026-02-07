@@ -1,9 +1,10 @@
+import type { Context } from "hono";
 import { cors } from "hono/cors";
 import type { HonoEnv } from "../types/bindings";
 
 export function createCorsMiddleware() {
-  return cors<HonoEnv>({
-    origin: (origin, c) => {
+  return cors({
+    origin: (origin, c: Context<HonoEnv>) => {
       const allowedOrigins = [
         "http://localhost:3000",
         "http://localhost:5173",
