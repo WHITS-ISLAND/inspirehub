@@ -1,14 +1,13 @@
 ---
-name: api-conventions
-description: REST API design conventions, pagination rules, and arktype + hono-openapi gotchas for apps/api
+paths:
+  - "apps/api/**"
 ---
 
 # API Conventions (apps/api)
 
 ## Naming
 
-- All API response fields: **snake_case** (`parent_node`, not `parentNode`)
-- Request body fields: snake_case (`parent_node_id`, not `parentNodeId`)
+- All API response/request fields: **snake_case** (`parent_node`, not `parentNode`)
 
 ## Pagination
 

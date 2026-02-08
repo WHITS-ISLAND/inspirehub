@@ -40,4 +40,4 @@ IMPORTANT: Run lint + tests after any code change before reporting completion.
 
 ## API development
 
-See skill `api-conventions` for detailed rules on pagination, response schemas, and arktype + hono-openapi gotchas.
+Rules auto-loaded from `.claude/rules/api.md` when working in `apps/api/`.
