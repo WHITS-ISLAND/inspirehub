@@ -81,7 +81,7 @@ function DiscoverPage() {
             setSearchQuery(e.target.value);
             setSelectedTag(null);
           }}
-          placeholder="ノードやタグで検索..."
+          placeholder="投稿やタグを検索..."
           className="pl-9"
         />
       </div>
