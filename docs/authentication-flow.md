@@ -29,7 +29,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 <GoogleOAuthProvider clientId={env.VITE_GOOGLE_CLIENT_ID}>
   <App />
-</GoogleOAuthProvider>
+</GoogleOAuthProvider>;
 ```
 
 ### 2. ログインボタン
@@ -47,7 +47,7 @@ import { GoogleLogin } from "@react-oauth/google";
     });
   }}
   onError={() => console.error("Login failed")}
-/>
+/>;
 ```
 
 ### 3. シーケンス図
@@ -233,6 +233,7 @@ User        Android App            Google              API
 Google ID Token を検証し、アクセストークンを発行します。
 
 **Request:**
+
 ```json
 {
   "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6..."
@@ -240,6 +241,7 @@ Google ID Token を検証し、アクセストークンを発行します。
 ```
 
 **Response (200):**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
@@ -255,6 +257,7 @@ Google ID Token を検証し、アクセストークンを発行します。
 ```
 
 **Response (401):**
+
 ```json
 {
   "success": false,
@@ -270,6 +273,7 @@ Google ID Token を検証し、アクセストークンを発行します。
 アクセストークンをリフレッシュします。
 
 **Request:**
+
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
@@ -277,6 +281,7 @@ Google ID Token を検証し、アクセストークンを発行します。
 ```
 
 **Response (200):**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
@@ -290,11 +295,13 @@ Google ID Token を検証し、アクセストークンを発行します。
 現在のユーザー情報を取得します。
 
 **Headers:**
+
 ```
 Authorization: Bearer {access_token}
 ```
 
 **Response (200):**
+
 ```json
 {
   "user": {
@@ -311,11 +318,13 @@ Authorization: Bearer {access_token}
 ログアウトします（リフレッシュトークンを無効化）。
 
 **Headers:**
+
 ```
 Authorization: Bearer {access_token}
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true
@@ -326,10 +335,10 @@ Authorization: Bearer {access_token}
 
 ## トークン有効期限
 
-| トークン | 有効期限 |
-|---------|---------|
-| access_token | 15分 |
-| refresh_token | 30日 |
+| トークン      | 有効期限 |
+| ------------- | -------- |
+| access_token  | 15分     |
+| refresh_token | 30日     |
 
 ---
 
@@ -345,8 +354,8 @@ Authorization: Bearer {access_token}
 
 ### クライアントID
 
-| プラットフォーム | 用途 |
-|----------------|------|
-| Web | JavaScript 生成元で制限 |
-| iOS | Bundle ID で制限 |
-| Android | パッケージ名 + SHA-1 で制限 |
+| プラットフォーム | 用途                        |
+| ---------------- | --------------------------- |
+| Web              | JavaScript 生成元で制限     |
+| iOS              | Bundle ID で制限            |
+| Android          | パッケージ名 + SHA-1 で制限 |
