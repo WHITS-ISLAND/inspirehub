@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
-    "build": "vite build && tsc",
+    "build": "vite build",
     "preview": "vite preview",
     "deploy": "bun run build && wrangler pages deploy dist",
     "lint": "oxlint --type-aware --type-check src/",
