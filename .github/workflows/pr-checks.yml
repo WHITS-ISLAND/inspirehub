@@ -64,7 +64,6 @@ jobs:
   web-checks:
     name: Web Checks
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'apps/web/')
     defaults:
       run:
         working-directory: apps/web
