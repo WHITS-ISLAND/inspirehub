@@ -9,18 +9,24 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import LoginRoute from "./routes/login.tsx";
-import AuthCallbackRoute from "./routes/auth/callback.tsx";
 
 import Header from "./components/Header";
+import { BottomNav } from "./components/BottomNav";
+import { AuthGuard } from "./components/auth/AuthGuard";
 
-import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
+import LoginRoute from "./routes/login";
+import AuthCallbackRoute from "./routes/auth/callback";
+import HomeRoute from "./routes/home";
+import NodeDetailRoute from "./routes/nodes/detail";
+import NodeCreateRoute from "./routes/nodes/new";
+import DiscoverRoute from "./routes/discover";
+import ProfileRoute from "./routes/profile";
+
+import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider";
 
 import "./styles.css";
-import reportWebVitals from "./reportWebVitals.ts";
-
-import App from "./App.tsx";
-import { env } from "./env.ts";
+import reportWebVitals from "./reportWebVitals";
+import { env } from "./env";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -32,16 +38,29 @@ const rootRoute = createRootRoute({
   ),
 });
 
-const indexRoute = createRoute({
+const authenticatedLayout = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
-  component: App,
+  id: "authenticated",
+  component: () => (
+    <AuthGuard>
+      <main className="mx-auto max-w-5xl pb-20 md:pb-4">
+        <Outlet />
+      </main>
+      <BottomNav />
+    </AuthGuard>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([
-  indexRoute,
   LoginRoute(rootRoute),
   AuthCallbackRoute(rootRoute),
+  authenticatedLayout.addChildren([
+    HomeRoute(authenticatedLayout),
+    NodeDetailRoute(authenticatedLayout),
+    NodeCreateRoute(authenticatedLayout),
+    DiscoverRoute(authenticatedLayout),
+    ProfileRoute(authenticatedLayout),
+  ]),
 ]);
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
@@ -76,7 +95,4 @@ if (rootElement && !rootElement.innerHTML) {
   );
 }
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

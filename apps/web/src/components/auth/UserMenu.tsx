@@ -1,13 +1,14 @@
 import { useAuthStore } from "@/stores/auth";
-import { apiClient } from "@/lib/api-client";
-import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
+import { LogOut } from "lucide-react";
 
 export function UserMenu() {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
 
   const handleLogout = async () => {
+    if (!window.confirm("ログアウトしますか？")) return;
     try {
-      await apiClient.post("/auth/logout");
+      await api.auth.logout.$post();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -15,21 +16,16 @@ export function UserMenu() {
     }
   };
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex items-center gap-2">
-        {user.picture && (
-          <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full" />
-        )}
-        <span className="text-sm font-medium">{user.name}</span>
-      </div>
-      <Button variant="outline" size="sm" onClick={handleLogout}>
-        Logout
-      </Button>
-    </div>
+    <button
+      onClick={handleLogout}
+      className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+    >
+      <LogOut size={18} />
+    </button>
   );
 }
