@@ -1,10 +1,8 @@
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
-import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth";
 import { env } from "@/env";
 
 export function GoogleLoginButton() {
-  const navigate = useNavigate();
   const { setAuth, setError, setLoading } = useAuthStore();
 
   const handleSuccess = async (response: CredentialResponse) => {
@@ -33,7 +31,6 @@ export function GoogleLoginButton() {
       const data = (await res.json()) as { user: Parameters<typeof setAuth>[0]; access_token: string };
 
       setAuth(data.user, data.access_token);
-      void navigate({ to: "/" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
