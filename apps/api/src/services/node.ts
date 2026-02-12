@@ -113,10 +113,20 @@ export class NodeService {
     tag?: string;
     q?: string;
     sort?: "recent" | "popular";
+    liked_by_user_id?: string;
     limit?: number;
     offset?: number;
   }) {
     let baseQuery = this.db.selectFrom("nodes");
+
+    if (params?.liked_by_user_id) {
+      baseQuery = baseQuery
+        .innerJoin("likes", (join) =>
+          join
+            .onRef("nodes.id", "=", "likes.node_id")
+            .on("likes.user_id", "=", params.liked_by_user_id!),
+        );
+    }
 
     if (params?.parent_node_id) {
       baseQuery = baseQuery
@@ -175,6 +185,8 @@ export class NodeService {
         )`,
         "desc",
       );
+    } else if (params?.liked_by_user_id) {
+      query = query.orderBy(sql`likes.created_at`, "desc");
     } else {
       query = query.orderBy("nodes.created_at", "desc");
     }

@@ -23,6 +23,7 @@ export const ListNodesQuerySchema = type({
   "tag?": "string",
   "q?": "string",
   "sort?": "'recent' | 'popular'",
+  "liked_by?": "'me'",
   "limit?": type("string.numeric.parse").to("1 <= number <= 100"),
   "offset?": type("string.numeric.parse").to("number >= 0"),
 });

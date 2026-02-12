@@ -97,7 +97,7 @@ export function useToggleReaction(nodeId: string) {
       }
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ["nodes", nodeId] });
+      void queryClient.invalidateQueries({ queryKey: ["nodes"] });
     },
   });
 }

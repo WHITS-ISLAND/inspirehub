@@ -38,6 +38,19 @@ function ProfilePage() {
     enabled: activeTab === "posts" && !!user,
   });
 
+  const likedPosts = useQuery({
+    queryKey: ["nodes", { liked_by: "me" }],
+    queryFn: async () => {
+      const fetchLiked = () =>
+        api.nodes.$get({
+          query: { liked_by: "me" as const, limit: 50 },
+        });
+      const res = await fetchLiked();
+      return handleResponse<NodesListResponse>(res, fetchLiked);
+    },
+    enabled: activeTab === "liked" && !!user,
+  });
+
   const updateName = useMutation({
     mutationFn: async (name: string) => {
       const fetcher = () => api.users.me.$patch({ json: { name } });
@@ -54,7 +67,7 @@ function ProfilePage() {
 
   if (!user) return null;
 
-  const data = activeTab === "posts" ? myPosts : undefined;
+  const data = activeTab === "posts" ? myPosts : likedPosts;
 
   return (
     <div className="p-4">
@@ -136,18 +149,14 @@ function ProfilePage() {
         )}
 
         {data?.data?.nodes.length === 0 && !data?.isLoading && (
-          <div className="py-12 text-center text-muted-foreground">まだ投稿がありません。</div>
+          <div className="py-12 text-center text-muted-foreground">
+            {activeTab === "posts" ? "まだ投稿がありません。" : "いいねした投稿はありません。"}
+          </div>
         )}
 
         {data?.data?.nodes.map((node) => (
           <NodeCard key={node.id} node={node} />
         ))}
-
-        {activeTab === "liked" && (
-          <div className="py-12 text-center text-muted-foreground">
-            いいねした投稿は近日公開予定です。
-          </div>
-        )}
       </div>
     </div>
   );
