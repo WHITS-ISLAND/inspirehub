@@ -1,7 +1,9 @@
 import { validator } from "hono/validator";
 import { type } from "arktype";
 
-export function arktypeQueryValidator<T>(schema: (input: unknown) => T | InstanceType<typeof type.errors>) {
+export function arktypeQueryValidator<T>(
+  schema: (input: unknown) => T | InstanceType<typeof type.errors>,
+) {
   return validator("query", (value, c) => {
     const result = schema(value);
     if (result instanceof type.errors) {

@@ -19,8 +19,10 @@ export const UpdateNodeSchema = type({
 export const ListNodesQuerySchema = type({
   "type?": NodeType,
   "author_id?": "string",
+  "parent_node_id?": "string",
   "tag?": "string",
   "q?": "string",
+  "sort?": "'recent' | 'popular'",
   "limit?": type("string.numeric.parse").to("1 <= number <= 100"),
   "offset?": type("string.numeric.parse").to("number >= 0"),
 });

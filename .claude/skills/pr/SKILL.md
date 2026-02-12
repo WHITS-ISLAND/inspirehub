@@ -18,6 +18,7 @@ Follow this workflow strictly:
 7. **Create PR**: `gh pr create --base develop` with a clear title and description.
 
 Rules:
+
 - NEVER use `git reset --hard`
 - NEVER commit directly to `develop` or `main`
 - If any step fails, STOP and explain — do not attempt workarounds that could lose work

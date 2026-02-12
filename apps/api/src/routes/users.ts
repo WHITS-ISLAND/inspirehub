@@ -6,10 +6,7 @@ import { createDb } from "../lib/db";
 import { authMiddleware } from "../middleware/auth";
 import { UpdateMeBodySchema, UpdateMeResponseSchema, ErrorResponseSchema } from "../schemas/auth";
 
-const users = new Hono<HonoEnv>();
-
-// PATCH /users/me - Update current user name
-users.patch(
+const users = new Hono<HonoEnv>().patch(
   "/me",
   describeRoute({
     tags: ["Users"],

@@ -19,12 +19,13 @@ app.use(logger());
 app.use("*", createCorsMiddleware());
 app.use(renderer);
 
-// Routes
-app.route("/auth", auth);
-app.route("/nodes", nodes);
-app.route("/comments", comments);
-app.route("/tags", tags);
-app.route("/users", users);
+// Routes (chained for RPC type inference)
+const routes = app
+  .route("/auth", auth)
+  .route("/nodes", nodes)
+  .route("/comments", comments)
+  .route("/tags", tags)
+  .route("/users", users);
 
 // Health check
 app.get("/", (c) => {
@@ -76,4 +77,5 @@ app.get("/docs", async (c) => {
   return html;
 });
 
+export type AppType = typeof routes;
 export default app;
