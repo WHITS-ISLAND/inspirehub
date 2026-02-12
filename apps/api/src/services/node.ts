@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely";
+import { type Kysely, sql } from "kysely";
 import type { Database, NodesTable } from "../lib/db";
 
 export class NodeService {
@@ -109,12 +109,20 @@ export class NodeService {
   async list(params?: {
     type?: NodesTable["type"];
     author_id?: string;
+    parent_node_id?: string;
     tag?: string;
     q?: string;
+    sort?: "recent" | "popular";
     limit?: number;
     offset?: number;
   }) {
     let baseQuery = this.db.selectFrom("nodes");
+
+    if (params?.parent_node_id) {
+      baseQuery = baseQuery
+        .innerJoin("edges", "nodes.id", "edges.target")
+        .where("edges.source", "=", params.parent_node_id);
+    }
 
     if (params?.tag) {
       baseQuery = baseQuery
@@ -155,8 +163,21 @@ export class NodeService {
         "nodes.updated_at",
         "users.name as author_name",
         "users.picture as author_picture",
-      ])
-      .orderBy("nodes.created_at", "desc");
+      ]);
+
+    if (params?.sort === "popular") {
+      query = query.orderBy(
+        sql`(
+          (SELECT COUNT(*) FROM likes WHERE likes.node_id = nodes.id) +
+          (SELECT COUNT(*) FROM interested WHERE interested.node_id = nodes.id) +
+          (SELECT COUNT(*) FROM want_to_try WHERE want_to_try.node_id = nodes.id) +
+          (SELECT COUNT(*) FROM comments WHERE comments.node_id = nodes.id)
+        )`,
+        "desc",
+      );
+    } else {
+      query = query.orderBy("nodes.created_at", "desc");
+    }
 
     if (params?.limit) {
       query = query.limit(params.limit);
@@ -175,7 +196,7 @@ export class NodeService {
   private async enrichNodes(
     nodes: {
       id: string;
-      type: string;
+      type: NodesTable["type"];
       title: string;
       content: string;
       author_id: string;
@@ -240,7 +261,7 @@ export class NodeService {
       tagsByNode.set(row.node_id, list);
     }
 
-    const parentByNode = new Map<string, { id: string; type: string; title: string }>();
+    const parentByNode = new Map<string, { id: string; type: NodesTable["type"]; title: string }>();
     for (const row of parentRows) {
       parentByNode.set(row.target, { id: row.id, type: row.type, title: row.title });
     }

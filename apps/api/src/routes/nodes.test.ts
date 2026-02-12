@@ -123,11 +123,7 @@ describe("Node Routes", () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
-    const res = await app.request(
-      "/nodes?limit=20&offset=0",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/nodes?limit=20&offset=0", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
     const data = (await res.json()) as { nodes: unknown[] };
@@ -138,11 +134,7 @@ describe("Node Routes", () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
-    const res = await app.request(
-      "/nodes?limit=abc",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/nodes?limit=abc", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(400);
   });
@@ -151,11 +143,7 @@ describe("Node Routes", () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
-    const res = await app.request(
-      "/nodes?limit=0",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/nodes?limit=0", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(400);
   });

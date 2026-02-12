@@ -1,6 +1,14 @@
 import type { Kysely } from "kysely";
-import type { User } from "@inspirehub/shared/types";
 import type { Database, UsersTable } from "../lib/db";
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  picture: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 function rowToUser(row: UsersTable): User {
   return {
@@ -117,14 +125,7 @@ export async function findOrCreateUser(
   },
 ): Promise<User> {
   const existing = await findUserByGoogleId(db, params.googleId);
-
-  if (existing) {
-    const updated = await updateUser(db, existing.id, {
-      name: params.name,
-      picture: params.picture,
-    });
-    return updated || existing;
-  }
+  if (existing) return existing;
 
   return createUser(db, params);
 }

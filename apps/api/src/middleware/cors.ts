@@ -13,7 +13,7 @@ export function createCorsMiddleware() {
       return allowedOrigins.includes(origin) ? origin : null;
     },
     allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length", "X-Request-Id"],
     maxAge: 86400,
     credentials: true,

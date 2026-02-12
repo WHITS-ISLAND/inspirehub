@@ -8,11 +8,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
-    const res = await app.request(
-      "/tags?limit=10&offset=0",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/tags?limit=10&offset=0", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
   });
@@ -21,11 +17,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
-    const res = await app.request(
-      "/tags?limit=abc",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/tags?limit=abc", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(400);
   });
@@ -34,11 +26,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
-    const res = await app.request(
-      "/tags/suggest?q=test&limit=5",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/tags/suggest?q=test&limit=5", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
   });
@@ -47,11 +35,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
-    const res = await app.request(
-      "/tags/suggest?q=test&limit=abc",
-      { method: "GET" },
-      mockEnv,
-    );
+    const res = await app.request("/tags/suggest?q=test&limit=abc", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(400);
   });
