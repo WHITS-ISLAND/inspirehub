@@ -6,6 +6,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  useMatchRoute,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -28,14 +29,21 @@ import "./styles.css";
 import reportWebVitals from "./reportWebVitals";
 import { env } from "./env";
 
-const rootRoute = createRootRoute({
-  component: () => (
+function RootComponent() {
+  const matchRoute = useMatchRoute();
+  const isLogin = matchRoute({ to: "/login" });
+
+  return (
     <>
-      <Header />
+      {!isLogin && <Header />}
       <Outlet />
       <TanStackRouterDevtools />
     </>
-  ),
+  );
+}
+
+const rootRoute = createRootRoute({
+  component: RootComponent,
 });
 
 const authenticatedLayout = createRoute({

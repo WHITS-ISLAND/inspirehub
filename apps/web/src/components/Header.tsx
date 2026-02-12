@@ -2,7 +2,6 @@ import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Home, Compass, User } from "lucide-react";
 import { UserMenu } from "./auth/UserMenu";
 import { useAuthStore } from "@/stores/auth";
-import { Button } from "./ui/button";
 
 const navLinks = [
   { to: "/", icon: Home, label: "ホーム" },
@@ -17,7 +16,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold tracking-tight text-primary">
+        <Link to="/" className="text-xl font-bold tracking-tight text-foreground">
           InspireHub
         </Link>
 
@@ -43,15 +42,11 @@ export default function Header() {
           </nav>
         )}
 
-        <div>
-          {isAuthenticated ? (
+        {isAuthenticated && (
+          <div>
             <UserMenu />
-          ) : (
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/login">ログイン</Link>
-            </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );
