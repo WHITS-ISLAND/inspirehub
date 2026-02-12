@@ -148,6 +148,40 @@ describe("Node Routes", () => {
     expect(res.status).toBe(400);
   });
 
+  test("GET /nodes?liked_by=me without auth should return 401", async () => {
+    const app = new Hono();
+    app.route("/nodes", nodeRoutes);
+
+    const res = await app.request("/nodes?liked_by=me", { method: "GET" }, mockEnv);
+
+    expect(res.status).toBe(401);
+  });
+
+  test("GET /nodes?liked_by=me with auth should return 200", async () => {
+    const app = new Hono();
+    app.route("/nodes", nodeRoutes);
+
+    const now = Math.floor(Date.now() / 1000);
+    const token = await sign(
+      { sub: "test-user-id", email: "test@example.com", type: "access", iat: now, exp: now + 900 },
+      mockEnv.JWT_ACCESS_SECRET,
+      "HS256",
+    );
+
+    const res = await app.request(
+      "/nodes?liked_by=me",
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      mockEnv,
+    );
+
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { nodes: unknown[] };
+    expect(Array.isArray(data.nodes)).toBe(true);
+  });
+
   test("GET /nodes/:id should return 404 for non-existent node", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);

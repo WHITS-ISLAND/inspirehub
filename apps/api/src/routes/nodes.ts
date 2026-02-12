@@ -55,6 +55,12 @@ const nodes = new Hono<HonoEnv>()
           schema: { type: "string", enum: ["recent", "popular"] },
         },
         {
+          name: "liked_by",
+          in: "query",
+          required: false,
+          schema: { type: "string", enum: ["me"] },
+        },
+        {
           name: "limit",
           in: "query",
           required: false,
@@ -71,12 +77,32 @@ const nodes = new Hono<HonoEnv>()
             },
           },
         },
+        401: {
+          description: "認証エラー（liked_by=me使用時）",
+          content: {
+            "application/json": {
+              schema: resolver(ErrorResponseSchema),
+            },
+          },
+        },
       },
     }),
     optionalAuthMiddleware,
     arktypeQueryValidator(ListNodesQuerySchema),
     async (c) => {
       const query = c.req.valid("query") as ListNodesQuery;
+      const userId = c.get("userId");
+
+      if (query.liked_by === "me" && !userId) {
+        return c.json(
+          {
+            success: false as const,
+            error: { code: "UNAUTHORIZED", message: "Authentication required for liked_by=me" },
+          },
+          401,
+        );
+      }
+
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
@@ -87,12 +113,10 @@ const nodes = new Hono<HonoEnv>()
         tag: query.tag,
         q: query.q,
         sort: query.sort,
+        liked_by_user_id: query.liked_by === "me" ? userId! : undefined,
         limit: query.limit || 20,
         offset: query.offset || 0,
       });
-
-      // Get user's reaction statuses if authenticated
-      const userId = c.get("userId");
       let likeStatuses: Record<string, boolean> = {};
       let interestedStatuses: Record<string, boolean> = {};
       let wantToTryStatuses: Record<string, boolean> = {};
