@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { usePostComment, useUpdateComment, useDeleteComment } from "@/hooks/use-comments";
 import { ReactionButtons } from "@/components/nodes/ReactionButtons";
 import { TagInput } from "@/components/nodes/TagInput";
 import { Button } from "@/components/ui/button";
@@ -36,10 +37,6 @@ type CommentsListResponse = InferResponseType<
   200
 >;
 type NodeCreateResponse = InferResponseType<(typeof api.nodes)["$post"], 201>;
-type CommentCreateResponse = InferResponseType<
-  (typeof api.nodes)[":nodeId"]["comments"]["$post"],
-  201
->;
 type MessageResponse = InferResponseType<(typeof api.nodes)[":id"]["$put"], 200>;
 type Comment = CommentsListResponse["comments"][number];
 
@@ -148,41 +145,12 @@ const typeStyles = {
 
 function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) {
   const { user } = useAuthStore();
-  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const isOwner = user?.id === comment.author_id;
 
-  const updateComment = useMutation({
-    mutationFn: async (content: string) => {
-      const fetcher = () =>
-        api.comments[":id"].$put({ param: { id: comment.id }, json: { content } });
-      const res = await fetcher();
-      return handleResponse<InferResponseType<(typeof api.comments)[":id"]["$put"], 200>>(
-        res,
-        fetcher,
-      );
-    },
-    onSuccess: () => {
-      setIsEditing(false);
-      void queryClient.invalidateQueries({ queryKey: ["nodes", nodeId, "comments"] });
-    },
-  });
-
-  const deleteComment = useMutation({
-    mutationFn: async () => {
-      const fetcher = () => api.comments[":id"].$delete({ param: { id: comment.id } });
-      const res = await fetcher();
-      return handleResponse<InferResponseType<(typeof api.comments)[":id"]["$delete"], 200>>(
-        res,
-        fetcher,
-      );
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["nodes", nodeId, "comments"] });
-      void queryClient.invalidateQueries({ queryKey: ["nodes", nodeId] });
-    },
-  });
+  const updateComment = useUpdateComment(nodeId);
+  const deleteComment = useDeleteComment(nodeId);
 
   return (
     <div className="flex gap-3">
@@ -213,7 +181,7 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
               <button
                 onClick={() => {
                   if (window.confirm("このコメントを削除しますか？")) {
-                    deleteComment.mutate();
+                    deleteComment.mutate(comment.id);
                   }
                 }}
                 disabled={deleteComment.isPending}
@@ -234,13 +202,21 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter" && editContent.trim()) {
-                  updateComment.mutate(editContent.trim());
+                  updateComment.mutate(
+                    { commentId: comment.id, content: editContent.trim() },
+                    { onSuccess: () => setIsEditing(false) },
+                  );
                 }
                 if (e.key === "Escape") setIsEditing(false);
               }}
             />
             <button
-              onClick={() => updateComment.mutate(editContent.trim())}
+              onClick={() =>
+                updateComment.mutate(
+                  { commentId: comment.id, content: editContent.trim() },
+                  { onSuccess: () => setIsEditing(false) },
+                )
+              }
               disabled={updateComment.isPending || !editContent.trim()}
               className="rounded p-1 text-primary hover:bg-primary/10"
             >
@@ -306,19 +282,7 @@ function NodeDetailContent({ id }: { id: string }) {
     },
   });
 
-  const postComment = useMutation({
-    mutationFn: async (content: string) => {
-      const fetcher = () =>
-        api.nodes[":nodeId"].comments.$post({ param: { nodeId: id }, json: { content } });
-      const res = await fetcher();
-      return handleResponse<CommentCreateResponse>(res, fetcher);
-    },
-    onSuccess: () => {
-      setCommentText("");
-      void queryClient.invalidateQueries({ queryKey: ["nodes", id, "comments"] });
-      void queryClient.invalidateQueries({ queryKey: ["nodes", id] });
-    },
-  });
+  const postComment = usePostComment(id);
 
   const updateNode = useMutation({
     mutationFn: async (body: { title?: string; content?: string; tags?: string[] }) => {
@@ -563,7 +527,9 @@ function NodeDetailContent({ id }: { id: string }) {
           onSubmit={(e) => {
             e.preventDefault();
             if (commentText.trim()) {
-              postComment.mutate(commentText.trim());
+              postComment.mutate(commentText.trim(), {
+                onSuccess: () => setCommentText(""),
+              });
             }
           }}
         >
