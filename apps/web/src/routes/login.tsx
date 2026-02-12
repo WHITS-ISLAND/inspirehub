@@ -43,22 +43,22 @@ function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background">
       {/* Background orbs */}
       <motion.div
-        className="pointer-events-none absolute -left-32 -top-24 h-[420px] w-[420px] rounded-full opacity-[0.15] blur-[100px]"
+        className="pointer-events-none absolute -left-32 -top-24 h-[280px] w-[280px] rounded-full opacity-[0.25] blur-[100px]"
         style={{ background: "#9ca3af" }}
-        animate={{ x: [0, 30, 0], y: [0, 20, 0], scale: [1, 1.1, 1] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ x: [0, 80, 80, 0, 0], y: [0, 0, 60, 60, 0], scale: [1, 1.1, 1, 1.1, 1] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="pointer-events-none absolute -bottom-32 -right-24 h-[360px] w-[360px] rounded-full opacity-[0.12] blur-[100px]"
+        className="pointer-events-none absolute -bottom-32 -right-24 h-[240px] w-[240px] rounded-full opacity-[0.22] blur-[100px]"
         style={{ background: "#a1a1aa" }}
-        animate={{ x: [0, -20, 0], y: [0, -30, 0], scale: [1, 1.15, 1] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ x: [0, -70, -70, 0, 0], y: [0, 0, -60, -60, 0], scale: [1, 1.15, 1, 1.1, 1] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="pointer-events-none absolute -right-16 top-1/4 h-[240px] w-[240px] rounded-full opacity-[0.10] blur-[80px]"
+        className="pointer-events-none absolute -right-16 top-1/4 h-[180px] w-[180px] rounded-full opacity-[0.18] blur-[80px]"
         style={{ background: "#d4d4d8" }}
-        animate={{ x: [0, -15, 0], y: [0, 25, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ x: [0, -50, 0, 50, 0], y: [0, 40, 0, -40, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <AnimatePresence>
@@ -94,7 +94,7 @@ function LoginPage() {
         }}
       >
         {/* Brand + Yaruo */}
-        <div className="flex items-end justify-between">
+        <div className="flex items-end justify-center md:justify-between">
           {/* Brand */}
           <motion.div
             className="shrink-0 select-none"
@@ -103,15 +103,18 @@ function LoginPage() {
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
-              Inspire
-              <br />
-              Hub
+              <span className="md:hidden">InspireHub</span>
+              <span className="hidden md:inline">
+                Inspire
+                <br />
+                Hub
+              </span>
             </h1>
           </motion.div>
 
           {/* Yaruo */}
           <motion.pre
-            className="shrink-0 select-none text-[9px] leading-[1.2] text-foreground/80 md:text-[11px]"
+            className="hidden shrink-0 select-none leading-[1.2] text-foreground/80 md:block md:text-[11px]"
             style={{
               fontFamily: "'Mona','IPAMonaPGothic','MS PGothic',monospace",
             }}
