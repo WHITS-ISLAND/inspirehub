@@ -415,7 +415,7 @@ function NodeDetailContent({ id }: { id: string }) {
             <ReactionButtons nodeId={node.id} reactions={node.reactions} variant="detail" />
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <DeriveIdeaDialog
               parentNodeId={node.id}
               parentTitle={node.title}

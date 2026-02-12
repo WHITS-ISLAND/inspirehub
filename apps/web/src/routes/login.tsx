@@ -74,7 +74,7 @@ function LoginPage() {
       </AnimatePresence>
 
       <motion.div
-        className="w-full max-w-lg px-6"
+        className="w-full max-w-sm px-6 md:max-w-lg"
         animate={
           isTransitioning
             ? {
@@ -94,7 +94,7 @@ function LoginPage() {
         }}
       >
         {/* Brand + Yaruo */}
-        <div className="flex items-end justify-center gap-6">
+        <div className="flex items-end justify-between">
           {/* Brand */}
           <motion.div
             className="shrink-0 select-none"
@@ -102,7 +102,7 @@ function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            <h1 className="text-5xl font-bold tracking-tight text-foreground">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
               Inspire
               <br />
               Hub
@@ -111,7 +111,7 @@ function LoginPage() {
 
           {/* Yaruo */}
           <motion.pre
-            className="shrink-0 select-none text-[11px] leading-[1.2] text-foreground/80"
+            className="shrink-0 select-none text-[9px] leading-[1.2] text-foreground/80 md:text-[11px]"
             style={{
               fontFamily: "'Mona','IPAMonaPGothic','MS PGothic',monospace",
             }}
