@@ -653,7 +653,7 @@ function NodeDetailContent({ id }: { id: string }) {
 
 function NodeDetailPage() {
   const { id } = nodeDetailRoute.useParams();
-  return <NodeDetailContent id={id} />;
+  return <NodeDetailContent key={id} id={id} />;
 }
 
 let nodeDetailRoute: ReturnType<typeof createRoute>;
