@@ -1,25 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, GitFork, CircleAlert, Lightbulb } from "lucide-react";
+import type { InferResponseType } from "hono/client";
+import { api } from "@/lib/api";
 import { ReactionButtons } from "./ReactionButtons";
 
+type NodesResponse = InferResponseType<(typeof api.nodes)["$get"], 200>;
+type Node = NodesResponse["nodes"][number];
+
 interface NodeCardProps {
-  node: {
-    id: string;
-    type: "issue" | "idea" | "project";
-    title: string;
-    content: string;
-    author_name: string | null;
-    author_picture: string | null;
-    created_at: string;
-    tags: { id: string; name: string }[];
-    reactions: {
-      like: { count: number; is_reacted?: boolean };
-      interested: { count: number; is_reacted?: boolean };
-      want_to_try: { count: number; is_reacted?: boolean };
-    };
-    comment_count: number;
-    parent_node?: { id: string; type: string; title: string } | null;
-  };
+  node: Node;
 }
 
 const typeStyles = {

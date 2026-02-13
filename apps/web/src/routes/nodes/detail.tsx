@@ -187,19 +187,19 @@ const typeStyles = {
     label: "課題",
     icon: CircleAlert,
     className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-    textClassName: "text-red-800 dark:text-red-300",
+    iconClassName: "text-red-800 dark:text-red-300",
   },
   idea: {
     label: "アイデア",
     icon: Lightbulb,
     className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    textClassName: "text-blue-800 dark:text-blue-300",
+    iconClassName: "text-blue-800 dark:text-blue-300",
   },
   project: {
     label: "プロジェクト",
     icon: null,
     className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-    textClassName: "text-green-800 dark:text-green-300",
+    iconClassName: "text-green-800 dark:text-green-300",
   },
 };
 
@@ -557,17 +557,12 @@ function NodeDetailContent({ id }: { id: string }) {
                       className="group flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-colors hover:border-primary/30 hover:bg-secondary/40"
                     >
                       {parentStyle.icon && (
-                        <parentStyle.icon size={20} className={`shrink-0 ${parentStyle.textClassName}`} />
+                        <parentStyle.icon size={20} className={`shrink-0 ${parentStyle.iconClassName}`} />
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                            派生元
-                          </span>
-                          <span className={`text-xs ${parentStyle.textClassName}`}>
-                            {parentStyle.label}
-                          </span>
-                        </div>
+                        <span className={`text-xs font-medium ${parentStyle.iconClassName}`}>
+                          派生元{parentStyle.label}
+                        </span>
                         <p className="mt-1 truncate text-sm font-medium">{node.parent_node.title}</p>
                       </div>
                     </Link>
@@ -586,17 +581,12 @@ function NodeDetailContent({ id }: { id: string }) {
                     className="group flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-colors hover:border-primary/30 hover:bg-secondary/40"
                   >
                     {style.icon && (
-                      <style.icon size={20} className={`shrink-0 ${style.textClassName}`} />
+                      <style.icon size={20} className={`shrink-0 ${style.iconClassName}`} />
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                          派生先
-                        </span>
-                        <span className={`text-xs ${style.textClassName}`}>
-                          {style.label}
-                        </span>
-                      </div>
+                      <span className={`text-xs font-medium ${style.iconClassName}`}>
+                        派生先{style.label}
+                      </span>
                       <p className="mt-1 truncate text-sm font-medium">{child.title}</p>
                       <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{child.content}</p>
                     </div>
