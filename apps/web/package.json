@@ -38,6 +38,7 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
     "tw-animate-css": "^1.3.6",
+    "vaul": "^1.1.2",
     "zod": "^4.1.11",
     "zustand": "^5.0.10"
   },

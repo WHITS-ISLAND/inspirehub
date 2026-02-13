@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, GitFork } from "lucide-react";
+import { MessageCircle, GitFork, CircleAlert, Lightbulb } from "lucide-react";
 import { ReactionButtons } from "./ReactionButtons";
 
 interface NodeCardProps {
@@ -25,14 +25,17 @@ interface NodeCardProps {
 const typeStyles = {
   issue: {
     label: "課題",
+    icon: CircleAlert,
     className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   },
   idea: {
     label: "アイデア",
+    icon: Lightbulb,
     className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   },
   project: {
     label: "プロジェクト",
+    icon: null as null,
     className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   },
 };
@@ -66,7 +69,8 @@ export function NodeCard({ node }: NodeCardProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${typeStyle.className}`}>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${typeStyle.className}`}>
+            {typeStyle.icon && <typeStyle.icon size={12} />}
             {typeStyle.label}
           </span>
           {node.parent_node && (
