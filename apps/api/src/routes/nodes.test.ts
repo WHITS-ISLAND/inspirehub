@@ -196,4 +196,82 @@ describe("Node Routes", () => {
 
     expect(res.status).toBe(404);
   });
+
+  describe("Reaction User List", () => {
+    test("GET /nodes/:id/reactions/like should return 404 for non-existent node", async () => {
+      const app = new Hono();
+      app.route("/nodes", nodeRoutes);
+
+      const res = await app.request(
+        "/nodes/non-existent-id/reactions/like",
+        {
+          method: "GET",
+        },
+        mockEnv,
+      );
+
+      expect(res.status).toBe(404);
+    });
+
+    test("GET /nodes/:id/reactions/interested should return 404 for non-existent node", async () => {
+      const app = new Hono();
+      app.route("/nodes", nodeRoutes);
+
+      const res = await app.request(
+        "/nodes/non-existent-id/reactions/interested",
+        {
+          method: "GET",
+        },
+        mockEnv,
+      );
+
+      expect(res.status).toBe(404);
+    });
+
+    test("GET /nodes/:id/reactions/want-to-try should return 404 for non-existent node", async () => {
+      const app = new Hono();
+      app.route("/nodes", nodeRoutes);
+
+      const res = await app.request(
+        "/nodes/non-existent-id/reactions/want-to-try",
+        {
+          method: "GET",
+        },
+        mockEnv,
+      );
+
+      expect(res.status).toBe(404);
+    });
+
+    test("GET /nodes/:id/reactions/like with invalid limit should return 400", async () => {
+      const app = new Hono();
+      app.route("/nodes", nodeRoutes);
+
+      const res = await app.request(
+        "/nodes/any-id/reactions/like?limit=5",
+        {
+          method: "GET",
+        },
+        mockEnv,
+      );
+
+      expect(res.status).toBe(400);
+    });
+
+    test("GET /nodes/:id/reactions/like with valid limit should accept", async () => {
+      const app = new Hono();
+      app.route("/nodes", nodeRoutes);
+
+      const res = await app.request(
+        "/nodes/non-existent-id/reactions/like?limit=30",
+        {
+          method: "GET",
+        },
+        mockEnv,
+      );
+
+      // Will return 404 because node doesn't exist, but validates limit is acceptable
+      expect(res.status).toBe(404);
+    });
+  });
 });

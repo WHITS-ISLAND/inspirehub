@@ -14,9 +14,12 @@ import {
   NodeResponseSchema,
   CreateNodeResponseSchema,
   ListNodesResponseSchema,
+  ReactionUserListQuerySchema,
+  ReactionUserListResponseSchema,
   type CreateNodeInput,
   type UpdateNodeInput,
   type ListNodesQuery,
+  type ReactionUserListQuery,
 } from "../schemas/node";
 import {
   CreateCommentSchema,
@@ -612,6 +615,195 @@ const nodes = new Hono<HonoEnv>()
         is_reacted: result.is_reacted,
         count,
       });
+    },
+  )
+  .get(
+    "/:id/reactions/like",
+    describeRoute({
+      tags: ["Nodes"],
+      summary: "いいねユーザー一覧取得",
+      description: "ノードにいいねしたユーザーの一覧を取得（カーソルベースのページネーション）",
+      parameters: [
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: { type: "integer", minimum: 10, maximum: 100 },
+        },
+        { name: "cursor", in: "query", required: false, schema: { type: "string" } },
+      ],
+      responses: {
+        200: {
+          description: "いいねユーザー一覧",
+          content: {
+            "application/json": {
+              schema: resolver(ReactionUserListResponseSchema),
+            },
+          },
+        },
+        404: {
+          description: "ノードが見つかりません",
+          content: {
+            "application/json": {
+              schema: resolver(ErrorResponseSchema),
+            },
+          },
+        },
+      },
+    }),
+    arktypeQueryValidator(ReactionUserListQuerySchema),
+    async (c) => {
+      const nodeId = c.req.param("id");
+      const query = c.req.valid("query") as ReactionUserListQuery;
+
+      const db = createDb(c.env.DB);
+      const nodeService = new NodeService(db);
+
+      const node = await nodeService.getById(nodeId);
+      if (!node) {
+        return c.json(
+          {
+            success: false as const,
+            error: { code: "NOT_FOUND", message: "Node not found" },
+          },
+          404,
+        );
+      }
+
+      const result = await nodeService.getReactionUsers(
+        nodeId,
+        "like",
+        query.limit || 30,
+        query.cursor,
+      );
+
+      return c.json(result);
+    },
+  )
+  .get(
+    "/:id/reactions/interested",
+    describeRoute({
+      tags: ["Nodes"],
+      summary: "気になるユーザー一覧取得",
+      description: "ノードに気になる反応をしたユーザーの一覧を取得（カーソルベースのページネーション）",
+      parameters: [
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: { type: "integer", minimum: 10, maximum: 100 },
+        },
+        { name: "cursor", in: "query", required: false, schema: { type: "string" } },
+      ],
+      responses: {
+        200: {
+          description: "気になるユーザー一覧",
+          content: {
+            "application/json": {
+              schema: resolver(ReactionUserListResponseSchema),
+            },
+          },
+        },
+        404: {
+          description: "ノードが見つかりません",
+          content: {
+            "application/json": {
+              schema: resolver(ErrorResponseSchema),
+            },
+          },
+        },
+      },
+    }),
+    arktypeQueryValidator(ReactionUserListQuerySchema),
+    async (c) => {
+      const nodeId = c.req.param("id");
+      const query = c.req.valid("query") as ReactionUserListQuery;
+
+      const db = createDb(c.env.DB);
+      const nodeService = new NodeService(db);
+
+      const node = await nodeService.getById(nodeId);
+      if (!node) {
+        return c.json(
+          {
+            success: false as const,
+            error: { code: "NOT_FOUND", message: "Node not found" },
+          },
+          404,
+        );
+      }
+
+      const result = await nodeService.getReactionUsers(
+        nodeId,
+        "interested",
+        query.limit || 30,
+        query.cursor,
+      );
+
+      return c.json(result);
+    },
+  )
+  .get(
+    "/:id/reactions/want-to-try",
+    describeRoute({
+      tags: ["Nodes"],
+      summary: "やってみたいユーザー一覧取得",
+      description: "ノードにやってみたい反応をしたユーザーの一覧を取得（カーソルベースのページネーション）",
+      parameters: [
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: { type: "integer", minimum: 10, maximum: 100 },
+        },
+        { name: "cursor", in: "query", required: false, schema: { type: "string" } },
+      ],
+      responses: {
+        200: {
+          description: "やってみたいユーザー一覧",
+          content: {
+            "application/json": {
+              schema: resolver(ReactionUserListResponseSchema),
+            },
+          },
+        },
+        404: {
+          description: "ノードが見つかりません",
+          content: {
+            "application/json": {
+              schema: resolver(ErrorResponseSchema),
+            },
+          },
+        },
+      },
+    }),
+    arktypeQueryValidator(ReactionUserListQuerySchema),
+    async (c) => {
+      const nodeId = c.req.param("id");
+      const query = c.req.valid("query") as ReactionUserListQuery;
+
+      const db = createDb(c.env.DB);
+      const nodeService = new NodeService(db);
+
+      const node = await nodeService.getById(nodeId);
+      if (!node) {
+        return c.json(
+          {
+            success: false as const,
+            error: { code: "NOT_FOUND", message: "Node not found" },
+          },
+          404,
+        );
+      }
+
+      const result = await nodeService.getReactionUsers(
+        nodeId,
+        "want_to_try",
+        query.limit || 30,
+        query.cursor,
+      );
+
+      return c.json(result);
     },
   )
   .get(
