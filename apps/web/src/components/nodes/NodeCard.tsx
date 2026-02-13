@@ -43,20 +43,14 @@ const typeStyles = {
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1) return "たった今";
+  if (minutes < 60) return `${minutes}分前`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
+  if (hours < 24) return `${hours}時間前`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d`;
+  if (days < 30) return `${days}日前`;
   return new Date(dateStr).toLocaleDateString();
 }
-
-const hoverBorder = {
-  issue: "hover:border-red-300 dark:hover:border-red-700",
-  idea: "hover:border-blue-300 dark:hover:border-blue-700",
-  project: "hover:border-green-300 dark:hover:border-green-700",
-};
 
 export function NodeCard({ node }: NodeCardProps) {
   const typeStyle = typeStyles[node.type];
@@ -65,7 +59,7 @@ export function NodeCard({ node }: NodeCardProps) {
     <Link
       to="/nodes/$id"
       params={{ id: node.id }}
-      className={`block rounded-xl border border-border bg-secondary/20 p-4 ${hoverBorder[node.type]} hover:bg-secondary/40 hover:shadow-md hover:-translate-y-0.5 transition-all animate-fade-in-up`}
+      className="block rounded-xl border border-border bg-secondary/20 p-4 hover:bg-secondary/40 hover:shadow-md hover:-translate-y-0.5 transition-all animate-fade-in-up"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
