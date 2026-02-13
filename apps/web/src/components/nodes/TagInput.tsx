@@ -46,7 +46,7 @@ export function TagInput({ tags, onTagsChange }: TagInputProps) {
   }, []);
 
   const addTag = (name: string) => {
-    const tag = name.trim().toLowerCase();
+    const tag = name.trim();
     if (tag && !tags.includes(tag)) {
       onTagsChange([...tags, tag]);
     }
