@@ -537,7 +537,7 @@ function NodeDetailContent({ id }: { id: string }) {
       )}
 
       {(node.parent_node || (childNodesQuery.data && childNodesQuery.data.nodes.length > 0)) && (
-        <div className="mt-6 border-t border-border pt-4">
+        <div className="mt-6">
           <h2 className="flex items-center gap-2 font-semibold">
             <GitFork size={18} />
             派生ツリー
@@ -608,13 +608,13 @@ function NodeDetailContent({ id }: { id: string }) {
         </div>
       )}
 
-      <div className="mt-6 border-t border-border pt-4">
+      <div className="mt-6">
         <h2 className="font-semibold">
           コメント {commentsQuery.data?.total ?? 0}
         </h2>
 
         <form
-          className="mt-3 flex gap-2"
+          className="mt-3"
           onSubmit={(e) => {
             e.preventDefault();
             if (commentText.trim()) {
@@ -624,16 +624,18 @@ function NodeDetailContent({ id }: { id: string }) {
             }
           }}
         >
-          <input
-            type="text"
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            placeholder="コメントを入力"
-            className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-          />
-          <Button type="submit" size="sm" disabled={postComment.isPending || !commentText.trim()}>
-            <Send size={14} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="コメントを入力"
+              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+            />
+            <Button type="submit" size="sm" disabled={postComment.isPending || !commentText.trim()}>
+              <Send size={14} />
+            </Button>
+          </div>
         </form>
 
         <div className="mt-4 space-y-4">
