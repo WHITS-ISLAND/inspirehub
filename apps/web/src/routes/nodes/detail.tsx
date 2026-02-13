@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createRoute, Link, useNavigate, type AnyRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 import {
   ArrowLeft,
-  ChevronRight,
+  CircleAlert,
+  EllipsisVertical,
   GitFork,
-  MessageCircle,
+  Lightbulb,
   Loader2,
   Send,
   Pencil,
@@ -19,10 +20,11 @@ import { useAuthStore } from "@/stores/auth";
 import { usePostComment, useUpdateComment, useDeleteComment } from "@/hooks/use-comments";
 import { ReactionButtons } from "@/components/nodes/ReactionButtons";
 import { TagInput } from "@/components/nodes/TagInput";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -79,67 +81,125 @@ function DeriveIdeaDialog({
     },
   });
 
+  const isMobile = useIsMobile();
+
+  const handleSubmit = () =>
+    createDerived.mutate({ title: title.trim(), content: content.trim(), tags });
+
+  const formFields = (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <label className="text-sm text-muted-foreground">派生元</label>
+        <div className="rounded-lg border border-border bg-secondary/50 p-3">
+          <p className="text-sm font-medium">{parentTitle}</p>
+          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{parentContent}</p>
+        </div>
+      </div>
+      <div className="space-y-1">
+        <label className="text-sm text-muted-foreground">タイトル</label>
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="タイトル…"
+          aria-label="タイトル"
+          className="rounded-md bg-background"
+        />
+      </div>
+      <div className="space-y-1">
+        <label className="text-sm text-muted-foreground">本文</label>
+        <Textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="内容…"
+          aria-label="内容"
+          rows={4}
+          className="rounded-md bg-background"
+        />
+      </div>
+      <div className="space-y-1">
+        <label className="text-sm text-muted-foreground">タグ</label>
+        <TagInput tags={tags} onTagsChange={setTags} />
+      </div>
+    </div>
+  );
+
+  const trigger = (
+    <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <GitFork size={14} className="mr-1" />
+      派生アイデアを投稿
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        {trigger}
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="h-full bg-gray-50 dark:bg-zinc-900">
+            <div className="flex items-center justify-between px-4 py-4">
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-lg border border-border bg-background px-4 py-1.5 text-base text-muted-foreground"
+              >
+                キャンセル
+              </button>
+              <span className="text-base font-semibold">派生アイデアを投稿</span>
+              <button
+                onClick={handleSubmit}
+                disabled={createDerived.isPending || !title.trim()}
+                className="rounded-lg bg-primary px-4 py-1.5 text-base font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                {createDerived.isPending ? "投稿中…" : "投稿"}
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-6">{formFields}</div>
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <GitFork size={14} className="mr-1" />
-          アイデアを派生
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>派生アイデアを投稿</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="rounded-lg border border-border bg-secondary/50 p-3">
-            <p className="text-sm font-medium">{parentTitle}</p>
-            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{parentContent}</p>
-          </div>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="タイトル…"
-            aria-label="タイトル"
-            className="bg-background"
-          />
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="内容…"
-            aria-label="内容"
-            rows={4}
-            className="bg-background"
-          />
-          <TagInput tags={tags} onTagsChange={setTags} />
+    <>
+      {trigger}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>派生アイデアを投稿</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">{formFields}</div>
           <Button
-            onClick={() =>
-              createDerived.mutate({ title: title.trim(), content: content.trim(), tags })
-            }
+            className="mt-2 w-full"
+            onClick={handleSubmit}
             disabled={createDerived.isPending || !title.trim()}
-            className="w-full"
           >
             {createDerived.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             投稿
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
 const typeStyles = {
   issue: {
     label: "課題",
+    icon: CircleAlert,
     className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+    textClassName: "text-red-800 dark:text-red-300",
   },
   idea: {
     label: "アイデア",
+    icon: Lightbulb,
     className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    textClassName: "text-blue-800 dark:text-blue-300",
   },
   project: {
     label: "プロジェクト",
+    icon: null,
     className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+    textClassName: "text-green-800 dark:text-green-300",
   },
 };
 
@@ -253,6 +313,19 @@ function NodeDetailContent({ id }: { id: string }) {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
 
   const nodeQuery = useQuery({
     queryKey: ["nodes", id],
@@ -333,13 +406,53 @@ function NodeDetailContent({ id }: { id: string }) {
 
   return (
     <div className="p-4">
-      <Link
-        to="/"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft size={16} />
-        戻る
-      </Link>
+      <div className="mb-4 flex items-center justify-between">
+        <Link
+          to="/"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+          aria-label="戻る"
+        >
+          <ArrowLeft size={18} />
+        </Link>
+        {isOwner && !isEditing && (
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen((prev) => !prev)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+              aria-label="メニュー"
+            >
+              <EllipsisVertical size={18} />
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1 w-32 overflow-hidden rounded-lg border border-border bg-popover shadow-md">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    startEditing();
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-secondary"
+                >
+                  <Pencil size={14} />
+                  編集
+                </button>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    if (window.confirm("このノードを削除しますか？")) {
+                      deleteNode.mutate();
+                    }
+                  }}
+                  disabled={deleteNode.isPending}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-secondary"
+                >
+                  <Trash2 size={14} />
+                  削除
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {isEditing ? (
         <div className="space-y-3">
@@ -374,27 +487,27 @@ function NodeDetailContent({ id }: { id: string }) {
         <>
           <div className="flex items-center gap-2">
             <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${typeStyle.className}`}
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${typeStyle.className}`}
             >
+              {typeStyle.icon && <typeStyle.icon size={12} />}
               {typeStyle.label}
             </span>
             <span className="text-xs text-muted-foreground">
               {new Date(node.created_at).toLocaleDateString()}
             </span>
+            <div className="ml-auto flex items-center gap-1.5">
+              {node.author_picture && (
+                <img
+                  src={node.author_picture}
+                  alt={node.author_name ?? ""}
+                  className="h-5 w-5 rounded-full"
+                />
+              )}
+              <span className="text-xs text-muted-foreground">{node.author_name ?? "匿名"}</span>
+            </div>
           </div>
 
           <h1 className="mt-2 text-2xl font-bold">{node.title}</h1>
-
-          <div className="mt-2 flex items-center gap-2">
-            {node.author_picture && (
-              <img
-                src={node.author_picture}
-                alt={node.author_name ?? ""}
-                className="h-6 w-6 rounded-full"
-              />
-            )}
-            <span className="text-sm text-muted-foreground">{node.author_name ?? "匿名"}</span>
-          </div>
 
           <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed">{node.content}</div>
 
@@ -411,82 +524,58 @@ function NodeDetailContent({ id }: { id: string }) {
             </div>
           )}
 
-          <div className="mt-4">
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
             <ReactionButtons nodeId={node.id} reactions={node.reactions} variant="detail" />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
             <DeriveIdeaDialog
               parentNodeId={node.id}
               parentTitle={node.title}
               parentContent={node.content}
             />
-            {isOwner && (
-              <>
-                <Button variant="outline" size="sm" onClick={startEditing}>
-                  <Pencil size={14} className="mr-1" />
-                  編集
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (window.confirm("このノードを削除しますか？")) {
-                      deleteNode.mutate();
-                    }
-                  }}
-                  disabled={deleteNode.isPending}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 size={14} className="mr-1" />
-                  削除
-                </Button>
-              </>
-            )}
           </div>
 
-          {node.parent_node &&
-            (() => {
-              const parentStyle = typeStyles[node.parent_node.type];
-              return (
-                <div className="mt-6 border-t border-border pt-4">
-                  <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                    <GitFork size={14} />
-                    派生元
-                  </h2>
-                  <Link
-                    to="/nodes/$id"
-                    params={{ id: node.parent_node.id }}
-                    className="group mt-2 flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-colors hover:border-primary/30 hover:bg-secondary/40"
-                  >
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${parentStyle.className}`}
-                    >
-                      {parentStyle.label}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                      {node.parent_node.title}
-                    </span>
-                    <ChevronRight
-                      size={16}
-                      className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-                    />
-                  </Link>
-                </div>
-              );
-            })()}
         </>
       )}
 
-      {childNodesQuery.data && childNodesQuery.data.nodes.length > 0 && (
+      {(node.parent_node || (childNodesQuery.data && childNodesQuery.data.nodes.length > 0)) && (
         <div className="mt-6 border-t border-border pt-4">
           <h2 className="flex items-center gap-2 font-semibold">
             <GitFork size={18} />
-            派生ツリー ({childNodesQuery.data.total})
+            派生ツリー
           </h2>
           <div className="relative mt-3 ml-3">
             <span className="absolute left-0 top-0 bottom-0 w-px bg-border" />
-            {childNodesQuery.data.nodes.map((child) => {
+
+            {node.parent_node &&
+              (() => {
+                const parentStyle = typeStyles[node.parent_node.type];
+                return (
+                  <div className="relative pl-5 pb-2">
+                    <span className="absolute left-0 top-4 h-px w-4 bg-border" />
+                    <Link
+                      to="/nodes/$id"
+                      params={{ id: node.parent_node.id }}
+                      className="group flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-colors hover:border-primary/30 hover:bg-secondary/40"
+                    >
+                      {parentStyle.icon && (
+                        <parentStyle.icon size={20} className={`shrink-0 ${parentStyle.textClassName}`} />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                            派生元
+                          </span>
+                          <span className={`text-xs ${parentStyle.textClassName}`}>
+                            {parentStyle.label}
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-sm font-medium">{node.parent_node.title}</p>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })()}
+
+            {childNodesQuery.data?.nodes.map((child) => {
               const style = typeStyles[child.type];
               return (
                 <div key={child.id} className="relative pl-5 pb-2 last:pb-0">
@@ -496,18 +585,21 @@ function NodeDetailContent({ id }: { id: string }) {
                     params={{ id: child.id }}
                     className="group flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-colors hover:border-primary/30 hover:bg-secondary/40"
                   >
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${style.className}`}
-                    >
-                      {style.label}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                      {child.title}
-                    </span>
-                    <ChevronRight
-                      size={16}
-                      className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-                    />
+                    {style.icon && (
+                      <style.icon size={20} className={`shrink-0 ${style.textClassName}`} />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                          派生先
+                        </span>
+                        <span className={`text-xs ${style.textClassName}`}>
+                          {style.label}
+                        </span>
+                      </div>
+                      <p className="mt-1 truncate text-sm font-medium">{child.title}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{child.content}</p>
+                    </div>
                   </Link>
                 </div>
               );
@@ -517,9 +609,8 @@ function NodeDetailContent({ id }: { id: string }) {
       )}
 
       <div className="mt-6 border-t border-border pt-4">
-        <h2 className="flex items-center gap-2 font-semibold">
-          <MessageCircle size={18} />
-          コメント ({commentsQuery.data?.total ?? 0})
+        <h2 className="font-semibold">
+          コメント {commentsQuery.data?.total ?? 0}
         </h2>
 
         <form
@@ -537,7 +628,7 @@ function NodeDetailContent({ id }: { id: string }) {
             type="text"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="コメント..."
+            placeholder="コメントを入力"
             className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
           />
           <Button type="submit" size="sm" disabled={postComment.isPending || !commentText.trim()}>
