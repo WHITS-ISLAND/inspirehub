@@ -517,4 +517,56 @@ export class NodeService {
       .executeTakeFirst();
     return Number(result?.count || 0);
   }
+
+  async getReactionUsers(
+    nodeId: string,
+    reactionType: "like" | "interested" | "want_to_try",
+    limit = 30,
+    cursor?: string,
+  ) {
+    const tableName = reactionType === "like" ? "likes" : reactionType;
+
+    let query = this.db
+      .selectFrom(tableName)
+      .innerJoin("users", "users.id", `${tableName}.user_id`)
+      .select([
+        "users.id as user_id",
+        "users.name as user_name",
+        "users.picture as user_picture",
+        `${tableName}.created_at as reacted_at`,
+      ])
+      .where(`${tableName}.node_id`, "=", nodeId)
+      .orderBy(`${tableName}.created_at`, "desc");
+
+    if (cursor) {
+      query = query.where(`${tableName}.created_at`, "<", cursor);
+    }
+
+    const results = await query.limit(limit + 1).execute();
+
+    const hasMore = results.length > limit;
+    const data = hasMore ? results.slice(0, limit) : results;
+
+    const totalResult = await this.db
+      .selectFrom(tableName)
+      .where("node_id", "=", nodeId)
+      .select((eb) => eb.fn.countAll().as("count"))
+      .executeTakeFirst();
+
+    const total = Number(totalResult?.count ?? 0);
+
+    const nextCursor = hasMore && data.length > 0 ? data[data.length - 1].reacted_at : null;
+
+    return {
+      data: data.map((row) => ({
+        user_id: row.user_id,
+        user_name: row.user_name,
+        user_picture: row.user_picture,
+        reacted_at: row.reacted_at,
+      })),
+      next_cursor: nextCursor,
+      has_more: hasMore,
+      total,
+    };
+  }
 }

@@ -82,6 +82,27 @@ export const ReactionToggleResponseSchema = type({
   count: "number",
 });
 
+// Reaction user list schemas
+export const ReactionUserSchema = type({
+  user_id: "string",
+  user_name: "string | null",
+  user_picture: "string | null",
+  reacted_at: "string",
+});
+
+export const ReactionUserListQuerySchema = type({
+  "limit?": type("string.numeric.parse").to("10 <= number <= 100"),
+  "cursor?": "string",
+});
+
+export const ReactionUserListResponseSchema = type({
+  data: type([ReactionUserSchema]),
+  next_cursor: "string | null",
+  has_more: "boolean",
+  total: "number",
+});
+
 export type CreateNodeInput = typeof CreateNodeSchema.infer;
 export type UpdateNodeInput = typeof UpdateNodeSchema.infer;
 export type ListNodesQuery = typeof ListNodesQuerySchema.infer;
+export type ReactionUserListQuery = typeof ReactionUserListQuerySchema.infer;
