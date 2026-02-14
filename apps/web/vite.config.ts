@@ -17,5 +17,9 @@ export default defineConfig({
     environment: "jsdom",
     globals: false,
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    env: {
+      VITE_API_URL: "http://localhost:8787",
+      VITE_GOOGLE_CLIENT_ID: "test-google-client-id",
+    },
   },
 });
