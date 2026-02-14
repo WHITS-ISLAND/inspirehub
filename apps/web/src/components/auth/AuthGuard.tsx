@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth";
-import { refreshToken } from "@/lib/api";
+import { useTokenRefresh } from "@/hooks/use-token-refresh";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,20 +10,8 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, accessToken } = useAuthStore();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated && !accessToken && !isRefreshing) {
-      setIsRefreshing(true);
-      void refreshToken().then((ok) => {
-        if (!ok) {
-          useAuthStore.getState().logout();
-        }
-        setIsRefreshing(false);
-      });
-    }
-  }, [isAuthenticated, accessToken, isRefreshing]);
+  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isRefreshing } = useTokenRefresh();
 
   useEffect(() => {
     if (!isLoading && !isRefreshing && !isAuthenticated) {

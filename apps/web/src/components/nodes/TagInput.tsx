@@ -1,11 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { InferResponseType } from "hono/client";
 import { Plus, X } from "lucide-react";
-import { api, handleResponse } from "@/lib/api";
 import { useDebounce } from "@/hooks/use-debounce";
-
-type TagsSuggestResponse = InferResponseType<(typeof api.tags)["suggest"]["$get"], 200>;
+import { useTagSuggestions } from "@/hooks/use-tag-suggestions";
 
 interface TagInputProps {
   tags: string[];
@@ -18,14 +14,7 @@ export function TagInput({ tags, onTagsChange }: TagInputProps) {
   const debouncedQuery = useDebounce(tagInput, 300);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const suggestions = useQuery({
-    queryKey: ["tags", "suggest", debouncedQuery],
-    queryFn: async () => {
-      const res = await api.tags.suggest.$get({ query: { q: debouncedQuery, limit: 5 } });
-      return handleResponse<TagsSuggestResponse>(res);
-    },
-    enabled: debouncedQuery.length > 0,
-  });
+  const suggestions = useTagSuggestions(debouncedQuery);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
