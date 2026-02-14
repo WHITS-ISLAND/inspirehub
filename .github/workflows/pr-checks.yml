@@ -92,13 +92,8 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Run tests with coverage
-        run: |
-          if compgen -G "src/**/*.test.*" > /dev/null || compgen -G "src/**/*.spec.*" > /dev/null; then
-            bun test --coverage
-          else
-            echo "No test files found, skipping"
-          fi
+      - name: Run tests
+        run: bun run test
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
