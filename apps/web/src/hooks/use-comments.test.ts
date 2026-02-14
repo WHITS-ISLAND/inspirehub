@@ -5,27 +5,27 @@ const makeComment = (id: string, replies: any[] = []) =>
   ({ id, content: `content-${id}`, replies }) as any;
 
 describe("removeCommentById", () => {
-  test("removes a top-level comment by id", () => {
+  test("トップレベルのコメントをIDで削除する", () => {
     const comments = [makeComment("1"), makeComment("2")];
     const result = removeCommentById(comments, "1");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("2");
   });
 
-  test("removes a nested reply by id", () => {
+  test("ネストされた返信をIDで削除する", () => {
     const comments = [makeComment("1", [makeComment("1-1"), makeComment("1-2")])];
     const result = removeCommentById(comments, "1-1");
     expect(result[0].replies).toHaveLength(1);
     expect(result[0].replies[0].id).toBe("1-2");
   });
 
-  test("removes a deeply nested reply by id", () => {
+  test("深くネストされた返信をIDで削除する", () => {
     const comments = [makeComment("1", [makeComment("1-1", [makeComment("1-1-1")])])];
     const result = removeCommentById(comments, "1-1-1");
     expect(result[0].replies[0].replies).toHaveLength(0);
   });
 
-  test("returns unchanged array when id does not exist", () => {
+  test("存在しないIDでは配列を変更しない", () => {
     const comments = [makeComment("1"), makeComment("2")];
     const result = removeCommentById(comments, "999");
     expect(result).toHaveLength(2);
@@ -33,13 +33,13 @@ describe("removeCommentById", () => {
     expect(result[1].id).toBe("2");
   });
 
-  test("returns empty array when removing the only comment", () => {
+  test("唯一のコメントを削除すると空配列を返す", () => {
     const comments = [makeComment("1")];
     const result = removeCommentById(comments, "1");
     expect(result).toEqual([]);
   });
 
-  test("does not mutate the original array", () => {
+  test("元の配列を変更しない", () => {
     const comments = [makeComment("1"), makeComment("2")];
     removeCommentById(comments, "1");
     expect(comments).toHaveLength(2);
@@ -47,37 +47,37 @@ describe("removeCommentById", () => {
 });
 
 describe("updateCommentContent", () => {
-  test("updates content of a top-level comment by id", () => {
+  test("トップレベルのコメント内容をIDで更新する", () => {
     const comments = [makeComment("1")];
     const result = updateCommentContent(comments, "1", "updated");
     expect(result[0].content).toBe("updated");
   });
 
-  test("updates content of a nested reply by id", () => {
+  test("ネストされた返信の内容をIDで更新する", () => {
     const comments = [makeComment("1", [makeComment("1-1")])];
     const result = updateCommentContent(comments, "1-1", "updated");
     expect(result[0].replies[0].content).toBe("updated");
   });
 
-  test("updates content of a deeply nested reply by id", () => {
+  test("深くネストされた返信の内容をIDで更新する", () => {
     const comments = [makeComment("1", [makeComment("1-1", [makeComment("1-1-1")])])];
     const result = updateCommentContent(comments, "1-1-1", "updated");
     expect(result[0].replies[0].replies[0].content).toBe("updated");
   });
 
-  test("leaves other comments unchanged when updating by id", () => {
+  test("対象外のコメントは変更しない", () => {
     const comments = [makeComment("1"), makeComment("2")];
     const result = updateCommentContent(comments, "1", "updated");
     expect(result[1].content).toBe("content-2");
   });
 
-  test("returns unchanged array when id does not exist", () => {
+  test("存在しないIDでは配列を変更しない", () => {
     const comments = [makeComment("1")];
     const result = updateCommentContent(comments, "999", "updated");
     expect(result[0].content).toBe("content-1");
   });
 
-  test("does not mutate the original array", () => {
+  test("元の配列を変更しない", () => {
     const comments = [makeComment("1")];
     const original = comments[0].content;
     updateCommentContent(comments, "1", "updated");

@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import authRoutes from "./auth";
 import { mockEnv } from "../test/mock-env";
 
-describe("Auth Routes", () => {
-  test("GET /auth/me should return 401 without token", async () => {
+describe("認証ルート", () => {
+  test("GET /auth/me はトークンなしで401を返す", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
@@ -19,7 +19,7 @@ describe("Auth Routes", () => {
     expect(res.status).toBe(401);
   });
 
-  test("POST /auth/verify should return 401 with invalid id_token", async () => {
+  test("POST /auth/verify は無効なid_tokenで401を返す", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 
@@ -38,7 +38,7 @@ describe("Auth Routes", () => {
     expect(res.status).toBe(401);
   });
 
-  test("POST /auth/logout should return 401 with invalid token", async () => {
+  test("POST /auth/logout は無効なトークンで401を返す", async () => {
     const app = new Hono();
     app.route("/auth", authRoutes);
 

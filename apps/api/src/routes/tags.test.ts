@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import tagRoutes from "./tags";
 import { mockEnv } from "../test/mock-env";
 
-describe("Tag Routes - Query Parameter Coercion", () => {
-  test("GET /tags with string limit/offset should return 200", async () => {
+describe("タグルート", () => {
+  test("GET /tags は文字列のlimit/offsetを数値に変換して受け付ける", async () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
@@ -13,7 +13,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     expect(res.status).toBe(200);
   });
 
-  test("GET /tags with non-numeric limit should return 400", async () => {
+  test("GET /tags は非数値のlimitで400を返す", async () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
@@ -22,7 +22,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     expect(res.status).toBe(400);
   });
 
-  test("GET /tags/suggest with string limit should return 200", async () => {
+  test("GET /tags/suggest は文字列のlimitを数値に変換して受け付ける", async () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 
@@ -31,7 +31,7 @@ describe("Tag Routes - Query Parameter Coercion", () => {
     expect(res.status).toBe(200);
   });
 
-  test("GET /tags/suggest with non-numeric limit should return 400", async () => {
+  test("GET /tags/suggest は非数値のlimitで400を返す", async () => {
     const app = new Hono();
     app.route("/tags", tagRoutes);
 

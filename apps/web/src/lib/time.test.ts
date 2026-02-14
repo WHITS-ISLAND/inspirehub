@@ -2,12 +2,12 @@ import { describe, expect, test, vi } from "vitest";
 import { timeAgo } from "./time";
 
 describe("timeAgo", () => {
-  test("returns 'たった今' for timestamps less than 1 minute ago", () => {
+  test("1分未満のタイムスタンプに対して「たった今」を返す", () => {
     const now = new Date().toISOString();
     expect(timeAgo(now)).toBe("たった今");
   });
 
-  test("returns minutes suffix for timestamps 1-59 minutes ago", () => {
+  test("1〜59分前のタイムスタンプに対して「N分前」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T12:30:00Z"));
     expect(timeAgo("2025-01-01T12:25:00Z")).toBe("5分前");
@@ -15,7 +15,7 @@ describe("timeAgo", () => {
     vi.useRealTimers();
   });
 
-  test("returns hours suffix for timestamps 1-23 hours ago", () => {
+  test("1〜23時間前のタイムスタンプに対して「N時間前」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T12:00:00Z"));
     expect(timeAgo("2025-01-01T11:00:00Z")).toBe("1時間前");
@@ -23,7 +23,7 @@ describe("timeAgo", () => {
     vi.useRealTimers();
   });
 
-  test("returns days suffix for timestamps 1-29 days ago", () => {
+  test("1〜29日前のタイムスタンプに対して「N日前」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-30T00:00:00Z"));
     expect(timeAgo("2025-01-29T00:00:00Z")).toBe("1日前");
@@ -31,7 +31,7 @@ describe("timeAgo", () => {
     vi.useRealTimers();
   });
 
-  test("returns localized date string for timestamps 30 or more days ago", () => {
+  test("30日以上前のタイムスタンプに対してロケール日付文字列を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-02-01T00:00:00Z"));
     const result = timeAgo("2025-01-01T00:00:00Z");
@@ -39,28 +39,28 @@ describe("timeAgo", () => {
     vi.useRealTimers();
   });
 
-  test("boundary: exactly 0 seconds returns 'たった今'", () => {
+  test("差分0秒は「たった今」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T12:00:00Z"));
     expect(timeAgo("2025-01-01T12:00:00Z")).toBe("たった今");
     vi.useRealTimers();
   });
 
-  test("boundary: exactly 60 seconds returns '1分前'", () => {
+  test("差分ちょうど60秒は「1分前」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T12:01:00Z"));
     expect(timeAgo("2025-01-01T12:00:00Z")).toBe("1分前");
     vi.useRealTimers();
   });
 
-  test("boundary: exactly 60 minutes returns '1時間前'", () => {
+  test("差分ちょうど60分は「1時間前」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T13:00:00Z"));
     expect(timeAgo("2025-01-01T12:00:00Z")).toBe("1時間前");
     vi.useRealTimers();
   });
 
-  test("boundary: exactly 24 hours returns '1日前'", () => {
+  test("差分ちょうど24時間は「1日前」を返す", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-02T12:00:00Z"));
     expect(timeAgo("2025-01-01T12:00:00Z")).toBe("1日前");

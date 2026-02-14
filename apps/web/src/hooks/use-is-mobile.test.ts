@@ -29,19 +29,19 @@ afterEach(() => {
 });
 
 describe("useIsMobile", () => {
-  test("returns false when viewport is wider than 768px", () => {
+  test("768pxより広いビューポートではfalseを返す", () => {
     matches = false;
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(false);
   });
 
-  test("returns true when viewport is 767px or narrower", () => {
+  test("767px以下のビューポートではtrueを返す", () => {
     matches = true;
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(true);
   });
 
-  test("updates when media query match changes", () => {
+  test("メディアクエリの変化に追従して値を更新する", () => {
     matches = false;
     const { result } = renderHook(() => useIsMobile());
     expect(result.current).toBe(false);
@@ -53,7 +53,7 @@ describe("useIsMobile", () => {
     expect(result.current).toBe(true);
   });
 
-  test("removes event listener on unmount", () => {
+  test("アンマウント時にイベントリスナーを解除する", () => {
     matches = false;
     const { unmount } = renderHook(() => useIsMobile());
     expect(listeners).toHaveLength(1);

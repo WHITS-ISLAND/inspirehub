@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import nodeRoutes from "./nodes";
 import { mockEnv } from "../test/mock-env";
 
-describe("Comment Routes - Query Parameter Coercion", () => {
-  test("GET /nodes/:nodeId/comments with string limit/offset should return 200 or 404", async () => {
+describe("コメントルート", () => {
+  test("GET /nodes/:nodeId/comments は文字列のlimit/offsetを数値に変換して受け付ける", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -14,11 +14,11 @@ describe("Comment Routes - Query Parameter Coercion", () => {
       mockEnv,
     );
 
-    // 404 because node doesn't exist, but not 400 (validation passed)
+    // 404 = ノード不在だがバリデーションは通過
     expect(res.status).toBe(404);
   });
 
-  test("GET /nodes/:nodeId/comments with non-numeric limit should return 400", async () => {
+  test("GET /nodes/:nodeId/comments は非数値のlimitで400を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 

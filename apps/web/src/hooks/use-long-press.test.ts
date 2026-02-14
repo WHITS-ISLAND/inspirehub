@@ -11,7 +11,7 @@ afterEach(() => {
 });
 
 describe("useLongPress", () => {
-  test("fires onLongPress callback after default 500ms threshold", async () => {
+  test("デフォルト500ms経過後にonLongPressコールバックを発火する", async () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
@@ -21,7 +21,7 @@ describe("useLongPress", () => {
     expect(onLongPress).toHaveBeenCalledOnce();
   });
 
-  test("fires onLongPress callback after custom threshold", async () => {
+  test("カスタム閾値の経過後にonLongPressコールバックを発火する", async () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress, threshold: 200 }));
 
@@ -32,7 +32,7 @@ describe("useLongPress", () => {
     expect(onLongPress).toHaveBeenCalledOnce();
   });
 
-  test("cancels long press when touch moves before threshold", async () => {
+  test("閾値到達前にtouchMoveするとロングプレスをキャンセルする", async () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
@@ -42,7 +42,7 @@ describe("useLongPress", () => {
     expect(onLongPress).not.toHaveBeenCalled();
   });
 
-  test("cancels long press when touch ends before threshold", async () => {
+  test("閾値到達前にtouchEndするとロングプレスをキャンセルする", async () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
@@ -52,7 +52,7 @@ describe("useLongPress", () => {
     expect(onLongPress).not.toHaveBeenCalled();
   });
 
-  test("suppresses click event after long press fires", async () => {
+  test("ロングプレス発火後のclickイベントを抑制する", async () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
@@ -65,7 +65,7 @@ describe("useLongPress", () => {
     expect(event.stopPropagation).toHaveBeenCalled();
   });
 
-  test("does not suppress click event when long press did not fire", () => {
+  test("ロングプレス未発火時はclickイベントを抑制しない", () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
@@ -77,7 +77,7 @@ describe("useLongPress", () => {
     expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  test("resets fired state on new touch start after previous long press", async () => {
+  test("ロングプレス後の新しいtouchStartで発火状態をリセットする", async () => {
     const onLongPress = vi.fn();
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
