@@ -3,6 +3,7 @@ import { MessageCircle, GitFork, CircleAlert, Lightbulb } from "lucide-react";
 import type { InferResponseType } from "hono/client";
 import { api } from "@/lib/api";
 import { ReactionButtons } from "./ReactionButtons";
+import { timeAgo } from "@/lib/time";
 
 type NodesResponse = InferResponseType<(typeof api.nodes)["$get"], 200>;
 type Node = NodesResponse["nodes"][number];
@@ -28,18 +29,6 @@ const typeStyles = {
     className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   },
 };
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "たった今";
-  if (minutes < 60) return `${minutes}分前`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}時間前`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}日前`;
-  return new Date(dateStr).toLocaleDateString();
-}
 
 export function NodeCard({ node }: NodeCardProps) {
   const typeStyle = typeStyles[node.type];

@@ -13,7 +13,7 @@ type CommentCreateResponse = InferResponseType<
 >;
 type Comment = CommentsListResponse["comments"][number];
 
-function removeCommentById(comments: Comment[], id: string): Comment[] {
+export function removeCommentById(comments: Comment[], id: string): Comment[] {
   return comments.reduce<Comment[]>((acc, c) => {
     if (c.id === id) return acc;
     const filtered = { ...c };
@@ -25,7 +25,7 @@ function removeCommentById(comments: Comment[], id: string): Comment[] {
   }, []);
 }
 
-function updateCommentContent(comments: Comment[], id: string, content: string): Comment[] {
+export function updateCommentContent(comments: Comment[], id: string, content: string): Comment[] {
   return comments.map((c) => {
     if (c.id === id) return { ...c, content };
     if (c.replies && c.replies.length > 0) {
