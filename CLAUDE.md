@@ -34,9 +34,17 @@ IMPORTANT: Run lint + tests after any code change before reporting completion.
 ## Code style
 
 - snake_case for all API request/response fields (`parent_node`, not `parentNode`)
-- Test names in English, no regression references in code
+- Test names in Japanese, no regression references in code
 - Minimal comments — only where logic is non-obvious
 - Colocate test files with source (`foo.test.ts` next to `foo.ts`)
+
+## Testing philosophy
+
+- Follow TDD with the Red → Green → Refactor cycle: write a failing test first, implement the minimum code to pass it, then refactor.
+- Structure each test as Arrange → Act → Assert.
+- Each test case name must be a unique, self-contained behavioral specification — when listed together, the names alone should describe the system's behavior.
+- Tests are the single source of truth. Natural-language documentation follows them, not the other way around.
+- After writing or modifying tests, review that each test case name accurately matches what the test body verifies. If they diverge, determine which is correct and fix the other.
 
 ## API development
 

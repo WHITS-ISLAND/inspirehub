@@ -3,17 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 import { Plus, X } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
+import { useDebounce } from "@/hooks/use-debounce";
 
 type TagsSuggestResponse = InferResponseType<(typeof api.tags)["suggest"]["$get"], 200>;
-
-function useDebounce(value: string, delay: number) {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debounced;
-}
 
 interface TagInputProps {
   tags: string[];

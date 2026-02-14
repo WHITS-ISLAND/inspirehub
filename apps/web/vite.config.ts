@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { devtools } from "@tanstack/devtools-vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -11,6 +11,15 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+  test: {
+    environment: "jsdom",
+    globals: false,
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    env: {
+      VITE_API_URL: "http://localhost:8787",
+      VITE_GOOGLE_CLIENT_ID: "test-google-client-id",
     },
   },
 });

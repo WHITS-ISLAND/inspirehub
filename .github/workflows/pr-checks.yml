@@ -47,14 +47,6 @@ jobs:
       - name: Run tests with coverage
         run: bun test --coverage
 
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-
       - name: Test database migrations
         run: |
           # ローカルD1データベースでマイグレーションテスト
@@ -92,21 +84,8 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Run tests with coverage
-        run: |
-          if compgen -G "src/**/*.test.*" > /dev/null || compgen -G "src/**/*.spec.*" > /dev/null; then
-            bun test --coverage
-          else
-            echo "No test files found, skipping"
-          fi
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
+      - name: Run tests
+        run: bun run test
 
   security-scan:
     name: Security Scan

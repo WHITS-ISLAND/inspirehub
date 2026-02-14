@@ -4,8 +4,8 @@ import { sign } from "hono/jwt";
 import nodeRoutes from "./nodes";
 import { mockEnv } from "../test/mock-env";
 
-describe("Node Routes", () => {
-  test("GET /nodes should return nodes list", async () => {
+describe("ノードルート", () => {
+  test("GET /nodes はノード一覧を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -22,7 +22,7 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
-  test("POST /nodes should require authentication", async () => {
+  test("POST /nodes は未認証で401を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -45,7 +45,7 @@ describe("Node Routes", () => {
     expect(res.status).toBe(401);
   });
 
-  test("GET /nodes with valid token should set userId context", async () => {
+  test("GET /nodes は有効なトークンでノード一覧を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -70,7 +70,7 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
-  test("GET /nodes with invalid token should still return 200", async () => {
+  test("GET /nodes は無効なトークンでも公開データを返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -88,7 +88,7 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
-  test("GET /nodes with expired token should still return 200", async () => {
+  test("GET /nodes は期限切れトークンでも公開データを返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -119,7 +119,7 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
-  test("GET /nodes with string limit/offset should return 200", async () => {
+  test("GET /nodes は文字列のlimit/offsetを数値に変換して受け付ける", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -130,7 +130,7 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
-  test("GET /nodes with non-numeric limit should return 400", async () => {
+  test("GET /nodes は非数値のlimitで400を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -139,7 +139,7 @@ describe("Node Routes", () => {
     expect(res.status).toBe(400);
   });
 
-  test("GET /nodes with out-of-range limit should return 400", async () => {
+  test("GET /nodes は範囲外のlimitで400を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -148,7 +148,7 @@ describe("Node Routes", () => {
     expect(res.status).toBe(400);
   });
 
-  test("GET /nodes?liked_by=me without auth should return 401", async () => {
+  test("GET /nodes?liked_by=me は未認証で401を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -157,7 +157,7 @@ describe("Node Routes", () => {
     expect(res.status).toBe(401);
   });
 
-  test("GET /nodes?liked_by=me with auth should return 200", async () => {
+  test("GET /nodes?liked_by=me は認証済みでノード一覧を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -182,7 +182,7 @@ describe("Node Routes", () => {
     expect(Array.isArray(data.nodes)).toBe(true);
   });
 
-  test("GET /nodes/:id should return 404 for non-existent node", async () => {
+  test("GET /nodes/:id は存在しないノードで404を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -197,8 +197,8 @@ describe("Node Routes", () => {
     expect(res.status).toBe(404);
   });
 
-  describe("Reaction User List", () => {
-    test("GET /nodes/:id/reactions/like should return 404 for non-existent node", async () => {
+  describe("リアクションユーザー一覧", () => {
+    test("GET /nodes/:id/reactions/like は存在しないノードで404を返す", async () => {
       const app = new Hono();
       app.route("/nodes", nodeRoutes);
 
@@ -213,7 +213,7 @@ describe("Node Routes", () => {
       expect(res.status).toBe(404);
     });
 
-    test("GET /nodes/:id/reactions/interested should return 404 for non-existent node", async () => {
+    test("GET /nodes/:id/reactions/interested は存在しないノードで404を返す", async () => {
       const app = new Hono();
       app.route("/nodes", nodeRoutes);
 
@@ -228,7 +228,7 @@ describe("Node Routes", () => {
       expect(res.status).toBe(404);
     });
 
-    test("GET /nodes/:id/reactions/want-to-try should return 404 for non-existent node", async () => {
+    test("GET /nodes/:id/reactions/want-to-try は存在しないノードで404を返す", async () => {
       const app = new Hono();
       app.route("/nodes", nodeRoutes);
 
@@ -243,7 +243,7 @@ describe("Node Routes", () => {
       expect(res.status).toBe(404);
     });
 
-    test("GET /nodes/:id/reactions/like with invalid limit should return 400", async () => {
+    test("GET /nodes/:id/reactions/like は許可範囲外のlimitで400を返す", async () => {
       const app = new Hono();
       app.route("/nodes", nodeRoutes);
 
@@ -258,7 +258,7 @@ describe("Node Routes", () => {
       expect(res.status).toBe(400);
     });
 
-    test("GET /nodes/:id/reactions/like with valid limit should accept", async () => {
+    test("GET /nodes/:id/reactions/like は許可範囲内のlimitでバリデーションを通過する", async () => {
       const app = new Hono();
       app.route("/nodes", nodeRoutes);
 
@@ -270,7 +270,7 @@ describe("Node Routes", () => {
         mockEnv,
       );
 
-      // Will return 404 because node doesn't exist, but validates limit is acceptable
+      // 404 = ノード不在だがlimitバリデーションは通過
       expect(res.status).toBe(404);
     });
   });

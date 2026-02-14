@@ -27,7 +27,7 @@ function getReactionFetcher(nodeId: string, type: ReactionType) {
   return () => api.nodes[":id"]["want-to-try"].$post({ param });
 }
 
-function updateReactionsInData(data: unknown, nodeId: string, type: ReactionType): boolean {
+export function updateReactionsInData(data: unknown, nodeId: string, type: ReactionType): boolean {
   if (!data || typeof data !== "object") return false;
 
   // NodeDetail shape: { id, reactions, ... }
