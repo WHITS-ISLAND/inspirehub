@@ -13,7 +13,7 @@ export const api = hc<AppType>(env.VITE_API_URL, {
   init: { credentials: "include" },
 });
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,

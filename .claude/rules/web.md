@@ -30,7 +30,7 @@ React 19 | TanStack Router + Query | Zustand | Tailwind v4 | Radix UI + CVA | Vi
 ## UI Components
 
 - `components/ui/` — shadcn/ui pattern: CVA variants + Radix primitives + `cn()` from `lib/utils.ts`
-- Use existing `Button`, `Input`, `Label`, `Select`, `Switch`, `Slider`, `Textarea` before creating new ones
+- Use existing `Button`, `Input`, `Label`, `Dialog`, `Textarea` before creating new ones
 - Styling: Tailwind semantic tokens (`primary`, `secondary`, `muted-foreground`, `destructive`, `border`, `card`)
 - Icons: `lucide-react`
 

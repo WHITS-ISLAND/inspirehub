@@ -102,4 +102,4 @@ export function useToggleReaction(nodeId: string) {
   });
 }
 
-export type { Reactions, ReactionType, ReactionStatus };
+export type { Reactions, ReactionType };
