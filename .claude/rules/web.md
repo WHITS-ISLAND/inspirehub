@@ -42,3 +42,24 @@ React 19 | TanStack Router + Query | Zustand | Tailwind v4 | Radix UI + CVA | Vi
 ## Path Alias
 
 - `@/` resolves to `src/`
+
+## Architecture
+
+### Layer responsibilities
+- **components/** — Rendering and user interaction. Get behavior via hooks, state via stores. Never call the API directly.
+- **hooks/** — Data fetching/mutation logic (TanStack Query wrappers) + pure functions for cache updates and data transforms.
+- **stores/** — Client-only state (auth, UI preferences). Keep thin. No API calls inside stores.
+- **lib/** — Pure utilities. Must not import React APIs.
+
+### Dependency rules
+```
+components → hooks → lib/api
+components → stores
+hooks → stores (read-only via getState())
+hooks → lib
+```
+Components must not import `lib/api` directly — always go through a hook.
+
+### Pure function extraction pattern
+Logic inside hooks that does not use React APIs (useState, useEffect, useQuery, etc.) should be named-exported from the same file.
+This enables unit testing without rendering (e.g. `updateReactionsInData`, `removeCommentById`).

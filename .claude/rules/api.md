@@ -36,3 +36,20 @@ paths:
 
 - Avoid N+1 queries: use batch methods with `WHERE IN` + `GROUP BY` for related data
 - Reaction counts, tags, parent nodes should be fetched in batch (see `NodeService.enrichNodes`)
+
+## Architecture
+
+### Layer responsibilities
+- **routes/** — HTTP concerns only: parse request, call service, format response. Never write DB queries directly.
+- **services/** — Business logic + data access. Receive `Kysely<Database>` via constructor. Own all query logic.
+- **schemas/** — Validation and response type definitions. Imported by routes. Must not import routes or services.
+- **lib/** — Shared utilities. Stateless. Must not import routes, services, or schemas.
+- **middleware/** — Cross-cutting HTTP concerns. May import from lib. Must not import from services.
+
+### Dependency rules
+```
+routes → services → lib
+routes → schemas
+routes → middleware → lib
+```
+Any import that violates these arrows is a design error. Extract shared code into the appropriate lower layer.

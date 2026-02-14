@@ -17,6 +17,13 @@ Monorepo: `apps/api` (Hono on Cloudflare Workers + D1/SQLite via Kysely).
 - When implementing endpoints or features, ask about naming and placement BEFORE implementing. Do not assume.
 - Keep changes minimal and scoped.
 
+## Architecture principles
+
+- **Dependency direction**: Dependencies flow inward. routes→services→lib, components→hooks→lib. A reverse dependency is a design error.
+- **No circular imports**: If A imports B, B must not import A (directly or transitively). Extract shared types/functions into a third module.
+- **Separate pure logic**: Business logic that does not require I/O (HTTP, DB, DOM) should be extracted as pure functions, testable without infrastructure mocks.
+- **Constructor injection at I/O boundaries**: Classes that perform I/O receive dependencies via constructor. Inject rather than import globals to ensure testability.
+
 ## Runtime
 
 Use Bun, not Node.js. `bun test`, `bun run <script>`, `bunx <pkg>`.
