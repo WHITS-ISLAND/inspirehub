@@ -76,7 +76,7 @@ function ProfilePage() {
           <img
             src={user.picture}
             alt={user.name}
-            loading="lazy"
+            fetchPriority="high"
             width={64}
             height={64}
             className="h-16 w-16 rounded-full"
