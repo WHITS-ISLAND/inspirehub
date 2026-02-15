@@ -23,6 +23,7 @@ export function UserMenu() {
   return (
     <button
       onClick={handleLogout}
+      aria-label="ログアウト"
       className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
     >
       <LogOut size={18} />
