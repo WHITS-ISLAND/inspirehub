@@ -174,6 +174,7 @@ function HomePage() {
 
   return (
     <div className="p-4">
+      <h1 className="sr-only">ホーム</h1>
       <div className="mb-4 hidden md:block">
         <InlineCompose />
       </div>
@@ -194,6 +195,7 @@ function HomePage() {
         ))}
       </div>
 
+      <h2 className="sr-only">投稿一覧</h2>
       <div className="mt-4 space-y-3">
         {isLoading && (
           <div className="flex justify-center py-12">

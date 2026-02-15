@@ -3,17 +3,16 @@ import { api } from "@/lib/api";
 import { LogOut } from "lucide-react";
 
 export function UserMenu() {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, accessToken } = useAuthStore();
 
   const handleLogout = async () => {
     if (!window.confirm("ログアウトしますか？")) return;
-    try {
-      await api.auth.logout.$post();
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      logout();
+    if (accessToken) {
+      try {
+        await api.auth.logout.$post();
+      } catch {}
     }
+    logout();
   };
 
   if (!isAuthenticated) {
