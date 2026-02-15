@@ -13,9 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { TagInput } from "@/components/nodes/TagInput";
 
-type NodeType = "issue" | "idea";
+export type NodeType = "issue" | "idea";
 
-interface SearchParams {
+export interface SearchParams {
   type?: NodeType;
   parent_id?: string;
 }
