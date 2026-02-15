@@ -90,6 +90,9 @@ export function NodeCard({ node }: NodeCardProps) {
           <img
             src={node.author_picture}
             alt={node.author_name ?? ""}
+            loading="lazy"
+            width={20}
+            height={20}
             className="h-5 w-5 rounded-full"
           />
         )}
