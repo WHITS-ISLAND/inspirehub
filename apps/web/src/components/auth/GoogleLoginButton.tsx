@@ -7,12 +7,17 @@ export function GoogleLoginButton() {
   const { setAuth, setError, setLoading } = useAuthStore();
   const [width, setWidth] = useState(400);
   const ref = useRef<HTMLDivElement>(null);
+  const widthRef = useRef(400);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
-      setWidth(Math.floor(entry.contentRect.width));
+      const next = Math.floor(entry.contentRect.width);
+      if (next !== widthRef.current) {
+        widthRef.current = next;
+        setWidth(next);
+      }
     });
     ro.observe(el);
     return () => ro.disconnect();
