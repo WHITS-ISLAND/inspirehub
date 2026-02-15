@@ -1,9 +1,22 @@
+import { useState, useRef, useEffect } from "react";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuthStore } from "@/stores/auth";
 import { env } from "@/env";
 
 export function GoogleLoginButton() {
   const { setAuth, setError, setLoading } = useAuthStore();
+  const [width, setWidth] = useState(400);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setWidth(Math.floor(entry.contentRect.width));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const handleSuccess = async (response: CredentialResponse) => {
     if (!response.credential) {
@@ -46,13 +59,15 @@ export function GoogleLoginButton() {
   };
 
   return (
-    <GoogleLogin
-      onSuccess={handleSuccess}
-      onError={handleError}
-      useOneTap
-      theme="outline"
-      size="large"
-      width="100%"
-    />
+    <div ref={ref}>
+      <GoogleLogin
+        onSuccess={handleSuccess}
+        onError={handleError}
+        useOneTap
+        theme="outline"
+        size="large"
+        width={String(width)}
+      />
+    </div>
   );
 }
