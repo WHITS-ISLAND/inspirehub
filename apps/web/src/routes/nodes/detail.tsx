@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -166,6 +167,9 @@ function DeriveIdeaDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>派生アイデアを投稿</DialogTitle>
+            <DialogDescription className="sr-only">
+              選択したノードから派生するアイデアを作成します
+            </DialogDescription>
           </DialogHeader>
           <div className="mt-2">{formFields}</div>
           <Button
