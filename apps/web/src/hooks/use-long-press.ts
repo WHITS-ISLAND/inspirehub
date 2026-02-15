@@ -27,16 +27,13 @@ export function useLongPress({ onLongPress, threshold = 500 }: UseLongPressOptio
   const onTouchMove = cancel;
   const onTouchEnd = cancel;
 
-  const onClick = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
-      if (firedRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-        firedRef.current = false;
-      }
-    },
-    [],
-  );
+  const onClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (firedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      firedRef.current = false;
+    }
+  }, []);
 
   return { onTouchStart, onTouchMove, onTouchEnd, onClick };
 }

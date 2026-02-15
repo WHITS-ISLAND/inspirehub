@@ -68,17 +68,14 @@ export function usePostComment(nodeId: string) {
         replies: [],
       } as unknown as Comment;
 
-      queryClient.setQueryData<CommentsListResponse>(
-        ["nodes", nodeId, "comments"],
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            comments: [...old.comments, tempComment],
-            total: old.total + 1,
-          };
-        },
-      );
+      queryClient.setQueryData<CommentsListResponse>(["nodes", nodeId, "comments"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          comments: [...old.comments, tempComment],
+          total: old.total + 1,
+        };
+      });
 
       return { snapshot };
     },
@@ -116,16 +113,13 @@ export function useUpdateComment(nodeId: string) {
         "comments",
       ]);
 
-      queryClient.setQueryData<CommentsListResponse>(
-        ["nodes", nodeId, "comments"],
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            comments: updateCommentContent(old.comments, commentId, content),
-          };
-        },
-      );
+      queryClient.setQueryData<CommentsListResponse>(["nodes", nodeId, "comments"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          comments: updateCommentContent(old.comments, commentId, content),
+        };
+      });
 
       return { snapshot };
     },
@@ -161,18 +155,15 @@ export function useDeleteComment(nodeId: string) {
         "comments",
       ]);
 
-      queryClient.setQueryData<CommentsListResponse>(
-        ["nodes", nodeId, "comments"],
-        (old) => {
-          if (!old) return old;
-          const filtered = removeCommentById(old.comments, commentId);
-          return {
-            ...old,
-            comments: filtered,
-            total: old.total - (old.comments.length - filtered.length),
-          };
-        },
-      );
+      queryClient.setQueryData<CommentsListResponse>(["nodes", nodeId, "comments"], (old) => {
+        if (!old) return old;
+        const filtered = removeCommentById(old.comments, commentId);
+        return {
+          ...old,
+          comments: filtered,
+          total: old.total - (old.comments.length - filtered.length),
+        };
+      });
 
       return { snapshot };
     },

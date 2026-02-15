@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  createRoute,
-  type AnyRootRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createRoute, type AnyRootRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
 import { useAuthStore } from "@/stores/auth";

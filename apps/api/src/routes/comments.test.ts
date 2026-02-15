@@ -64,11 +64,7 @@ describe("コメントルート（単体操作）", () => {
     const app = new Hono();
     app.route("/comments", commentRoutes);
 
-    const res = await app.request(
-      "/comments/some-id",
-      { method: "DELETE" },
-      mockEnv,
-    );
+    const res = await app.request("/comments/some-id", { method: "DELETE" }, mockEnv);
 
     expect(res.status).toBe(401);
   });

@@ -41,8 +41,11 @@ export function ReactionUsersDrawer({
     if (open) setActiveType(initialType);
   }, [open, initialType]);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useReactionUsers(nodeId, activeType, open);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useReactionUsers(
+    nodeId,
+    activeType,
+    open,
+  );
 
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -82,7 +85,9 @@ export function ReactionUsersDrawer({
             <span>{label}</span>
             <span className="text-xs tabular-nums">{reactions[key].count}</span>
             {isActive && (
-              <span className={`absolute inset-x-3 bottom-0 h-0.5 rounded-full ${color.replace("text-", "bg-")}`} />
+              <span
+                className={`absolute inset-x-3 bottom-0 h-0.5 rounded-full ${color.replace("text-", "bg-")}`}
+              />
             )}
           </button>
         );
@@ -116,18 +121,14 @@ export function ReactionUsersDrawer({
                     {(user.user_name ?? "?")[0]}
                   </div>
                 )}
-                <span className="text-sm font-medium">
-                  {user.user_name ?? "匿名ユーザー"}
-                </span>
+                <span className="text-sm font-medium">{user.user_name ?? "匿名ユーザー"}</span>
               </div>
               {i < users.length - 1 && <div className="border-b border-border/50" />}
             </div>
           ))}
           {hasNextPage && <div ref={sentinelRef} className="h-4" />}
           {isFetchingNextPage && (
-            <div className="py-3 text-center text-xs text-muted-foreground">
-              読み込み中...
-            </div>
+            <div className="py-3 text-center text-xs text-muted-foreground">読み込み中...</div>
           )}
         </div>
       )}
@@ -156,9 +157,7 @@ export function ReactionUsersDrawer({
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>リアクション</DialogTitle>
-          <DialogDescription className="sr-only">
-            リアクションしたユーザーの一覧
-          </DialogDescription>
+          <DialogDescription className="sr-only">リアクションしたユーザーの一覧</DialogDescription>
         </DialogHeader>
         {tabBar}
         <div className="min-h-[60vh] max-h-[70vh] overflow-y-auto">{userList}</div>

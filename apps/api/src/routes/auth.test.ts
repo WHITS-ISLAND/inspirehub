@@ -123,7 +123,13 @@ describe("認証ルート", () => {
 
     const now = Math.floor(Date.now() / 1000);
     const token = await sign(
-      { sub: "non-existent-user", email: "test@example.com", type: "access", iat: now, exp: now + 900 },
+      {
+        sub: "non-existent-user",
+        email: "test@example.com",
+        type: "access",
+        iat: now,
+        exp: now + 900,
+      },
       mockEnv.JWT_ACCESS_SECRET,
       "HS256",
     );

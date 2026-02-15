@@ -120,12 +120,11 @@ export class NodeService {
     let baseQuery = this.db.selectFrom("nodes");
 
     if (params?.liked_by_user_id) {
-      baseQuery = baseQuery
-        .innerJoin("likes", (join) =>
-          join
-            .onRef("nodes.id", "=", "likes.node_id")
-            .on("likes.user_id", "=", params.liked_by_user_id!),
-        );
+      baseQuery = baseQuery.innerJoin("likes", (join) =>
+        join
+          .onRef("nodes.id", "=", "likes.node_id")
+          .on("likes.user_id", "=", params.liked_by_user_id!),
+      );
     }
 
     if (params?.parent_node_id) {

@@ -13,8 +13,20 @@ interface ReactionButtonsProps {
 
 export const reactionMeta = [
   { key: "like", icon: Heart, label: "いいね", color: "text-rose-500", bg: "bg-rose-500/15" },
-  { key: "interested", icon: Flame, label: "気になる", color: "text-amber-500", bg: "bg-amber-500/15" },
-  { key: "want_to_try", icon: Rocket, label: "やってみたい", color: "text-violet-500", bg: "bg-violet-500/15" },
+  {
+    key: "interested",
+    icon: Flame,
+    label: "気になる",
+    color: "text-amber-500",
+    bg: "bg-amber-500/15",
+  },
+  {
+    key: "want_to_try",
+    icon: Rocket,
+    label: "やってみたい",
+    color: "text-violet-500",
+    bg: "bg-violet-500/15",
+  },
 ] as const;
 
 export function ReactionButtons({ nodeId, reactions, variant = "compact" }: ReactionButtonsProps) {
@@ -23,18 +35,19 @@ export function ReactionButtons({ nodeId, reactions, variant = "compact" }: Reac
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-1.5">
-        {reactionMeta.map(({ key, icon: Icon, color, bg }) => {
+        {reactionMeta.map(({ key, icon: Icon, label, color, bg }) => {
           const reaction = reactions[key];
           const isActive = reaction.is_reacted;
           return (
             <button
               key={key}
+              aria-label={label}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 mutation.mutate(key);
               }}
-              className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs active:scale-90 transition-transform ${
+              className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs active:scale-90 transition-transform ${
                 isActive
                   ? `${bg} ${color}`
                   : "bg-secondary text-muted-foreground hover:bg-secondary/80"
@@ -65,13 +78,10 @@ function DetailReactionButtons({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<ReactionType>("like");
 
-  const openDrawer = useCallback(
-    (type: ReactionType) => {
-      setDrawerType(type);
-      setDrawerOpen(true);
-    },
-    [],
-  );
+  const openDrawer = useCallback((type: ReactionType) => {
+    setDrawerType(type);
+    setDrawerOpen(true);
+  }, []);
 
   const likeLongPress = useLongPress({ onLongPress: () => openDrawer("like") });
   const interestedLongPress = useLongPress({ onLongPress: () => openDrawer("interested") });
@@ -93,6 +103,7 @@ function DetailReactionButtons({
           return (
             <div key={key} className="flex flex-col items-center">
               <button
+                aria-label={label}
                 {...(isMobile
                   ? {
                       onTouchStart: lp.onTouchStart,
@@ -116,6 +127,7 @@ function DetailReactionButtons({
                 <Icon size={20} className={isActive ? "fill-current" : ""} />
               </button>
               <button
+                aria-label={`${label}したユーザーを表示`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
