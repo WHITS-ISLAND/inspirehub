@@ -51,6 +51,7 @@ export function TagInput({ tags, onTagsChange }: TagInputProps) {
               if (tagInput) setShowSuggestions(true);
             }}
             placeholder="タグ"
+            aria-label="タグを入力"
             className="h-7 w-28 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -62,6 +63,7 @@ export function TagInput({ tags, onTagsChange }: TagInputProps) {
           <button
             type="button"
             onClick={() => addTag(tagInput)}
+            aria-label="タグを追加"
             className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
             <Plus size={14} />
@@ -90,7 +92,11 @@ export function TagInput({ tags, onTagsChange }: TagInputProps) {
               className="flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-xs"
             >
               {tag}
-              <button type="button" onClick={() => onTagsChange(tags.filter((t) => t !== tag))}>
+              <button
+                type="button"
+                onClick={() => onTagsChange(tags.filter((t) => t !== tag))}
+                aria-label="タグを削除"
+              >
                 <X size={12} />
               </button>
             </span>

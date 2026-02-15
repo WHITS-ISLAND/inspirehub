@@ -73,7 +73,14 @@ function ProfilePage() {
     <div className="p-4">
       <div className="flex items-center gap-4">
         {user.picture && (
-          <img src={user.picture} alt={user.name} className="h-16 w-16 rounded-full" />
+          <img
+            src={user.picture}
+            alt={user.name}
+            loading="lazy"
+            width={64}
+            height={64}
+            className="h-16 w-16 rounded-full"
+          />
         )}
         <div className="flex-1">
           {isEditingName ? (
@@ -93,6 +100,7 @@ function ProfilePage() {
               <button
                 onClick={() => updateName.mutate(editName.trim())}
                 disabled={updateName.isPending || !editName.trim()}
+                aria-label="保存"
                 className="rounded p-1 text-primary hover:bg-primary/10"
               >
                 {updateName.isPending ? (
@@ -103,6 +111,7 @@ function ProfilePage() {
               </button>
               <button
                 onClick={() => setIsEditingName(false)}
+                aria-label="キャンセル"
                 className="rounded p-1 text-muted-foreground hover:bg-secondary"
               >
                 <X size={16} />
@@ -116,6 +125,7 @@ function ProfilePage() {
                   setEditName(user.name);
                   setIsEditingName(true);
                 }}
+                aria-label="名前を編集"
                 className="rounded p-1 text-muted-foreground hover:text-foreground"
               >
                 <Pencil size={14} />

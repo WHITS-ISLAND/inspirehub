@@ -113,7 +113,10 @@ export function ReactionUsersDrawer({
                 {user.user_picture ? (
                   <img
                     src={user.user_picture}
-                    alt=""
+                    alt={user.user_name ?? ""}
+                    loading="lazy"
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 ) : (

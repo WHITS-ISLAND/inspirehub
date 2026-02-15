@@ -222,6 +222,9 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
         <img
           src={comment.author_picture}
           alt={comment.author_name ?? ""}
+          loading="lazy"
+          width={28}
+          height={28}
           className="mt-0.5 h-7 w-7 rounded-full"
         />
       )}
@@ -238,6 +241,7 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
                   setEditContent(comment.content);
                   setIsEditing(true);
                 }}
+                aria-label="コメントを編集"
                 className="rounded p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <Pencil size={12} />
@@ -249,6 +253,7 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
                   }
                 }}
                 disabled={deleteComment.isPending}
+                aria-label="コメントを削除"
                 className="rounded p-0.5 text-muted-foreground hover:text-destructive"
               >
                 <Trash2 size={12} />
@@ -262,6 +267,7 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
               type="text"
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
+              aria-label="コメントを編集"
               className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-sm"
               autoFocus
               onKeyDown={(e) => {
@@ -282,12 +288,14 @@ function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) 
                 )
               }
               disabled={updateComment.isPending || !editContent.trim()}
+              aria-label="編集を保存"
               className="rounded p-1 text-primary hover:bg-primary/10"
             >
               <Check size={14} />
             </button>
             <button
               onClick={() => setIsEditing(false)}
+              aria-label="編集をキャンセル"
               className="rounded p-1 text-muted-foreground hover:bg-secondary"
             >
               <X size={14} />
@@ -504,6 +512,9 @@ function NodeDetailContent({ id }: { id: string }) {
                 <img
                   src={node.author_picture}
                   alt={node.author_name ?? ""}
+                  loading="lazy"
+                  width={20}
+                  height={20}
                   className="h-5 w-5 rounded-full"
                 />
               )}
@@ -628,6 +639,7 @@ function NodeDetailContent({ id }: { id: string }) {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="コメントを入力"
+              aria-label="コメントを入力"
               className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
             />
             <Button type="submit" size="sm" disabled={postComment.isPending || !commentText.trim()}>
