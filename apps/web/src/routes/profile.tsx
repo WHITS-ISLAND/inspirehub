@@ -151,6 +151,7 @@ function ProfilePage() {
         ))}
       </div>
 
+      <h2 className="sr-only">投稿一覧</h2>
       <div className="mt-4 space-y-3">
         {data?.isLoading && (
           <div className="flex justify-center py-12">
