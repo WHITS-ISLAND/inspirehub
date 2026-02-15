@@ -5,6 +5,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import type { OpenAPIV3_1 } from "openapi-types";
 import { renderer } from "./renderer";
 import { createCorsMiddleware } from "./middleware/cors";
+import { scheduled } from "./notifications/scheduled";
 import auth from "./routes/auth";
 import nodes from "./routes/nodes";
 import comments from "./routes/comments";
@@ -33,7 +34,9 @@ app.get("/", (c) => {
 });
 
 // OpenAPI configuration
-const createOpenAPIConfig = (env: HonoEnv["Bindings"]): Partial<GenerateSpecOptions> => ({
+const createOpenAPIConfig = (
+  env: HonoEnv["Bindings"],
+): Partial<GenerateSpecOptions> => ({
   documentation: {
     info: {
       title: "InspireHub API",
@@ -43,7 +46,8 @@ const createOpenAPIConfig = (env: HonoEnv["Bindings"]): Partial<GenerateSpecOpti
     servers: [
       {
         url: env.API_URL || "http://localhost:8787",
-        description: env.ENVIRONMENT === "develop" ? "本番環境" : "ローカル開発環境",
+        description:
+          env.ENVIRONMENT === "develop" ? "本番環境" : "ローカル開発環境",
       },
     ],
     components: {
@@ -78,4 +82,8 @@ app.get("/docs", async (c) => {
 });
 
 export type AppType = typeof routes;
-export default app;
+
+export default {
+  fetch: app.fetch,
+  scheduled,
+};

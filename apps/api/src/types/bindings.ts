@@ -1,5 +1,6 @@
 export interface CloudflareBindings {
   // D1 Database
+
   DB: D1Database;
 
   // KV Namespace
@@ -17,6 +18,7 @@ export interface CloudflareBindings {
   JWT_ACCESS_SECRET: string;
   JWT_REFRESH_SECRET: string;
   CLIENT_URL: string;
+  SLACK_WEBHOOK_URL: string;
 }
 
 import type { AccessTokenPayload } from "../lib/jwt";
