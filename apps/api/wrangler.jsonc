@@ -20,6 +20,17 @@
     },
   ],
 
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "inspirehub-kv"
+    }
+  ],
+
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+
   "vars": {
     "ENVIRONMENT": "develop",
     "CLIENT_URL": "https://web.inspirehub.wtnqk.org",
