@@ -52,7 +52,7 @@ export function GoogleLoginButton() {
       useOneTap
       theme="outline"
       size="large"
-      width="400"
+      width="100%"
     />
   );
 }
