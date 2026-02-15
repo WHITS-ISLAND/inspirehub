@@ -4,9 +4,7 @@ import { useAuthStore } from "@/stores/auth";
 
 export function useTokenRefresh() {
   const { isAuthenticated, accessToken } = useAuthStore();
-  const [isRefreshing, setIsRefreshing] = useState(
-    () => isAuthenticated && !accessToken,
-  );
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !accessToken && !isRefreshing) {
@@ -18,7 +16,7 @@ export function useTokenRefresh() {
         setIsRefreshing(false);
       });
     }
-  }, [isAuthenticated, accessToken]);
+  }, [isAuthenticated, accessToken, isRefreshing]);
 
   return { isRefreshing };
 }

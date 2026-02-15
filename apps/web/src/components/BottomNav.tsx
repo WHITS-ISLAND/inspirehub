@@ -34,7 +34,6 @@ export function BottomNav() {
       {!isDetailPage && (
         <Link
           to="/nodes/new"
-          aria-label="新規ノード作成"
           className="absolute -top-16 right-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 transition-transform"
         >
           <Plus size={24} />
