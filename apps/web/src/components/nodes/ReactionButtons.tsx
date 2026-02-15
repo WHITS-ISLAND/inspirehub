@@ -23,19 +23,18 @@ export function ReactionButtons({ nodeId, reactions, variant = "compact" }: Reac
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-1.5">
-        {reactionMeta.map(({ key, icon: Icon, label, color, bg }) => {
+        {reactionMeta.map(({ key, icon: Icon, color, bg }) => {
           const reaction = reactions[key];
           const isActive = reaction.is_reacted;
           return (
             <button
               key={key}
-              aria-label={label}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 mutation.mutate(key);
               }}
-              className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs active:scale-90 transition-transform ${
+              className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs active:scale-90 transition-transform ${
                 isActive
                   ? `${bg} ${color}`
                   : "bg-secondary text-muted-foreground hover:bg-secondary/80"
@@ -94,7 +93,6 @@ function DetailReactionButtons({
           return (
             <div key={key} className="flex flex-col items-center">
               <button
-                aria-label={label}
                 {...(isMobile
                   ? {
                       onTouchStart: lp.onTouchStart,
@@ -118,7 +116,6 @@ function DetailReactionButtons({
                 <Icon size={20} className={isActive ? "fill-current" : ""} />
               </button>
               <button
-                aria-label={`${label}したユーザーを表示`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

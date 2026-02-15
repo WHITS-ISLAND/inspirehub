@@ -8,9 +8,6 @@ import { fileURLToPath, URL } from "node:url";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [devtools(), viteReact(), tailwindcss()],
-  build: {
-    sourcemap: "hidden",
-  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
