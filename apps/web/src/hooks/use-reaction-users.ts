@@ -8,27 +8,17 @@ type ReactionUsersResponse = InferResponseType<
   200
 >;
 
-function getReactionUsersFetcher(
-  nodeId: string,
-  type: ReactionType,
-  cursor?: string,
-) {
+function getReactionUsersFetcher(nodeId: string, type: ReactionType, cursor?: string) {
   const param = { id: nodeId };
   const query = cursor ? { cursor } : {};
 
-  if (type === "like")
-    return () => api.nodes[":id"].reactions.like.$get({ param, query });
+  if (type === "like") return () => api.nodes[":id"].reactions.like.$get({ param, query });
   if (type === "interested")
     return () => api.nodes[":id"].reactions.interested.$get({ param, query });
-  return () =>
-    api.nodes[":id"].reactions["want-to-try"].$get({ param, query });
+  return () => api.nodes[":id"].reactions["want-to-try"].$get({ param, query });
 }
 
-function useReactionUsersQuery(
-  nodeId: string,
-  type: ReactionType,
-  enabled: boolean,
-) {
+function useReactionUsersQuery(nodeId: string, type: ReactionType, enabled: boolean) {
   return useInfiniteQuery({
     queryKey: ["nodes", nodeId, "reaction-users", type],
     queryFn: async ({ pageParam }) => {

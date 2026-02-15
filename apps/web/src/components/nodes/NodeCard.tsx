@@ -41,7 +41,9 @@ export function NodeCard({ node }: NodeCardProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${typeStyle.className}`}>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${typeStyle.className}`}
+          >
             {typeStyle.icon && <typeStyle.icon size={12} />}
             {typeStyle.label}
           </span>

@@ -10,7 +10,8 @@ const navItems = [
 export function BottomNav() {
   const matchRoute = useMatchRoute();
   const location = useLocation();
-  const isDetailPage = /^\/nodes\/[^/]+$/.test(location.pathname) && !location.pathname.endsWith("/new");
+  const isDetailPage =
+    /^\/nodes\/[^/]+$/.test(location.pathname) && !location.pathname.endsWith("/new");
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-sm md:hidden">

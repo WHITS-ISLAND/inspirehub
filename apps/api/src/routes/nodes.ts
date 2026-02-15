@@ -685,7 +685,8 @@ const nodes = new Hono<HonoEnv>()
     describeRoute({
       tags: ["Nodes"],
       summary: "気になるユーザー一覧取得",
-      description: "ノードに気になる反応をしたユーザーの一覧を取得（カーソルベースのページネーション）",
+      description:
+        "ノードに気になる反応をしたユーザーの一覧を取得（カーソルベースのページネーション）",
       parameters: [
         {
           name: "limit",
@@ -748,7 +749,8 @@ const nodes = new Hono<HonoEnv>()
     describeRoute({
       tags: ["Nodes"],
       summary: "やってみたいユーザー一覧取得",
-      description: "ノードにやってみたい反応をしたユーザーの一覧を取得（カーソルベースのページネーション）",
+      description:
+        "ノードにやってみたい反応をしたユーザーの一覧を取得（カーソルベースのページネーション）",
       parameters: [
         {
           name: "limit",

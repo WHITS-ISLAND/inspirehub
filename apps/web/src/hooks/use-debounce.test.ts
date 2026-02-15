@@ -22,10 +22,9 @@ describe("useDebounce", () => {
   });
 
   test("遅延時間内の再変更で前の値をキャンセルし最新値のみ反映する", async () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: "first", delay: 300 } },
-    );
+    const { result, rerender } = renderHook(({ value, delay }) => useDebounce(value, delay), {
+      initialProps: { value: "first", delay: 300 },
+    });
 
     expect(result.current).toBe("first");
 

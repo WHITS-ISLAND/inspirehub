@@ -2,10 +2,7 @@ import type { InferResponseType } from "hono/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, handleResponse } from "@/lib/api";
 
-type ReactionToggleResponse = InferResponseType<
-  (typeof api.nodes)[":id"]["like"]["$post"],
-  200
->;
+type ReactionToggleResponse = InferResponseType<(typeof api.nodes)[":id"]["like"]["$post"], 200>;
 
 interface ReactionStatus {
   count: number;

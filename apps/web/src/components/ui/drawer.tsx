@@ -31,16 +31,8 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div className={cn("px-4 pb-2", className)} {...props} />;
 }
 
-function DrawerTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Title>) {
-  return (
-    <DrawerPrimitive.Title
-      className={cn("text-lg font-semibold", className)}
-      {...props}
-    />
-  );
+function DrawerTitle({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Title>) {
+  return <DrawerPrimitive.Title className={cn("text-lg font-semibold", className)} {...props} />;
 }
 
 function DrawerDescription({
@@ -55,10 +47,4 @@ function DrawerDescription({
   );
 }
 
-export {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-};
+export { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription };

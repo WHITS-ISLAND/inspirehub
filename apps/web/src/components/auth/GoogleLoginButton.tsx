@@ -28,7 +28,10 @@ export function GoogleLoginButton() {
         throw new Error(error.error?.message || "Authentication failed");
       }
 
-      const data = (await res.json()) as { user: Parameters<typeof setAuth>[0]; access_token: string };
+      const data = (await res.json()) as {
+        user: Parameters<typeof setAuth>[0];
+        access_token: string;
+      };
 
       setAuth(data.user, data.access_token);
     } catch (err) {

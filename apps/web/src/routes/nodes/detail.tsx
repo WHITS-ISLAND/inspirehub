@@ -536,7 +536,6 @@ function NodeDetailContent({ id }: { id: string }) {
               parentContent={node.content}
             />
           </div>
-
         </>
       )}
 
@@ -561,13 +560,18 @@ function NodeDetailContent({ id }: { id: string }) {
                       className="group flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-colors hover:border-primary/30 hover:bg-secondary/40"
                     >
                       {parentStyle.icon && (
-                        <parentStyle.icon size={20} className={`shrink-0 ${parentStyle.iconClassName}`} />
+                        <parentStyle.icon
+                          size={20}
+                          className={`shrink-0 ${parentStyle.iconClassName}`}
+                        />
                       )}
                       <div className="min-w-0 flex-1">
                         <span className={`text-xs font-medium ${parentStyle.iconClassName}`}>
                           派生元{parentStyle.label}
                         </span>
-                        <p className="mt-1 truncate text-sm font-medium">{node.parent_node.title}</p>
+                        <p className="mt-1 truncate text-sm font-medium">
+                          {node.parent_node.title}
+                        </p>
                       </div>
                     </Link>
                   </div>
@@ -592,7 +596,9 @@ function NodeDetailContent({ id }: { id: string }) {
                         派生先{style.label}
                       </span>
                       <p className="mt-1 truncate text-sm font-medium">{child.title}</p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{child.content}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                        {child.content}
+                      </p>
                     </div>
                   </Link>
                 </div>
@@ -603,9 +609,7 @@ function NodeDetailContent({ id }: { id: string }) {
       )}
 
       <div className="mt-6">
-        <h2 className="font-semibold">
-          コメント {commentsQuery.data?.total ?? 0}
-        </h2>
+        <h2 className="font-semibold">コメント {commentsQuery.data?.total ?? 0}</h2>
 
         <form
           className="mt-3"

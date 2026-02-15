@@ -13,8 +13,20 @@ interface ReactionButtonsProps {
 
 export const reactionMeta = [
   { key: "like", icon: Heart, label: "いいね", color: "text-rose-500", bg: "bg-rose-500/15" },
-  { key: "interested", icon: Flame, label: "気になる", color: "text-amber-500", bg: "bg-amber-500/15" },
-  { key: "want_to_try", icon: Rocket, label: "やってみたい", color: "text-violet-500", bg: "bg-violet-500/15" },
+  {
+    key: "interested",
+    icon: Flame,
+    label: "気になる",
+    color: "text-amber-500",
+    bg: "bg-amber-500/15",
+  },
+  {
+    key: "want_to_try",
+    icon: Rocket,
+    label: "やってみたい",
+    color: "text-violet-500",
+    bg: "bg-violet-500/15",
+  },
 ] as const;
 
 export function ReactionButtons({ nodeId, reactions, variant = "compact" }: ReactionButtonsProps) {
@@ -66,13 +78,10 @@ function DetailReactionButtons({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<ReactionType>("like");
 
-  const openDrawer = useCallback(
-    (type: ReactionType) => {
-      setDrawerType(type);
-      setDrawerOpen(true);
-    },
-    [],
-  );
+  const openDrawer = useCallback((type: ReactionType) => {
+    setDrawerType(type);
+    setDrawerOpen(true);
+  }, []);
 
   const likeLongPress = useLongPress({ onLongPress: () => openDrawer("like") });
   const interestedLongPress = useLongPress({ onLongPress: () => openDrawer("interested") });
