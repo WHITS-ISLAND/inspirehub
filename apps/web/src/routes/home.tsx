@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 import { Loader2 } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
 import { NODE_TYPE_STYLES, getToggleButtonColor } from "@/lib/node-types";
+import { useInfiniteNodes } from "@/hooks/use-nodes";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 
-type NodesListResponse = InferResponseType<(typeof api.nodes)["$get"], 200>;
 type NodeCreateResponse = InferResponseType<(typeof api.nodes)["$post"], 201>;
 import { useAuthStore } from "@/stores/auth";
 import { NodeCard } from "@/components/nodes/NodeCard";
@@ -15,11 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-type NodeType = "issue" | "idea" | "project";
-
 interface Tab {
   label: string;
-  type?: NodeType;
+  type?: string;
   authorFilter?: boolean;
 }
 
@@ -29,28 +28,6 @@ const tabs: Tab[] = [
   { label: "アイデア", type: "idea" },
   { label: "自分", authorFilter: true },
 ];
-
-function useNodes(params: {
-  type?: NodeType;
-  author_id?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery({
-    queryKey: ["nodes", params],
-    queryFn: async () => {
-      const query: Record<string, string> = {};
-      if (params.type) query.type = params.type;
-      if (params.author_id) query.author_id = params.author_id;
-      if (params.limit) query.limit = String(params.limit);
-      if (params.offset) query.offset = String(params.offset);
-
-      const fetchNodes = () => api.nodes.$get({ query });
-      const res = await fetchNodes();
-      return handleResponse<NodesListResponse>(res, fetchNodes);
-    },
-  });
-}
 
 type ComposeType = "issue" | "idea";
 
@@ -159,11 +136,15 @@ function HomePage() {
   const { user } = useAuthStore();
   const tab = tabs[activeTab];
 
-  const { data, isLoading, error } = useNodes({
-    type: tab.type,
-    author_id: tab.authorFilter ? user?.id : undefined,
-    limit: 20,
-  });
+  const { data, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteNodes({
+      type: tab.type,
+      author_id: tab.authorFilter ? user?.id : undefined,
+    });
+
+  const sentinelRef = useInfiniteScroll(hasNextPage ?? false, isFetchingNextPage, fetchNextPage);
+
+  const nodes = data?.pages.flatMap((p) => p.nodes) ?? [];
 
   return (
     <div className="p-4">
@@ -202,13 +183,20 @@ function HomePage() {
           </div>
         )}
 
-        {data?.nodes.length === 0 && !isLoading && (
+        {nodes.length === 0 && !isLoading && (
           <div className="py-12 text-center text-muted-foreground">ノードが見つかりません。</div>
         )}
 
-        {data?.nodes.map((node) => (
+        {nodes.map((node) => (
           <NodeCard key={node.id} node={node} />
         ))}
+
+        {hasNextPage && <div ref={sentinelRef} className="h-4" />}
+        {isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
       </div>
     </div>
   );

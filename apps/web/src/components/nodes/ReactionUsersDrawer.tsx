@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -14,6 +14,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useReactionUsers } from "@/hooks/use-reaction-users";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import type { Reactions, ReactionType } from "@/hooks/use-toggle-reaction";
 
@@ -47,25 +48,7 @@ export function ReactionUsersDrawer({
     open,
   );
 
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  useEffect(() => {
-    return () => observerRef.current?.disconnect();
-  }, []);
-
-  const sentinelRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      observerRef.current?.disconnect();
-      if (!node) return;
-      observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          void fetchNextPage();
-        }
-      });
-      observerRef.current.observe(node);
-    },
-    [hasNextPage, isFetchingNextPage, fetchNextPage],
-  );
+  const sentinelRef = useInfiniteScroll(hasNextPage ?? false, isFetchingNextPage, fetchNextPage);
 
   const users = data?.pages.flatMap((page) => page.data) ?? [];
 
