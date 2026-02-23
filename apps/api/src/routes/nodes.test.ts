@@ -148,16 +148,16 @@ describe("ノードルート", () => {
     expect(res.status).toBe(400);
   });
 
-  test("GET /nodes?liked_by=me は未認証で401を返す", async () => {
+  test("GET /nodes?reacted_by=me は未認証で401を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
-    const res = await app.request("/nodes?liked_by=me", { method: "GET" }, mockEnv);
+    const res = await app.request("/nodes?reacted_by=me", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(401);
   });
 
-  test("GET /nodes?liked_by=me は認証済みでノード一覧を返す", async () => {
+  test("GET /nodes?reacted_by=me は認証済みでノード一覧を返す", async () => {
     const app = new Hono();
     app.route("/nodes", nodeRoutes);
 
@@ -169,7 +169,7 @@ describe("ノードルート", () => {
     );
 
     const res = await app.request(
-      "/nodes?liked_by=me",
+      "/nodes?reacted_by=me",
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },

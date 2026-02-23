@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 import { Loader2, Pencil, Check, X } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { useInfiniteNodes } from "@/hooks/use-nodes";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { NodeCard } from "@/components/nodes/NodeCard";
 import { Input } from "@/components/ui/input";
 
-type NodesListResponse = InferResponseType<(typeof api.nodes)["$get"], 200>;
 type UserUpdateResponse = InferResponseType<(typeof api.users)["me"]["$patch"], 200>;
 
 const profileTabs = [
   { label: "自分", key: "posts" },
-  { label: "いいね済み", key: "liked" },
+  { label: "リアクション済み", key: "reacted" },
 ] as const;
 
 type TabKey = (typeof profileTabs)[number]["key"];
@@ -24,32 +25,15 @@ function ProfilePage() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState("");
 
-  const myPosts = useQuery({
-    queryKey: ["nodes", { author_id: user?.id }],
-    queryFn: async () => {
-      if (!user) return { nodes: [] as NodesListResponse["nodes"], total: 0 };
-      const fetchMyPosts = () =>
-        api.nodes.$get({
-          query: { author_id: user.id, limit: 50 },
-        });
-      const res = await fetchMyPosts();
-      return handleResponse<NodesListResponse>(res, fetchMyPosts);
-    },
-    enabled: activeTab === "posts" && !!user,
-  });
+  const myPosts = useInfiniteNodes(
+    { author_id: user?.id },
+    { enabled: activeTab === "posts" && !!user },
+  );
 
-  const likedPosts = useQuery({
-    queryKey: ["nodes", { liked_by: "me" }],
-    queryFn: async () => {
-      const fetchLiked = () =>
-        api.nodes.$get({
-          query: { liked_by: "me" as const, limit: 50 },
-        });
-      const res = await fetchLiked();
-      return handleResponse<NodesListResponse>(res, fetchLiked);
-    },
-    enabled: activeTab === "liked" && !!user,
-  });
+  const reactedPosts = useInfiniteNodes(
+    { reacted_by: "me" },
+    { enabled: activeTab === "reacted" && !!user },
+  );
 
   const updateName = useMutation({
     mutationFn: async (name: string) => {
@@ -65,9 +49,16 @@ function ProfilePage() {
     },
   });
 
-  if (!user) return null;
+  const query = activeTab === "posts" ? myPosts : reactedPosts;
+  const nodes = query.data?.pages.flatMap((p) => p.nodes) ?? [];
 
-  const data = activeTab === "posts" ? myPosts : likedPosts;
+  const sentinelRef = useInfiniteScroll(
+    query.hasNextPage ?? false,
+    query.isFetchingNextPage,
+    query.fetchNextPage,
+  );
+
+  if (!user) return null;
 
   return (
     <div className="p-4">
@@ -153,21 +144,28 @@ function ProfilePage() {
 
       <h2 className="sr-only">投稿一覧</h2>
       <div className="mt-4 space-y-3">
-        {data?.isLoading && (
+        {query.isLoading && (
           <div className="flex justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
 
-        {data?.data?.nodes.length === 0 && !data?.isLoading && (
+        {nodes.length === 0 && !query.isLoading && (
           <div className="py-12 text-center text-muted-foreground">
-            {activeTab === "posts" ? "まだ投稿がありません。" : "いいねした投稿はありません。"}
+            {activeTab === "posts" ? "まだ投稿がありません。" : "リアクションした投稿はありません。"}
           </div>
         )}
 
-        {data?.data?.nodes.map((node) => (
+        {nodes.map((node) => (
           <NodeCard key={node.id} node={node} />
         ))}
+
+        {query.hasNextPage && <div ref={sentinelRef} className="h-4" />}
+        {query.isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
       </div>
     </div>
   );

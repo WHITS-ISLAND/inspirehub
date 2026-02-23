@@ -91,17 +91,38 @@ export class NodeService {
     tag?: string;
     q?: string;
     sort?: "recent" | "popular";
-    liked_by_user_id?: string;
+    reacted_by_user_id?: string;
     limit?: number;
     offset?: number;
   }) {
     let baseQuery = this.db.selectFrom("nodes");
 
-    if (params?.liked_by_user_id) {
-      baseQuery = baseQuery.innerJoin("likes", (join) =>
-        join
-          .onRef("nodes.id", "=", "likes.node_id")
-          .on("likes.user_id", "=", params.liked_by_user_id!),
+    if (params?.reacted_by_user_id) {
+      const uid = params.reacted_by_user_id;
+      baseQuery = baseQuery.where((eb) =>
+        eb.or([
+          eb.exists(
+            eb
+              .selectFrom("likes")
+              .select(sql.lit(1).as("v"))
+              .whereRef("likes.node_id", "=", "nodes.id")
+              .where("likes.user_id", "=", uid),
+          ),
+          eb.exists(
+            eb
+              .selectFrom("interested")
+              .select(sql.lit(1).as("v"))
+              .whereRef("interested.node_id", "=", "nodes.id")
+              .where("interested.user_id", "=", uid),
+          ),
+          eb.exists(
+            eb
+              .selectFrom("want_to_try")
+              .select(sql.lit(1).as("v"))
+              .whereRef("want_to_try.node_id", "=", "nodes.id")
+              .where("want_to_try.user_id", "=", uid),
+          ),
+        ]),
       );
     }
 
@@ -162,8 +183,6 @@ export class NodeService {
         )`,
         "desc",
       );
-    } else if (params?.liked_by_user_id) {
-      query = query.orderBy(sql`likes.created_at`, "desc");
     } else {
       query = query.orderBy("nodes.created_at", "desc");
     }
