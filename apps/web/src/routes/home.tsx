@@ -7,14 +7,14 @@ import { api, handleResponse } from "@/lib/api";
 import { NODE_TYPE_STYLES, getToggleButtonColor } from "@/lib/node-types";
 import { useInfiniteNodes } from "@/hooks/use-nodes";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
-
-type NodeCreateResponse = InferResponseType<(typeof api.nodes)["$post"], 201>;
 import { useAuthStore } from "@/stores/auth";
 import { NodeCard } from "@/components/nodes/NodeCard";
 import { TagInput } from "@/components/nodes/TagInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
+type NodeCreateResponse = InferResponseType<(typeof api.nodes)["$post"], 201>;
 
 interface Tab {
   label: string;

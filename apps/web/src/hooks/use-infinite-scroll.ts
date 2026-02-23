@@ -15,11 +15,14 @@ export function useInfiniteScroll(
     (node: HTMLDivElement | null) => {
       observerRef.current?.disconnect();
       if (!node) return;
-      observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      });
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        },
+        { rootMargin: "200px" },
+      );
       observerRef.current.observe(node);
     },
     [hasNextPage, isFetchingNextPage, fetchNextPage],
