@@ -97,4 +97,30 @@ describe("updateReactionsInData", () => {
     expect(data.reactions.want_to_try.is_reacted).toBe(true);
     expect(data.reactions.want_to_try.count).toBe(3);
   });
+
+  test("InfiniteQuery形状のデータで該当ノードのリアクションを切り替える", () => {
+    const data = {
+      pages: [
+        { nodes: [{ id: "node-1", reactions: makeReactions(2) }], total: 3 },
+        { nodes: [{ id: "node-2", reactions: makeReactions(1) }], total: 3 },
+      ],
+      pageParams: [0, 20],
+    };
+    const result = updateReactionsInData(data, "node-2", "like");
+
+    expect(result).toBe(true);
+    expect(data.pages[1].nodes[0].reactions.like.is_reacted).toBe(true);
+    expect(data.pages[1].nodes[0].reactions.like.count).toBe(2);
+    expect(data.pages[0].nodes[0].reactions.like.count).toBe(2);
+  });
+
+  test("InfiniteQuery形状で該当ノードがない場合falseを返す", () => {
+    const data = {
+      pages: [{ nodes: [{ id: "node-1", reactions: makeReactions() }], total: 1 }],
+      pageParams: [0],
+    };
+    const result = updateReactionsInData(data, "node-999", "like");
+
+    expect(result).toBe(false);
+  });
 });

@@ -56,6 +56,13 @@ export function updateReactionsInData(data: unknown, nodeId: string, type: React
     }
   }
 
+  // InfiniteQuery shape: { pages: [{ nodes, total }, ...], pageParams }
+  if ("pages" in detail && Array.isArray(detail.pages)) {
+    for (const page of detail.pages as unknown[]) {
+      if (updateReactionsInData(page, nodeId, type)) return true;
+    }
+  }
+
   return false;
 }
 
