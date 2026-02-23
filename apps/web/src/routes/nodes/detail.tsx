@@ -185,7 +185,6 @@ function DeriveIdeaDialog({
   );
 }
 
-
 function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) {
   const { user } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);

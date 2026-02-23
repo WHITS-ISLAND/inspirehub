@@ -48,11 +48,7 @@ export function ReactionUsersDrawer({
     open,
   );
 
-  const sentinelRef = useInfiniteScroll(
-    hasNextPage ?? false,
-    isFetchingNextPage,
-    fetchNextPage,
-  );
+  const sentinelRef = useInfiniteScroll(hasNextPage ?? false, isFetchingNextPage, fetchNextPage);
 
   const users = data?.pages.flatMap((page) => page.data) ?? [];
 

@@ -152,7 +152,9 @@ function ProfilePage() {
 
         {nodes.length === 0 && !query.isLoading && (
           <div className="py-12 text-center text-muted-foreground">
-            {activeTab === "posts" ? "まだ投稿がありません。" : "リアクションした投稿はありません。"}
+            {activeTab === "posts"
+              ? "まだ投稿がありません。"
+              : "リアクションした投稿はありません。"}
           </div>
         )}
 

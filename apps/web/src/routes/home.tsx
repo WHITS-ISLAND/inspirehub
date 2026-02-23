@@ -142,11 +142,7 @@ function HomePage() {
       author_id: tab.authorFilter ? user?.id : undefined,
     });
 
-  const sentinelRef = useInfiniteScroll(
-    hasNextPage ?? false,
-    isFetchingNextPage,
-    fetchNextPage,
-  );
+  const sentinelRef = useInfiniteScroll(hasNextPage ?? false, isFetchingNextPage, fetchNextPage);
 
   const nodes = data?.pages.flatMap((p) => p.nodes) ?? [];
 
