@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, GitFork, CircleAlert, Lightbulb } from "lucide-react";
+import { MessageCircle, GitFork } from "lucide-react";
 import type { InferResponseType } from "hono/client";
 import { api } from "@/lib/api";
+import { NODE_TYPE_STYLES } from "@/lib/node-types";
 import { ReactionButtons } from "./ReactionButtons";
 import { timeAgo } from "@/lib/time";
 
@@ -12,26 +13,8 @@ interface NodeCardProps {
   node: Node;
 }
 
-const typeStyles = {
-  issue: {
-    label: "課題",
-    icon: CircleAlert,
-    className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  },
-  idea: {
-    label: "アイデア",
-    icon: Lightbulb,
-    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  },
-  project: {
-    label: "プロジェクト",
-    icon: null as null,
-    className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  },
-};
-
 export function NodeCard({ node }: NodeCardProps) {
-  const typeStyle = typeStyles[node.type];
+  const typeStyle = NODE_TYPE_STYLES[node.type];
 
   return (
     <Link

@@ -341,8 +341,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      // Check if node exists and user is the author
-      const node = await nodeService.getById(id);
+      const node = await nodeService.getNodeMeta(id);
       if (!node) {
         return c.json(
           {
@@ -413,8 +412,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      // Check if node exists and user is the author
-      const node = await nodeService.getById(id);
+      const node = await nodeService.getNodeMeta(id);
       if (!node) {
         return c.json(
           {
@@ -480,8 +478,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      // Check if node exists
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -493,11 +490,10 @@ const nodes = new Hono<HonoEnv>()
       }
 
       const result = await nodeService.toggleLike(nodeId, userId);
-      const count = await nodeService.getReactionCount(nodeId, "like");
 
       return c.json({
         is_reacted: result.liked,
-        count,
+        count: result.count,
       });
     },
   )
@@ -538,8 +534,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      // Check if node exists
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -551,11 +546,10 @@ const nodes = new Hono<HonoEnv>()
       }
 
       const result = await nodeService.toggleInterested(nodeId, userId);
-      const count = await nodeService.getReactionCount(nodeId, "interested");
 
       return c.json({
         is_reacted: result.is_reacted,
-        count,
+        count: result.count,
       });
     },
   )
@@ -596,8 +590,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      // Check if node exists
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -609,11 +602,10 @@ const nodes = new Hono<HonoEnv>()
       }
 
       const result = await nodeService.toggleWantToTry(nodeId, userId);
-      const count = await nodeService.getReactionCount(nodeId, "want_to_try");
 
       return c.json({
         is_reacted: result.is_reacted,
-        count,
+        count: result.count,
       });
     },
   )
@@ -659,7 +651,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -723,7 +715,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -787,7 +779,7 @@ const nodes = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const nodeService = new NodeService(db);
 
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -851,8 +843,7 @@ const nodes = new Hono<HonoEnv>()
       const nodeService = new NodeService(db);
       const commentService = new CommentService(db);
 
-      // Check if node exists
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -930,8 +921,7 @@ const nodes = new Hono<HonoEnv>()
       const nodeService = new NodeService(db);
       const commentService = new CommentService(db);
 
-      // Check if node exists
-      const node = await nodeService.getById(nodeId);
+      const node = await nodeService.getNodeMeta(nodeId);
       if (!node) {
         return c.json(
           {
@@ -942,9 +932,8 @@ const nodes = new Hono<HonoEnv>()
         );
       }
 
-      // Check if parent comment exists (if replying)
       if (body.parent_id) {
-        const parentComment = await commentService.getById(body.parent_id);
+        const parentComment = await commentService.getCommentMeta(body.parent_id);
         if (!parentComment || parentComment.node_id !== nodeId) {
           return c.json(
             {

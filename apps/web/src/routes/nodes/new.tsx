@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 import { Loader2 } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
+import { NODE_TYPE_STYLES, getToggleButtonColor } from "@/lib/node-types";
 
 type NodeDetail = InferResponseType<(typeof api.nodes)[":id"]["$get"], 200>;
 type NodeCreateResponse = InferResponseType<(typeof api.nodes)["$post"], 201>;
@@ -80,21 +81,13 @@ function NodeCreateContent({ searchParams }: { searchParams: SearchParams }) {
           <div className="flex gap-2">
             {(["issue", "idea"] as const).map((t) => {
               const active = nodeType === t;
-              const color =
-                t === "issue"
-                  ? active
-                    ? "border-red-400 bg-red-100 text-red-800 dark:border-red-600 dark:bg-red-900/30 dark:text-red-300"
-                    : "border-border text-muted-foreground hover:border-red-300"
-                  : active
-                    ? "border-blue-400 bg-blue-100 text-blue-800 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300"
-                    : "border-border text-muted-foreground hover:border-blue-300";
               return (
                 <button
                   key={t}
                   onClick={() => setNodeType(t)}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${color}`}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${getToggleButtonColor(t, active)}`}
                 >
-                  {t === "issue" ? "課題" : "アイデア"}
+                  {NODE_TYPE_STYLES[t].label}
                 </button>
               );
             })}

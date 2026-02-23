@@ -21,6 +21,43 @@ interface CommentReply {
   replies: CommentReply[];
 }
 
+interface CommentRow {
+  id: string;
+  node_id: string;
+  parent_id: string | null;
+  author_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  author_name: string | null;
+  author_picture: string | null;
+}
+
+function buildCommentTree(
+  topLevel: CommentRow[],
+  allReplies: CommentRow[],
+  mentionMap: Map<string, CommentMention[]>,
+): CommentReply[] {
+  const childrenMap = new Map<string, CommentRow[]>();
+  for (const reply of allReplies) {
+    if (!reply.parent_id) continue;
+    const list = childrenMap.get(reply.parent_id) ?? [];
+    list.push(reply);
+    childrenMap.set(reply.parent_id, list);
+  }
+
+  function buildNode(row: CommentRow): CommentReply {
+    const children = childrenMap.get(row.id) ?? [];
+    return {
+      ...row,
+      mentions: mentionMap.get(row.id) ?? [],
+      replies: children.map(buildNode),
+    };
+  }
+
+  return topLevel.map(buildNode);
+}
+
 export class CommentService {
   constructor(private db: Kysely<Database>) {}
 
@@ -98,24 +135,14 @@ export class CommentService {
       .offset(params?.offset || 0)
       .execute();
 
-    const commentsWithReplies = await Promise.all(
-      topLevelComments.map(async (comment) => {
-        const replies = await this.getReplies(comment.id);
-        const mentions = await this.getMentions(comment.id);
+    if (topLevelComments.length === 0) {
+      return { data: [], total };
+    }
 
-        return {
-          ...comment,
-          mentions,
-          replies,
-        };
-      }),
-    );
+    const topLevelIds = topLevelComments.map((c) => c.id);
 
-    return { data: commentsWithReplies, total };
-  }
-
-  async getReplies(parentId: string): Promise<CommentReply[]> {
-    const replies = await this.db
+    // Batch: fetch all descendant comments for these top-level comments
+    const allReplies = await this.db
       .selectFrom("comments")
       .leftJoin("users", "comments.author_id", "users.id")
       .select([
@@ -129,25 +156,19 @@ export class CommentService {
         "users.name as author_name",
         "users.picture as author_picture",
       ])
-      .where("comments.parent_id", "=", parentId)
+      .where("comments.node_id", "=", nodeId)
+      .where("comments.parent_id", "is not", null)
       .orderBy("comments.created_at", "asc")
       .execute();
 
-    // Recursively get replies for nested comments
-    const repliesWithNested = await Promise.all(
-      replies.map(async (reply) => {
-        const nestedReplies = await this.getReplies(reply.id);
-        const mentions = await this.getMentions(reply.id);
+    // Batch: fetch all mentions for all comments at once
+    const allCommentIds = [...topLevelIds, ...allReplies.map((r) => r.id)];
+    const allMentions = await this.getBatchMentions(allCommentIds);
 
-        return {
-          ...reply,
-          mentions,
-          replies: nestedReplies,
-        };
-      }),
-    );
+    // Build tree in memory
+    const commentsWithReplies = buildCommentTree(topLevelComments, allReplies, allMentions);
 
-    return repliesWithNested;
+    return { data: commentsWithReplies, total };
   }
 
   async getMentions(commentId: string) {
@@ -159,6 +180,30 @@ export class CommentService {
       .execute();
 
     return mentions;
+  }
+
+  private async getBatchMentions(commentIds: string[]) {
+    if (commentIds.length === 0) return new Map<string, CommentMention[]>();
+
+    const mentions = await this.db
+      .selectFrom("comment_mentions")
+      .innerJoin("users", "comment_mentions.mentioned_user_id", "users.id")
+      .select([
+        "comment_mentions.comment_id",
+        "users.id",
+        "users.name",
+        "users.picture",
+      ])
+      .where("comment_mentions.comment_id", "in", commentIds)
+      .execute();
+
+    const mentionMap = new Map<string, CommentMention[]>();
+    for (const m of mentions) {
+      const list = mentionMap.get(m.comment_id) ?? [];
+      list.push({ id: m.id, name: m.name, picture: m.picture });
+      mentionMap.set(m.comment_id, list);
+    }
+    return mentionMap;
   }
 
   async update(
@@ -229,6 +274,18 @@ export class CommentService {
       ...comment,
       mentions,
     };
+  }
+
+  async getCommentMeta(
+    id: string,
+  ): Promise<{ id: string; author_id: string; node_id: string } | null> {
+    return (
+      (await this.db
+        .selectFrom("comments")
+        .select(["id", "author_id", "node_id"])
+        .where("id", "=", id)
+        .executeTakeFirst()) ?? null
+    );
   }
 
   async extractMentions(content: string): Promise<string[]> {

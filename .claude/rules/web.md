@@ -18,7 +18,7 @@ React 19 | TanStack Router + Query | Zustand | Tailwind v4 | Radix UI + CVA | Vi
 ## Routing (TanStack Router)
 
 - Route files export a default function: `(parentRoute: AnyRoute) => createRoute({...})`
-- Public routes: `login`, `auth/callback` — children of `rootRoute`
+- Public routes: `login` — children of `rootRoute`
 - Authenticated routes: wrapped in `authenticatedLayout` (AuthGuard + BottomNav)
 - Route tree assembled in `main.tsx`
 

@@ -24,7 +24,7 @@ export async function createTokenFamily(
   return familyId;
 }
 
-export async function getTokenFamily(
+async function getTokenFamily(
   db: Kysely<Database>,
   familyId: string,
 ): Promise<RefreshTokenFamiliesTable | undefined> {
@@ -58,20 +58,6 @@ export async function revokeTokenFamily(db: Kysely<Database>, familyId: string):
       updated_at: new Date().toISOString(),
     })
     .where("id", "=", familyId)
-    .execute();
-}
-
-export async function revokeAllUserTokenFamilies(
-  db: Kysely<Database>,
-  userId: string,
-): Promise<void> {
-  await db
-    .updateTable("refresh_token_families")
-    .set({
-      is_revoked: 1,
-      updated_at: new Date().toISOString(),
-    })
-    .where("user_id", "=", userId)
     .execute();
 }
 

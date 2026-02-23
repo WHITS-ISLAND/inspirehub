@@ -106,6 +106,20 @@ export class TagService {
     };
   }
 
+  async existsById(id: string): Promise<boolean> {
+    const row = await this.db.selectFrom("tags").select("id").where("id", "=", id).executeTakeFirst();
+    return !!row;
+  }
+
+  async existsByName(name: string): Promise<boolean> {
+    const row = await this.db
+      .selectFrom("tags")
+      .select("id")
+      .where("name", "=", name)
+      .executeTakeFirst();
+    return !!row;
+  }
+
   async getPopularTags(limit: number = 10) {
     const tags = await this.db
       .selectFrom("tags")

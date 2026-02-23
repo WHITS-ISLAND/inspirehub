@@ -112,21 +112,16 @@ export async function verifyGoogleIdToken(
 
   // Get Google's public keys
   const jwks = await getGooglePublicKeys();
-  const jwk = jwks.keys.find((k) => k.kid === header.kid);
+  let key = jwks.keys.find((k) => k.kid === header.kid);
 
-  if (!jwk) {
+  if (!key) {
     // Key not found, try refreshing cache
     jwksCache = null;
     const refreshedJwks = await getGooglePublicKeys();
-    const refreshedJwk = refreshedJwks.keys.find((k) => k.kid === header.kid);
-    if (!refreshedJwk) {
+    key = refreshedJwks.keys.find((k) => k.kid === header.kid);
+    if (!key) {
       return null;
     }
-  }
-
-  const key = jwks.keys.find((k) => k.kid === header.kid);
-  if (!key) {
-    return null;
   }
 
   // Import public key

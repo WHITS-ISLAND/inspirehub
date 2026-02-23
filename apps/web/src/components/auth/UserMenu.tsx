@@ -10,7 +10,7 @@ export function UserMenu() {
     if (accessToken) {
       try {
         await api.auth.logout.$post();
-      } catch {}
+      } catch { /* logout API failure is non-critical */ }
     }
     logout();
   };

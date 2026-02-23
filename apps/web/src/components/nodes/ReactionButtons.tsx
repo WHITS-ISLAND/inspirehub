@@ -83,9 +83,13 @@ function DetailReactionButtons({
     setDrawerOpen(true);
   }, []);
 
-  const likeLongPress = useLongPress({ onLongPress: () => openDrawer("like") });
-  const interestedLongPress = useLongPress({ onLongPress: () => openDrawer("interested") });
-  const wantToTryLongPress = useLongPress({ onLongPress: () => openDrawer("want_to_try") });
+  const onLikeLongPress = useCallback(() => openDrawer("like"), [openDrawer]);
+  const onInterestedLongPress = useCallback(() => openDrawer("interested"), [openDrawer]);
+  const onWantToTryLongPress = useCallback(() => openDrawer("want_to_try"), [openDrawer]);
+
+  const likeLongPress = useLongPress({ onLongPress: onLikeLongPress });
+  const interestedLongPress = useLongPress({ onLongPress: onInterestedLongPress });
+  const wantToTryLongPress = useLongPress({ onLongPress: onWantToTryLongPress });
 
   const longPressHandlers = {
     like: likeLongPress,
