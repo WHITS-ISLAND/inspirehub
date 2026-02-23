@@ -20,16 +20,17 @@
     },
   ],
 
-  "kv_namespaces": [
-    {
-      "binding": "KV",
-      "id": "inspirehub-kv"
-    }
-  ],
+  // TODO: KV namespace ID を正しい UUID に差し替えてから有効化
+  // "kv_namespaces": [
+  //   {
+  //     "binding": "KV",
+  //     "id": "<UUID from `wrangler kv namespace list`>"
+  //   }
+  // ],
 
-  "triggers": {
-    "crons": ["* * * * *"]
-  },
+  // "triggers": {
+  //   "crons": ["* * * * *"]
+  // },
 
   "vars": {
     "ENVIRONMENT": "develop",
