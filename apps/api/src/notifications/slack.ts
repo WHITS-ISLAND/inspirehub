@@ -3,6 +3,10 @@ import type { Database } from "../lib/db";
 
 const KV_LAST_NOTIFIED_KEY = "slack:last_notified_at";
 
+function escapeSlackMrkdwn(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 interface NewNode {
   id: string;
   type: string;
@@ -91,11 +95,11 @@ export class SlackNotificationService {
           fields: [
             {
               type: "mrkdwn",
-              text: `*タイトル*\n${node.title}`,
+              text: `*タイトル*\n${escapeSlackMrkdwn(node.title)}`,
             },
             {
               type: "mrkdwn",
-              text: `*投稿者*\n${node.author_name || "Unknown"}`,
+              text: `*投稿者*\n${escapeSlackMrkdwn(node.author_name || "Unknown")}`,
             },
           ],
         },
@@ -103,7 +107,7 @@ export class SlackNotificationService {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*詳細*\n${truncatedContent}`,
+            text: `*詳細*\n${escapeSlackMrkdwn(truncatedContent)}`,
           },
         },
         // TODO: Webページ実装後に有効化
