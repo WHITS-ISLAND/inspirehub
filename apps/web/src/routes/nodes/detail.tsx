@@ -4,10 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 import {
   ArrowLeft,
-  CircleAlert,
   EllipsisVertical,
   GitFork,
-  Lightbulb,
   Loader2,
   Send,
   Pencil,
@@ -16,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
+import { NODE_TYPE_STYLES } from "@/lib/node-types";
 import { useAuthStore } from "@/stores/auth";
 import { usePostComment, useUpdateComment, useDeleteComment } from "@/hooks/use-comments";
 import { ReactionButtons } from "@/components/nodes/ReactionButtons";
@@ -186,26 +185,6 @@ function DeriveIdeaDialog({
   );
 }
 
-const typeStyles = {
-  issue: {
-    label: "課題",
-    icon: CircleAlert,
-    className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-    iconClassName: "text-red-800 dark:text-red-300",
-  },
-  idea: {
-    label: "アイデア",
-    icon: Lightbulb,
-    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    iconClassName: "text-blue-800 dark:text-blue-300",
-  },
-  project: {
-    label: "プロジェクト",
-    icon: null,
-    className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-    iconClassName: "text-green-800 dark:text-green-300",
-  },
-};
 
 function CommentItem({ comment, nodeId }: { comment: Comment; nodeId: string }) {
   const { user } = useAuthStore();
@@ -405,7 +384,7 @@ function NodeDetailContent({ id }: { id: string }) {
   }
 
   const node = nodeQuery.data;
-  const typeStyle = typeStyles[node.type];
+  const typeStyle = NODE_TYPE_STYLES[node.type];
   const comments = commentsQuery.data?.comments ?? [];
   const isOwner = user?.id === node.author_id;
 
@@ -561,7 +540,7 @@ function NodeDetailContent({ id }: { id: string }) {
 
             {node.parent_node &&
               (() => {
-                const parentStyle = typeStyles[node.parent_node.type];
+                const parentStyle = NODE_TYPE_STYLES[node.parent_node.type];
                 return (
                   <div className="relative pl-5 pb-2">
                     <span className="absolute left-0 top-4 h-px w-4 bg-border" />
@@ -590,7 +569,7 @@ function NodeDetailContent({ id }: { id: string }) {
               })()}
 
             {childNodesQuery.data?.nodes.map((child) => {
-              const style = typeStyles[child.type];
+              const style = NODE_TYPE_STYLES[child.type];
               return (
                 <div key={child.id} className="relative pl-5 pb-2 last:pb-0">
                   <span className="absolute left-0 top-4 h-px w-4 bg-border" />

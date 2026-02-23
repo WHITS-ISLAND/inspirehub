@@ -184,6 +184,6 @@ apps/api/
 apps/web/src/
 ├── stores/auth.ts
 ├── lib/api-client.ts
-├── routes/login.tsx, auth/callback.tsx
+├── routes/login.tsx
 └── components/auth/GoogleLoginButton.tsx, AuthGuard.tsx, UserMenu.tsx
 ```

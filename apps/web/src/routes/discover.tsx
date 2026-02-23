@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createRoute, type AnyRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
@@ -6,19 +6,11 @@ import { Search, Loader2, TrendingUp } from "lucide-react";
 import { api, handleResponse } from "@/lib/api";
 import { NodeCard } from "@/components/nodes/NodeCard";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
 
 type TagsPopularResponse = InferResponseType<(typeof api.tags)["popular"]["$get"], 200>;
 type TagsSuggestResponse = InferResponseType<(typeof api.tags)["suggest"]["$get"], 200>;
 type NodesListResponse = InferResponseType<(typeof api.nodes)["$get"], 200>;
-
-function useDebounce(value: string, delay: number) {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debounced;
-}
 
 function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState("");

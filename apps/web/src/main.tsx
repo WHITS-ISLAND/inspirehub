@@ -8,7 +8,15 @@ import {
   createRouter,
   useMatchRoute,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { lazy } from "react";
+
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import("@tanstack/react-router-devtools").then((m) => ({
+        default: m.TanStackRouterDevtools,
+      })),
+    )
+  : () => null;
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import Header from "./components/Header";
@@ -16,7 +24,6 @@ import { BottomNav } from "./components/BottomNav";
 import { AuthGuard } from "./components/auth/AuthGuard";
 
 import LoginRoute from "./routes/login";
-import AuthCallbackRoute from "./routes/auth/callback";
 import HomeRoute from "./routes/home";
 import NodeDetailRoute from "./routes/nodes/detail";
 import NodeCreateRoute from "./routes/nodes/new";
@@ -26,7 +33,6 @@ import ProfileRoute from "./routes/profile";
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider";
 
 import "./styles.css";
-import reportWebVitals from "./reportWebVitals";
 import { env } from "./env";
 
 function RootComponent() {
@@ -61,7 +67,6 @@ const authenticatedLayout = createRoute({
 
 const routeTree = rootRoute.addChildren([
   LoginRoute(rootRoute),
-  AuthCallbackRoute(rootRoute),
   authenticatedLayout.addChildren([
     HomeRoute(authenticatedLayout),
     NodeDetailRoute(authenticatedLayout),
@@ -102,5 +107,3 @@ if (rootElement && !rootElement.innerHTML) {
     </StrictMode>,
   );
 }
-
-reportWebVitals();
