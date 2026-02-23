@@ -21,7 +21,7 @@ function rowToUser(row: UsersTable): User {
   };
 }
 
-export async function findUserByGoogleId(
+async function findUserByGoogleId(
   db: Kysely<Database>,
   googleId: string,
 ): Promise<User | null> {
@@ -71,31 +71,6 @@ export async function createUser(
   }
 
   return user;
-}
-
-export async function updateUser(
-  db: Kysely<Database>,
-  id: string,
-  params: {
-    name?: string;
-    picture?: string | null;
-  },
-): Promise<User | null> {
-  const updates: Partial<UsersTable> = {
-    updated_at: new Date().toISOString(),
-  };
-
-  if (params.name !== undefined) {
-    updates.name = params.name;
-  }
-
-  if (params.picture !== undefined) {
-    updates.picture = params.picture;
-  }
-
-  await db.updateTable("users").set(updates).where("id", "=", id).execute();
-
-  return findUserById(db, id);
 }
 
 export async function updateUserName(

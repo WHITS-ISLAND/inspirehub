@@ -18,9 +18,9 @@ export async function scheduled(
     );
 
     const count = await slackService.notifyNewNodes();
-    console.log(`Sent ${count} Slack notifications`);
+    console.info(`Sent ${count} Slack notifications`);
   } else {
-    console.log("SLACK_WEBHOOK_URL not configured, skipping Slack notification");
+    console.info("SLACK_WEBHOOK_URL not configured, skipping Slack notification");
   }
 
   // 将来的に他の通知を追加

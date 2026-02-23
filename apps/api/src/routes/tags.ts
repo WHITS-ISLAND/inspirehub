@@ -268,8 +268,8 @@ const tags = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const tagService = new TagService(db);
 
-      const tag = await tagService.getByName(name);
-      if (!tag) {
+      const tagExists = await tagService.existsByName(name);
+      if (!tagExists) {
         return c.json(
           {
             success: false as const,
@@ -389,9 +389,8 @@ const tags = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const tagService = new TagService(db);
 
-      // Check if tag exists
-      const tag = await tagService.getById(id);
-      if (!tag) {
+      const tagExists = await tagService.existsById(id);
+      if (!tagExists) {
         return c.json(
           {
             success: false as const,
@@ -451,9 +450,8 @@ const tags = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const tagService = new TagService(db);
 
-      // Check if tag exists
-      const tag = await tagService.getById(id);
-      if (!tag) {
+      const tagExists = await tagService.existsById(id);
+      if (!tagExists) {
         return c.json(
           {
             success: false as const,

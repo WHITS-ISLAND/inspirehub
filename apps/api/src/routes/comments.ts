@@ -103,8 +103,7 @@ const comments = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const commentService = new CommentService(db);
 
-      // Check if comment exists and user is the author
-      const comment = await commentService.getById(id);
+      const comment = await commentService.getCommentMeta(id);
       if (!comment) {
         return c.json(
           {
@@ -184,8 +183,7 @@ const comments = new Hono<HonoEnv>()
       const db = createDb(c.env.DB);
       const commentService = new CommentService(db);
 
-      // Check if comment exists and user is the author
-      const comment = await commentService.getById(id);
+      const comment = await commentService.getCommentMeta(id);
       if (!comment) {
         return c.json(
           {

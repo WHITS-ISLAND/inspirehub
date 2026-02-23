@@ -43,40 +43,8 @@ export class NodeService {
         .execute();
     }
 
-    // Handle tags if provided
     if (params.tags && params.tags.length > 0) {
-      for (const tagName of params.tags) {
-        // Upsert tag
-        let tagId = crypto.randomUUID();
-        const existingTag = await this.db
-          .selectFrom("tags")
-          .select("id")
-          .where("name", "=", tagName)
-          .executeTakeFirst();
-
-        if (existingTag) {
-          tagId = existingTag.id;
-        } else {
-          await this.db
-            .insertInto("tags")
-            .values({
-              id: tagId,
-              name: tagName,
-              created_at: now,
-            })
-            .execute();
-        }
-
-        // Create node-tag relation
-        await this.db
-          .insertInto("node_tags")
-          .values({
-            node_id: nodeId,
-            tag_id: tagId,
-            created_at: now,
-          })
-          .execute();
-      }
+      await this.upsertTags(nodeId, params.tags, now);
     }
 
     return nodeId;
@@ -104,6 +72,16 @@ export class NodeService {
 
     const [enriched] = await this.enrichNodes([node]);
     return enriched;
+  }
+
+  async getNodeMeta(id: string): Promise<{ id: string; author_id: string; type: string } | null> {
+    return (
+      (await this.db
+        .selectFrom("nodes")
+        .select(["id", "author_id", "type"])
+        .where("id", "=", id)
+        .executeTakeFirst()) ?? null
+    );
   }
 
   async list(params?: {
@@ -335,43 +313,39 @@ export class NodeService {
 
     await this.db.updateTable("nodes").set(updateData).where("id", "=", id).execute();
 
-    // Update tags if provided
     if (params.tags !== undefined) {
-      // Remove existing tags
       await this.db.deleteFrom("node_tags").where("node_id", "=", id).execute();
-
-      // Add new tags
-      for (const tagName of params.tags) {
-        let tagId = crypto.randomUUID();
-        const existingTag = await this.db
-          .selectFrom("tags")
-          .select("id")
-          .where("name", "=", tagName)
-          .executeTakeFirst();
-
-        if (existingTag) {
-          tagId = existingTag.id;
-        } else {
-          await this.db
-            .insertInto("tags")
-            .values({
-              id: tagId,
-              name: tagName,
-              created_at: now,
-            })
-            .execute();
-        }
-
-        await this.db
-          .insertInto("node_tags")
-          .values({
-            node_id: id,
-            tag_id: tagId,
-            created_at: now,
-          })
-          .execute();
+      if (params.tags.length > 0) {
+        await this.upsertTags(id, params.tags, now);
       }
     }
+  }
+
+  private async upsertTags(nodeId: string, tags: string[], now: string) {
+    const existingTags = await this.db
+      .selectFrom("tags")
+      .select(["id", "name"])
+      .where("name", "in", tags)
+      .execute();
+
+    const existingByName = new Map(existingTags.map((t) => [t.name, t.id]));
+
+    const newTags = tags.filter((name) => !existingByName.has(name));
+    if (newTags.length > 0) {
+      const newTagValues = newTags.map((name) => {
+        const id = crypto.randomUUID();
+        existingByName.set(name, id);
+        return { id, name, created_at: now };
+      });
+      await this.db.insertInto("tags").values(newTagValues).execute();
+    }
+
+    const nodeTagValues = tags.map((name) => ({
+      node_id: nodeId,
+      tag_id: existingByName.get(name)!,
+      created_at: now,
+    }));
+    await this.db.insertInto("node_tags").values(nodeTagValues).execute();
   }
 
   async delete(id: string) {
@@ -387,15 +361,12 @@ export class NodeService {
       .executeTakeFirst();
 
     if (existing) {
-      // Unlike
       await this.db
         .deleteFrom("likes")
         .where("node_id", "=", nodeId)
         .where("user_id", "=", userId)
         .execute();
-      return { liked: false };
     } else {
-      // Like
       await this.db
         .insertInto("likes")
         .values({
@@ -404,8 +375,10 @@ export class NodeService {
           created_at: new Date().toISOString(),
         })
         .execute();
-      return { liked: true };
     }
+
+    const count = await this.getReactionCount(nodeId, "like");
+    return { liked: !existing, count };
   }
 
   async getUserLikeStatus(nodeIds: string[], userId: string) {
@@ -430,15 +403,12 @@ export class NodeService {
       .executeTakeFirst();
 
     if (existing) {
-      // Remove interested
       await this.db
         .deleteFrom("interested")
         .where("node_id", "=", nodeId)
         .where("user_id", "=", userId)
         .execute();
-      return { is_reacted: false };
     } else {
-      // Add interested
       await this.db
         .insertInto("interested")
         .values({
@@ -447,8 +417,10 @@ export class NodeService {
           created_at: new Date().toISOString(),
         })
         .execute();
-      return { is_reacted: true };
     }
+
+    const count = await this.getReactionCount(nodeId, "interested");
+    return { is_reacted: !existing, count };
   }
 
   async toggleWantToTry(nodeId: string, userId: string) {
@@ -460,15 +432,12 @@ export class NodeService {
       .executeTakeFirst();
 
     if (existing) {
-      // Remove want_to_try
       await this.db
         .deleteFrom("want_to_try")
         .where("node_id", "=", nodeId)
         .where("user_id", "=", userId)
         .execute();
-      return { is_reacted: false };
     } else {
-      // Add want_to_try
       await this.db
         .insertInto("want_to_try")
         .values({
@@ -477,8 +446,10 @@ export class NodeService {
           created_at: new Date().toISOString(),
         })
         .execute();
-      return { is_reacted: true };
     }
+
+    const count = await this.getReactionCount(nodeId, "want_to_try");
+    return { is_reacted: !existing, count };
   }
 
   async getUserInterestedStatus(nodeIds: string[], userId: string) {
